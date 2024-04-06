@@ -7,7 +7,7 @@ import tomllib
 
 async def load_config(base: str, folder: str) -> dict:
     hostname = socket.getfqdn()
-    file = pathlib.Path(folder) / hostname / 'config.yml'
+    file = pathlib.Path(folder) / hostname / 'config.toml'
     if not file.exists():
         p = await asyncio.subprocess.create_subprocess_shell(
                       f'mkdir -p {pathlib.Path(folder) / hostname} ; cp {pathlib.Path(base) / ".git/lcars_supervisor/config/config.toml"} {file}', 
@@ -45,6 +45,14 @@ async def link_folder(base: str, folder: str) -> None:
                                                                 stderr=asyncio.subprocess.PIPE, 
                                                                 stdout=asyncio.subprocess.PIPE)
         await p.wait()
+        
+async def get_requirements(package: str, version: str):
+    pip = '/'.join(sys.executable.split('/')[:-1]) + "/pip3"
+    p = await asyncio.subprocess.create_subprocess_shell(f'{pip} install {package}{version}', 
+                                                                stderr=asyncio.subprocess.PIPE, 
+                                                                stdout=asyncio.subprocess.PIPE)
+    await p.wait()
+    
 
 async def main() -> None:
     folder = await load_folder(pathlib.Path(sys.argv[1]) / 'data/supervisor/folder.yml')
@@ -53,6 +61,8 @@ async def main() -> None:
         await clone(folder['base'])
     for folder_ln in cfg.get('pre', {}).get('folder_ln', []):
         await link_folder(folder['base'], folder_ln)
+    for reqirements, version in cfg.get('pre', {}).get('requirements', {}).items():
+        await get_requirements(reqirements, version)
 
 if __name__ == "__main__":
     asyncio.run(main())
