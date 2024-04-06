@@ -23,10 +23,49 @@ async def part_a() -> None:
     await p.wait() 
     
 async def part_b() -> None:
-    print(RUN)
-    print(BASE_FOLDER)
-    print(LCARS_FOLDER)
-    print(yaml)
+    data_folder = pathlib.Path(LCARS_FOLDER) / 'data' / 'supervisor'
+    p = await asyncio.subprocess.create_subprocess_shell(f'mkdir -p {str(data_folder)}', 
+                                                             stderr=asyncio.subprocess.PIPE, 
+                                                             stdout=asyncio.subprocess.PIPE)
+    await p.wait()
+    folder_file = data_folder / 'folder.yml'
+    if folder_file.exists():
+        with folder_file.open() as f:
+            data = yaml.safe_load(f)
+    else:
+        data = {}
+    data['base'] = str(BASE_FOLDER)
+    data['lcars'] = str(LCARS_FOLDER)
+    data['data'] = str(data_folder)
+    with folder_file.open('w') as f:
+        yaml.dump(data, f)
+    cmd_folder = pathlib.Path(LCARS_FOLDER) / 'commands' 
+    p = await asyncio.subprocess.create_subprocess_shell(f'mkdir -p {str(cmd_folder)}', 
+                                                             stderr=asyncio.subprocess.PIPE, 
+                                                             stdout=asyncio.subprocess.PIPE)
+    if not (BASE_FOLDER / "commands").exists():
+        p = await asyncio.subprocess.create_subprocess_shell(f'ln -s  {BASE_FOLDER / ".git/lcars_supervisor/commands"} {BASE_FOLDER / "commands"}', 
+                                                                stderr=asyncio.subprocess.PIPE, 
+                                                                stdout=asyncio.subprocess.PIPE)
+        await p.wait()
+    with (cmd_folder / 'update.sh').open('w') as f:
+        f.write('#!/usr/bin/bash\n\ncd '+ str(BASE_FOLDER) + '\n\n' + sys.executable + f' {BASE_FOLDER / "commands" / "update_pre.py"} {LCARS_FOLDER}'+ '\n')
+        f.write(sys.executable + f' {BASE_FOLDER / "commands" / "update.py"} {LCARS_FOLDER}'+ '\n')
+    p = await asyncio.subprocess.create_subprocess_shell(f'chmod +x {cmd_folder / "update.sh"}', 
+                                                             stderr=asyncio.subprocess.PIPE, 
+                                                             stdout=asyncio.subprocess.PIPE)
+    await p.wait()
+    p = await asyncio.subprocess.create_subprocess_shell(f'rm /usr/bin/lcars-sv-update', 
+                                                             stderr=asyncio.subprocess.PIPE, 
+                                                             stdout=asyncio.subprocess.PIPE)
+    await p.wait()
+    p = await asyncio.subprocess.create_subprocess_shell(f'sudo ln -s {cmd_folder / "update.sh"} /usr/bin/lcars-sv-update', 
+                                                             stderr=asyncio.subprocess.PIPE, 
+                                                             stdout=asyncio.subprocess.PIPE)
+    await p.wait()
+    p = await asyncio.subprocess.create_subprocess_shell('lcars-sv-update')
+    await p.wait()
+    
             
 if __name__ == '__main__' and RUN == 1:
     asyncio.run(part_a())

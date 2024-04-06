@@ -1,0 +1,8 @@
+project = "lcars_supervisor"
+version = 1
+author = "Frank Holler"
+language = "de_DE.utf8"
+
+[pre]
+pull = true
+folder_ln = ['lib']
