@@ -4,6 +4,8 @@ if __name__ == "__main__":
 import asyncio
 import pathlib
 import aioretry
+import tempfile
+import os
 
 import corelib
 import constlib
@@ -38,6 +40,28 @@ async def acivate_docker() -> None:
     await p.wait()
     p = await asyncio.subprocess.create_subprocess_shell('sudo usermod -aG docker $USER', stderr=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
     await p.wait()
+    
+async def create_systemend(core: corelib.Core, entry: dict) -> None:
+    content = entry['content'].replace('%python%', sys.executable).replace('%base%', str(core.path.base)).replace('%lcars%', str(core.path.lcars))
+    name = ''
+    with tempfile.NamedTemporaryFile(delete=False) as f:
+        f.write(content.encode())
+        name = f.name
+    p = await asyncio.subprocess.create_subprocess_shell(f'sudo cp {name} /etc/systemd/system/{entry["name"]}', 
+                                                        stderr=asyncio.subprocess.PIPE, 
+                                                        stdout=asyncio.subprocess.PIPE)
+    await p.wait()
+    os.unlink(name)
+    if entry.get('start', False):
+        p = await asyncio.subprocess.create_subprocess_shell(f'sudo systemctl start {entry["name"]}', 
+                                                        stderr=asyncio.subprocess.PIPE, 
+                                                        stdout=asyncio.subprocess.PIPE)
+        await p.wait()
+    if entry.get('enable', False):
+        p = await asyncio.subprocess.create_subprocess_shell(f'sudo systemctl enable {entry["name"]}', 
+                                                        stderr=asyncio.subprocess.PIPE, 
+                                                        stdout=asyncio.subprocess.PIPE)
+        await p.wait()
 
 async def main() -> None:
     core = corelib.Core()
@@ -45,10 +69,13 @@ async def main() -> None:
     await core.add('path', sv_pathlib.Path, pathlib.Path(sys.argv[1]) / 'data' / 'supervisor' / 'folder.yml')
     await core.add('cfg', configlib.Config, toml=core.path.config / core.const.hostname / 'config.toml')
     if len(packages := core.cfg.toml.get('install', {}).get('apt', [])) > 0:
-        for package in core.cfg.toml.get('install', {}).get('apt', []):
+        for package in packages:
             print('.', end='', flush=True)
             await apt_install(package)
         print()
+    if len(entries := core.cfg.toml.get('systemend', [])) > 0:
+        for entry in entries:
+            await create_systemend(core, entry)
     await acivate_docker()
  
 if __name__ == "__main__":
