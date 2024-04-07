@@ -25,15 +25,18 @@ async def apt_install(package: str) -> None:
         raise Exception
     
 async def acivate_docker() -> None:
-    p = await asyncio.subprocess.create_subprocess_shell('curl -sSL https://get.docker.com | sudo sh', stderr=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
+    p = await asyncio.subprocess.create_subprocess_shell('docker --version', stderr=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
     await p.wait()
+    if p.returncode != 0:
+        p = await asyncio.subprocess.create_subprocess_shell('curl -sSL https://get.docker.com | sudo sh', stderr=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
+        await p.wait()
+        p = await asyncio.subprocess.create_subprocess_shell('sudo systemctl enable docker.service', stderr=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
+        await p.wait()
+        p = await asyncio.subprocess.create_subprocess_shell('sudo systemctl enable containerd.service', stderr=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
+        await p.wait()
     p = await asyncio.subprocess.create_subprocess_shell('sudo groupadd docker', stderr=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
     await p.wait()
     p = await asyncio.subprocess.create_subprocess_shell('sudo usermod -aG docker $USER', stderr=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
-    await p.wait()
-    p = await asyncio.subprocess.create_subprocess_shell('sudo systemctl enable docker.service', stderr=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
-    await p.wait()
-    p = await asyncio.subprocess.create_subprocess_shell('sudo systemctl enable containerd.service', stderr=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
     await p.wait()
 
 async def main() -> None:
@@ -41,10 +44,11 @@ async def main() -> None:
     await core.add('const', constlib.Const)
     await core.add('path', sv_pathlib.Path, pathlib.Path(sys.argv[1]) / 'data' / 'supervisor' / 'folder.yml')
     await core.add('cfg', configlib.Config, toml=core.path.config / core.const.hostname / 'config.toml')
-    for package in core.cfg.toml.get('install', {}).get('apt', []):
-        print('.', end='', flush=True)
-        await apt_install(package)
-    print()
+    if len(packages := core.cfg.toml.get('install', {}).get('apt', [])) > 0:
+        for package in core.cfg.toml.get('install', {}).get('apt', []):
+            print('.', end='', flush=True)
+            await apt_install(package)
+        print()
     await acivate_docker()
  
 if __name__ == "__main__":
