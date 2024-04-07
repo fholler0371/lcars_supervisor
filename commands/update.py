@@ -40,6 +40,8 @@ async def acivate_docker() -> None:
     await p.wait()
     p = await asyncio.subprocess.create_subprocess_shell('sudo usermod -aG docker $USER', stderr=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
     await p.wait()
+    p = await asyncio.subprocess.create_subprocess_shell('sudo chmod 666 /var/run/docker.sock', stderr=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
+    await p.wait()
     
 async def create_systemend(core: corelib.Core, entry: dict) -> None:
     content = entry['content'].replace('%python%', sys.executable).replace('%base%', str(core.path.base)).replace('%lcars%', str(core.path.lcars))
