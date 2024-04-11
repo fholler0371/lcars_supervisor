@@ -11,6 +11,8 @@ import configlib
 import aiodockerlib
 import loggerlib
 import signallib
+import httplib
+
 
 async def main() -> None:
     global FIRST
@@ -21,12 +23,17 @@ async def main() -> None:
     await core.add('log', loggerlib.Logger)
     await core.add('running', asyncio.Event())
     await core.add('signal', signallib.Signal)
+    await core.add('web', httplib.HTTP, sv=True)
     #await core.add('docker', aiodockerlib.Docker)
     core.log.info(f'alles geladen, wird Hauptschleife startet ({core.const.pid})')
-    async with asyncio.timeout(70):
-        await core.running.wait()
+    try:
+        async with asyncio.timeout(3600):
+            await core.running.wait()
+    except:
+        pass
     core.log.info('Hauptschleife beendet')
     await core.const._astop()
+    await core.web._astop()
     return core.const.reload
 
 async def reload_loop() -> None:
