@@ -22,8 +22,7 @@ class Logger(BaseObj):
             sys.exit(-1)
         for handler_name in _config.get('handlers', []):
             if 'filename' in _config['handlers'][handler_name]:
-                print(handler_name, _config['handlers'][handler_name]['filename'])
-                print(self.core.path.log)
+                _config['handlers'][handler_name]['filename'] = _config['handlers'][handler_name]['filename'].replace('%log_folder%', str(self.core.path.log))
         try:
             logging.config.dictConfig(config=_config)
             self._logger = logging.getLogger(sys.argv[0].split('/')[-1].split('.')[0])

@@ -41,7 +41,7 @@ stream = "ext://sys.stdout"
 class = "logging.handlers.RotatingFileHandler"
 formatter = "detailed"
 level = "DEBUG"
-filename = "/srv/lcars/my_log.log"
+filename = "%log_folder%/my_log.log"
 maxBytes = 100000
 backupCount = 3
 
@@ -49,7 +49,7 @@ backupCount = 3
 class = "logging.handlers.RotatingFileHandler"
 formatter = "json"
 level = "DEBUG"
-filename = "/srv/lcars/my_log.json"
+filename = "%log_folder%/my_log.json"
 maxBytes = 10000000
 backupCount = 9
 
