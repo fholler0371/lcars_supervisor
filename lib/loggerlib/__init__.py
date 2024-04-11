@@ -11,7 +11,6 @@ from corelib import BaseObj, Core
 from pprint import pprint
 
 
-
 class Logger(BaseObj):
     def __init__(self, core: Core) -> None:
         BaseObj.__init__(self, core)

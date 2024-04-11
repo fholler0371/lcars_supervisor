@@ -1,9 +1,13 @@
 import socket
 import asyncio
+import os
+import aiofiles
+import aiofiles.os
 
 from corelib import BaseObj, Core
 
 
+PIDFILE = '/run/lcars-supervisor.pid'
 class Const(BaseObj):
     def __init__(self, core: Core) -> None:
         BaseObj.__init__(self, core)
@@ -12,10 +16,21 @@ class Const(BaseObj):
         except:
             self.core.log.warning('hostname nicht gefunden')
             self.hostname = ''
+        self.pid = os.getpid()
+        self.reload = False
         self.is_docker = False
         
     async def _ainit(self):
         self.loop = asyncio.get_event_loop()
+        try:
+            async with aiofiles.open(PIDFILE, 'w') as f:
+                await f.write(str(self.pid))
+        except Exception as e:
+            print(e)
+
+    async def _astop(self):
+        await aiofiles.os.remove(PIDFILE)
+
         
 '''
 import os, re
