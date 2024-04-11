@@ -64,6 +64,13 @@ async def create_systemend(core: corelib.Core, entry: dict) -> None:
                                                         stderr=asyncio.subprocess.PIPE, 
                                                         stdout=asyncio.subprocess.PIPE)
         await p.wait()
+        
+async def reload_systemend() -> None:
+    p = await asyncio.subprocess.create_subprocess_shell('sudo systemctl daemon-reload', 
+                                                        stderr=asyncio.subprocess.PIPE, 
+                                                        stdout=asyncio.subprocess.PIPE)
+    await p.wait()
+    
 
 async def main() -> None:
     core = corelib.Core()

@@ -17,6 +17,7 @@ class Path(BaseObj):
         try:
             if path := self.cfg.get(propName):
                 return pathlib.Path(path)
+            print(self.cfg)
             return path
         except:
             return self.cfg.get(propName)

@@ -6,3 +6,104 @@ language = "de_DE.utf8"
 [pre]
 pull = true
 folder_ln = ['lib']
+
+[logger]
+version = 1
+disable_existing_loggers = true
+formatters.simple.format = "%(levelname)s: %(message)s"
+formatters.detailed.format = "[%(levelname)s|%(module)s|L%(lineno)d] %(asctime)s: %(message)s"
+formatters.detailed.datefmt = "%Y-%m-%dT%H:%M:%S%z"
+
+[logger.formatters.json]
+"()" = "loggerlib.MyJSONFormatter"
+
+[logger.formatters.json.fmt_keys]
+level = "levelname"
+message = "message"
+timestamp = "timestamp"
+logger = "name"
+module = "module"
+function = "funcName"
+line = "lineno"
+thread_name = "threadName"
+
+[logger.loggers.root]
+level = "DEBUG"
+handlers = ["stdout", "file", "json"]
+
+[logger.handlers.stdout]
+class = "logging.StreamHandler"
+formatter = "simple"
+level = "INFO"
+stream = "ext://sys.stdout"
+
+[logger.handlers.file]
+class = "logging.handlers.RotatingFileHandler"
+formatter = "detailed"
+level = "DEBUG"
+filename = "/srv/lcars/my_log.log"
+maxBytes = 100000
+backupCount = 3
+
+[logger.handlers.json]
+class = "logging.handlers.RotatingFileHandler"
+formatter = "json"
+level = "DEBUG"
+filename = "/srv/lcars/my_log.json"
+maxBytes = 10000000
+backupCount = 9
+
+[pre.requirements]
+aioretry = "==5.0.2"
+docker = "==7.0.0"
+
+[networks.lcars-bridge]
+#type = "bridge"
+#subnet = "10.0.0.0/16"
+#gateway = "10.0.0.1"
+#adapter = "lcars0"
+#interface = "eth0"
+
+[networks.local-bridge]
+#type = "bridge"
+#subnet = "10.1.0.0/16"
+#gateway = "10.1.0.1"
+#adapter = "lcars1"
+#interface = "eth0"
+
+[install]
+#apt = ["docker.io", "docker-doc", "docker-compose", "podman-docker", "containerd", "runc"]
+
+[[systemend]]
+name = "lcars-docker.service"
+start = true
+enable = false
+content = '''
+[Unit]
+Description=Docker Container Settings aktualiesieren 
+
+[Service]
+WorkingDirectory=%base%
+ExecStart=%python% %base%/commands/dockerd.py %base% %lcars%
+'''
+
+[[systemend]]
+name = "lcars-supervisor.service"
+start = true
+enable = false
+content = '''
+[Unit]
+Description=Supervisor Daemon für Informationen über den Host und ausführen einiger Komanndos 
+After=network-online.target
+StartLimitIntervalSec=25
+StartLimitBurst=5
+
+[Service]
+Restart=always
+RestartSec=3
+WorkingDirectory=%base%
+ExecStart=%python% %base%/commands/supervisord.py %base% %lcars%
+
+[Install]
+WantedBy=multi-user.target
+'''

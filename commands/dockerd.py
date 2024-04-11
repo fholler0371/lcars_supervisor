@@ -20,7 +20,8 @@ async def check_network(core: corelib.Core, name: str, data: any) -> None:
     match data["type"]:
         case 'bridge':
             p = await asyncio.subprocess.create_subprocess_shell(
-                f'docker network create --attachable --ip-range {data["subnet"]} --subnet {data["subnet"]} --opt com.docker.network.bridge.name={data["adapter"]} ' + 
+                f'docker network create --attachable --ip-range {data["subnet"]} --subnet {data["subnet"]} --gateway={data["gateway"]} ' +
+                f'--opt com.docker.network.bridge.name={data["adapter"]} ' + 
                 f'--opt com.docker.network.container_iface_prefix={data["interface"]} {name}', 
                 stderr=asyncio.subprocess.PIPE, 
                 stdout=asyncio.subprocess.PIPE)

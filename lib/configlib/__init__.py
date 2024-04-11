@@ -1,3 +1,4 @@
+from typing import Any
 from pathlib import Path
 
 from corelib import BaseObj, Core
@@ -13,3 +14,8 @@ class Config(BaseObj):
     async def _ainit(self) -> None:
         if self._toml_name is not None:
             self.toml = await aiotomllib.loader(self._toml_name)
+
+    def __getattr__(self, name: str) -> Any:
+        value = self.toml.get(name)
+        if value:
+            return value

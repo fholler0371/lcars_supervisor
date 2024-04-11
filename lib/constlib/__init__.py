@@ -10,6 +10,7 @@ class Const(BaseObj):
         try:
             self.hostname = socket.getfqdn()
         except:
+            self.core.log.warning('hostname nicht gefunden')
             self.hostname = ''
         self.is_docker = False
         
