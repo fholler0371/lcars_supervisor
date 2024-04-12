@@ -12,6 +12,7 @@ import aiodockerlib
 import loggerlib
 import signallib
 import httplib
+import clilib
 
 
 async def main() -> None:
@@ -24,6 +25,7 @@ async def main() -> None:
     await core.add('running', asyncio.Event())
     await core.add('signal', signallib.Signal)
     await core.add('web', httplib.HTTP, sv=True)
+    await core.add('cli_s', clilib.Server)
     #await core.add('docker', aiodockerlib.Docker)
     core.log.info(f'alles geladen, wird Hauptschleife startet ({core.const.pid})')
     try:

@@ -44,6 +44,11 @@ async def acivate_docker() -> None:
     await p.wait()
     
 async def create_systemend(core: corelib.Core, entry: dict) -> None:
+    if entry.get('start', False):
+        p = await asyncio.subprocess.create_subprocess_shell(f'sudo systemctl stop {entry["name"]}', 
+                                                        stderr=asyncio.subprocess.PIPE, 
+                                                        stdout=asyncio.subprocess.PIPE)
+        await p.wait()
     content = entry['content'].replace('%python%', sys.executable).replace('%base%', str(core.path.base)).replace('%lcars%', str(core.path.lcars))
     name = ''
     with tempfile.NamedTemporaryFile(delete=False) as f:
@@ -71,6 +76,24 @@ async def reload_systemend() -> None:
                                                         stdout=asyncio.subprocess.PIPE)
     await p.wait()
     
+async def install_app(core: dict, app: str, cmd_name: str) -> None:
+    sh_file = core.path.lcars / 'commands' / f'{app}.sh'
+    with sh_file.open('w') as f:
+        f.write('#!/usr/bin/bash\n\ncd ')
+        f.write(str(core.path.base))
+        f.write('\n\n')
+        f.write(f'{sys.executable} {core.path.base}/commands/{app}.py {core.path.base} {core.path.lcars}')
+        f.write('\n')
+    cmd = f'chmod +x {sh_file}'
+    p = await asyncio.subprocess.create_subprocess_shell(cmd, 
+                                                        stderr=asyncio.subprocess.PIPE, 
+                                                        stdout=asyncio.subprocess.PIPE)
+    await p.wait()
+    cmd = f'sudo ln -s {sh_file} /usr/bin/{cmd_name}'
+    p = await asyncio.subprocess.create_subprocess_shell(cmd, 
+                                                        stderr=asyncio.subprocess.PIPE, 
+                                                        stdout=asyncio.subprocess.PIPE)
+    await p.wait()
 
 async def main() -> None:
     core = corelib.Core()
@@ -82,12 +105,14 @@ async def main() -> None:
             print('.', end='', flush=True)
             await apt_install(package)
         print()
+    if len(apps := core.cfg.toml.get('install', {}).get('apps', [])) > 0:
+        for app, label in apps.items():
+            await install_app(core, app, label)
     if len(entries := core.cfg.toml.get('systemend', [])) > 0:
         for entry in entries:
             await create_systemend(core, entry)
+    await reload_systemend()
     await acivate_docker()
- 
+
 if __name__ == "__main__":
     asyncio.run(main())
-    
-    

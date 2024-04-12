@@ -74,6 +74,9 @@ docker = "==7.0.0"
 [install]
 #apt = ["docker.io", "docker-doc", "docker-compose", "podman-docker", "containerd", "runc"]
 
+[install.apps]
+cli = "lcars-cli"
+
 [[systemend]]
 name = "lcars-docker.service"
 start = true

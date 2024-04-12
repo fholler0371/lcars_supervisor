@@ -10,7 +10,7 @@ class LocalKeys:
     async def _ainit(self):
         self.file = self.core.path.data / 'local_keys.yml'
         if self.file.exists():
-            self.data = aioyamllib.save_load(self.file)
+            self.data = await aioyamllib.save_load(self.file)
         else:
             self.data = {'local': secrets.token_hex(32)}
             await self._save()
