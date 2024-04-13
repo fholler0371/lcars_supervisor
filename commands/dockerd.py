@@ -65,6 +65,10 @@ async def main() -> None:
                 comp['services'][toml['name']]['ports'] = []
                 for port in toml['ports']:
                     comp['services'][toml['name']]['ports'].append(port)
+            if 'environment' in toml:
+                comp['services'][toml['name']]['environment'] = []
+                for environment in toml['environment']:
+                    comp['services'][toml['name']]['environment'].append(environment)
             if 'networks' in toml:
                 comp['networks'] = {}
                 idx = 1
@@ -82,8 +86,8 @@ async def main() -> None:
             if 'restart' in toml:
                 comp['services'][toml['name']]['restart'] = toml['restart']
             comp['services'][toml['name']]['labels'] = ["pro.holler.lcars.managed=true"]
-            await aioyamllib.dump(core.path.temp / 'compose/portainer.yml', comp)    
-            cmd = f"docker compose -f {str(core.path.temp / 'compose/portainer.yml')} up -d"    
+            await aioyamllib.dump(core.path.temp / f'compose/{toml["name"]}.yml', comp)    
+            cmd = f'docker compose -f {str(core.path.temp)}/compose/{toml["name"]}.yml up -d'
             p = await asyncio.subprocess.create_subprocess_shell(
                 cmd, 
                 stderr=asyncio.subprocess.PIPE, 

@@ -1,0 +1,18 @@
+name = "watchtower"
+
+image = "containrrr/watchtower"
+restart = "unless-stopped"
+networks = ["local-bridge"]
+environment = ["TZ=Europe/Berlin", 
+              "WATCHTOWER_CLEANUP=true", 
+              "WATCHTOWER_INCLUDE_RESTARTING=true", 
+              "WATCHTOWER_INCLUDE_STOPPED=true",
+              "WATCHTOWER_ROLLING_RESTART=true", 
+              "WATCHTOWER_SCHEDULE=0 0 5 * * 6"]
+#              "WATCHTOWER_NOTIFICATIONS=gotify"]
+
+[volumes]
+"/var/run/docker.sock" = "/var/run/docker.sock"
+"%data_folder%/config.json" = "/config.json"
+
+
