@@ -95,6 +95,21 @@ async def install_app(core: dict, app: str, cmd_name: str) -> None:
                                                         stdout=asyncio.subprocess.PIPE)
     await p.wait()
 
+async def install_config(core: dict, source: str, dest: str) -> None:
+    dest_file = core.path.lcars / dest.replace('%hostname%', core.const.hostname)
+    if dest_file.exists():
+        return #Config wird nicht überschrieben
+    cmd = f"mkdir -p {'/'.join(str(dest_file).split('/')[:-1])}"
+    p = await asyncio.subprocess.create_subprocess_shell(cmd, 
+                                                        stderr=asyncio.subprocess.PIPE, 
+                                                        stdout=asyncio.subprocess.PIPE)
+    await p.wait()
+    cmd = f"cp {core.path.base}/.git/lcars_supervisor/config/{source} {dest_file}"
+    p = await asyncio.subprocess.create_subprocess_shell(cmd, 
+                                                        stderr=asyncio.subprocess.PIPE, 
+                                                        stdout=asyncio.subprocess.PIPE)
+    await p.wait()
+
 async def main() -> None:
     core = corelib.Core()
     await core.add('const', constlib.Const)
@@ -108,6 +123,9 @@ async def main() -> None:
     if len(apps := core.cfg.toml.get('install', {}).get('apps', [])) > 0:
         for app, label in apps.items():
             await install_app(core, app, label)
+    if len(entries := core.cfg.toml.get('install', {}).get('config', [])) > 0:
+        for source, dest in entries.items():
+            await install_config(core, source, dest)
     if len(entries := core.cfg.toml.get('systemend', [])) > 0:
         for entry in entries:
             await create_systemend(core, entry)

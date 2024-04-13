@@ -16,7 +16,6 @@ import clilib
 
 
 async def main() -> None:
-    global FIRST
     core = corelib.Core()
     await core.add('const', constlib.Const)
     await core.add('path', sv_pathlib.Path, pathlib.Path(sys.argv[2]) / 'data' / 'supervisor' / 'folder.yml')

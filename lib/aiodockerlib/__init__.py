@@ -3,6 +3,7 @@ import docker
 from corelib import BaseObj
 
 from .networks import Networks
+from .container import Container
 
 
 class Docker(BaseObj):
@@ -13,4 +14,5 @@ class Docker(BaseObj):
         
     async def _ainit(self) -> any:
         self.client = await self.core.const.loop.run_in_executor(None, docker.DockerClient, self.sock)
-        self.networks = Networks(self.core, self.client)
+        self.networks = Networks(self.core, self.client)        
+        self.containers = Container(self.core, self.client)

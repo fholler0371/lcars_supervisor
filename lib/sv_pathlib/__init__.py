@@ -40,10 +40,23 @@ class Path(BaseObj):
     def __init__(self, core: Core, file: str) -> None:
         BaseObj.__init__(self, core)
         self.file = file
+        self.allow_save = True
         
     async def _ainit(self) -> any:
         self.cfg = await aioyamllib.save_load(self.file)
         self.cfg = {} if self.cfg is None else self.cfg  
+        
+    async def replace_app(self, old_app: str) -> None:
+        self.allow_save = False
+        for entry in self.cfg:
+            if entry in ['base']:
+                continue
+            self.cfg[entry] = self.cfg[entry].replace(old_app, self.core.const.app)
+            cmd = f'mkdir -p {str(self.cfg[entry])}'
+            ev = threading.Event()
+            th = th_cmd(ev, cmd)
+            th.start()
+            ev.wait(10)
 
     def __getattr__(self, propName: str) -> any:
         try:
@@ -55,7 +68,8 @@ class Path(BaseObj):
             th = th_cmd(ev, cmd)
             th.start()
             ev.wait(10)
-            th_save(self.file, self.cfg).start()
+            if self.allow_save:
+                th_save(self.file, self.cfg).start()
             return pathlib.Path(self.cfg[propName])
 
         except Exception as e:

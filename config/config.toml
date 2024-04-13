@@ -77,6 +77,9 @@ docker = "==7.0.0"
 [install.apps]
 cli = "lcars-cli"
 
+[install.config]
+"cli.toml" = 'config/cli/%hostname%/config.toml'
+
 [[systemend]]
 name = "lcars-docker.service"
 start = true
