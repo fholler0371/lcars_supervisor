@@ -126,7 +126,7 @@ async def main() -> None:
     if len(entries := core.cfg.toml.get('install', {}).get('config', [])) > 0:
         for source, dest in entries.items():
             await install_config(core, source, dest)
-    if len(entries := core.cfg.toml.get('systemend', [])) > 0:
+    if len(entries := core.cfg.toml.get('systemd', [])) > 0:
         for entry in entries:
             await create_systemend(core, entry)
     await reload_systemend()

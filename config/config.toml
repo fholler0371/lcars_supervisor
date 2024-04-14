@@ -80,7 +80,7 @@ cli = "lcars-cli"
 [install.config]
 "cli.toml" = 'config/cli/%hostname%/config.toml'
 
-[[systemend]]
+[[systemd]]
 name = "lcars-docker.service"
 start = true
 enable = false
@@ -92,8 +92,24 @@ Description=Docker Container Settings aktualiesieren
 WorkingDirectory=%base%
 ExecStart=%python% %base%/commands/dockerd.py %base% %lcars%
 '''
+[[systemd]]
+name = "lcars-docker.timer"
+start = true
+enable = true
+content = '''
+[Unit]
+Description=Starten von Docker 
 
-[[systemend]]
+[Timer]
+OnCalendar=*-*-* *:00,02,04,06,08,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58:00
+RandomizedDelaySec=1m
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+'''
+
+[[systemd]]
 name = "lcars-supervisor.service"
 start = true
 enable = false
@@ -105,6 +121,8 @@ StartLimitIntervalSec=25
 StartLimitBurst=5
 
 [Service]
+PIDFile=/run/lcars-supervisor.pid
+ExecReload=/bin/kill -HUP $MAINPID
 Restart=always
 RestartSec=3
 WorkingDirectory=%base%
