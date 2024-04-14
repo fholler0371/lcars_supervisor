@@ -4,6 +4,8 @@ import aioyamllib
 from functools import partial
 import pathlib
 
+import time
+
 
 class MenuDockerAdd:
     def __init__(self, core):
@@ -12,20 +14,17 @@ class MenuDockerAdd:
         self.menu_entries = []
         
     async def update_data(self):
-        data = {}
-        for entry in await os.scandir(str(self.core.path.base / 'addons')):
-            cfg_file = self.core.path.base / 'addons' / entry.name / 'manifest.toml'
-            cfg = await aiotomllib.loader(cfg_file)
-            data[cfg['name']] = cfg['label']
-        for container in await self.core.docker.containers.list():
-            if container.name in data:
-                del data[container.name]
         self.menu_entries.clear()
-        for entry, label in data.items():
+        resp = await self.core.web_l.get('docker/avaible')
+        if resp is None:
+            return
+        for entry, label in resp.items():
             self.menu_entries.append({'label': label, 'action': partial(self.add_addons, name= entry)})
-            print(entry, label)
     
     async def add_addons(self, name: str) -> None:
+        await self.core.web_l.post('docker/activate', {'addon': name})
+        return
+        print(name)
         file = pathlib.Path(str(self.core.path.data).replace(self.core.const.app, 'supervisor')) / "docker.yml"
         cfg = await aioyamllib.save_load(file)
         if cfg is None:

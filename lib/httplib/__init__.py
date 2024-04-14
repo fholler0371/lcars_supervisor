@@ -2,6 +2,7 @@ from aiohttp import web
 
 from .webserver import server_start
 from .local_keys import LocalKeys
+from .client_local import ClientLocal
 
 from corelib import BaseObj, Core
 

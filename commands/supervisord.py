@@ -23,9 +23,9 @@ async def main() -> None:
     await core.add('log', loggerlib.Logger)
     await core.add('running', asyncio.Event())
     await core.add('signal', signallib.Signal)
+    await core.add('docker', aiodockerlib.Docker)
     await core.add('web', httplib.HTTP, sv=True)
     await core.add('cli_s', clilib.Server)
-    #await core.add('docker', aiodockerlib.Docker)
     core.log.info(f'alles geladen, wird Hauptschleife startet ({core.const.pid})')
     try:
         async with asyncio.timeout(3600):
