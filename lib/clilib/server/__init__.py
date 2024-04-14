@@ -1,5 +1,7 @@
 from aiohttp import web
 import aiofiles.os as os
+from datetime import datetime as dt
+from datetime import UTC
 
 from corelib import BaseObj, Core
 
@@ -43,6 +45,12 @@ class Server(BaseObj):
                 return await self.cli_docker_avaible()
             case 'docker/activate':
                 return await self.cli_docker_activate(data['json'])
+            case 'docker/running':
+                return await self.cli_docker_running()
+            case 'docker/deactivate':
+                return await self.cli_docker_deactivate(data['json'])
+            case 'docker/status':
+                return await self.cli_docker_status()
         return False
     
     async def cli_docker_avaible(self) -> None:
@@ -65,3 +73,52 @@ class Server(BaseObj):
             cfg['apps'].append(data['addon'])
         await aioyamllib.dump(file, cfg)
         return (True, web.json_response({}))
+
+    async def cli_docker_running(self) -> tuple:
+        data = {}
+        containers = await self.core.docker.containers.list()
+        for container in containers:
+            if 'pro.holler.lcars.managed' in container.labels:
+                cfg_file = self.core.path.base / 'addons' / container.name / 'manifest.toml'
+                cfg = await aiotomllib.loader(cfg_file)
+                if cfg is None:
+                    continue
+                data[cfg['name']] = cfg['label']
+        return (True, web.json_response(data))
+
+    async def cli_docker_deactivate(self, data: dict) -> None:
+        file = self.core.path.data / "docker.yml"
+        cfg = await aioyamllib.save_load(file)
+        if cfg is None:
+            cfg = {'apps':[]}
+        if data['addon'] in cfg['apps']:
+            cfg['apps'].remove(data['addon'])
+        await aioyamllib.dump(file, cfg)
+        return (True, web.json_response({}))
+
+    async def cli_docker_status(self) -> tuple:
+        data = []
+        containers = await self.core.docker.containers.list()
+        for container in containers:
+            if 'pro.holler.lcars.managed' not in container.labels:
+                rec = {'name': container.name, 'lcars': False}
+            else:
+                cfg_file = self.core.path.base / 'addons' / container.name / 'manifest.toml'
+                cfg = await aiotomllib.loader(cfg_file)
+                if cfg is None:
+                    continue
+                rec = {'name': cfg['label'], 'lcars': True}
+            rec['status'] = container.status
+            rec['network'] = ''
+            rec['ip'] = ''
+            if 'Networks' in container.attrs['NetworkSettings']:
+                for label, netdata in container.attrs['NetworkSettings']['Networks'].items():
+                    rec['network'] = label
+                    if 'IPAddress' in netdata:
+                        rec['ip'] = netdata['IPAddress']
+            epoch = dt.strptime('1970-01-01T00:00:00', '%Y-%m-%dT%H:%M:%S')
+            rec['start'] = int((dt.strptime(container.attrs['State']['StartedAt'][:19], '%Y-%m-%dT%H:%M:%S') - epoch).total_seconds())
+            rec['created'] = int((dt.strptime(container.attrs['Created'][:19], '%Y-%m-%dT%H:%M:%S') - epoch).total_seconds())
+            data.append(rec)
+        data = sorted(data, key=lambda x: x['name'])
+        return (True, web.json_response(data))

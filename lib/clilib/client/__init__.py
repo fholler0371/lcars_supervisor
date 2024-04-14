@@ -1,10 +1,11 @@
 from simple_term_menu import TerminalMenu
 from rich import console as con
+from rich.console import Console
 import time
 
 from corelib import BaseObj, Core
 
-from .module import MenuMain, MenuDockerAdd
+from .module import MenuMain, MenuDockerAdd, MenuDockerRemove, MenuDockerStatus
 
 
 class ClientCtrl(BaseObj):
@@ -12,6 +13,7 @@ class ClientCtrl(BaseObj):
         BaseObj.__init__(self, core)
         self._steps = {}
         self._con = con.Console()
+        self._rich = Console()
         
     async def show_menu(self, page) -> any:
         menu = []
@@ -19,7 +21,8 @@ class ClientCtrl(BaseObj):
         for entry in page.menu_entries:
             menu.append(f'[{idx}] {entry["label"]}')
             idx += 1
-        menu.append('')
+        if menu:
+            menu.append('')
         menu.append('[z] zurück')
         try:
             terminal_menu = TerminalMenu(menu, skip_empty_entries=True, 
@@ -37,11 +40,18 @@ class ClientCtrl(BaseObj):
     async def _ainit(self):
         self.add_entry(MenuMain(self.core))
         self.add_entry(MenuDockerAdd(self.core))
+        self.add_entry(MenuDockerRemove(self.core))
+        self.add_entry(MenuDockerStatus(self.core))
         step = 'main'
         while step != '':
             page = self._steps[step]
-            await page.update_data()
-            self._con.clear()
+            try:
+                await page.update_data()
+                self._con.clear()
+                if page.table:
+                    self._rich.print(page.table)
+            except Exception as e:
+                print(e)
             next = await self.show_menu(page)
             if next == -1:
                 step =  '/'.join(step.split('/')[:-1])

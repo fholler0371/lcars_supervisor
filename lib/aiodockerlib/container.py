@@ -11,6 +11,7 @@ class Container:
 
     async def list(self) -> None:
         try:
-            return await self.core.const.loop.run_in_executor(None, self.client.containers.list)
+            return await self.core.const.loop.run_in_executor(None, self.client.containers.list, True)
         except Exception as e:
+            print(e)
             return None

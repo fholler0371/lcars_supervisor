@@ -7,20 +7,20 @@ import pathlib
 import time
 
 
-class MenuDockerAdd:
+class MenuDockerRemove:
     def __init__(self, core):
         self.core = core
-        self.step = 'main/doc_add'
+        self.step = 'main/doc_remove'
         self.menu_entries = []
         self.table = None
-        
+    
     async def update_data(self):
         self.menu_entries.clear()
-        resp = await self.core.web_l.get('docker/avaible')
+        resp = await self.core.web_l.get('docker/running')
         if resp is None:
             return
         for entry, label in resp.items():
             self.menu_entries.append({'label': label, 'action': partial(self.add_addons, name= entry)})
     
     async def add_addons(self, name: str) -> None:
-        await self.core.web_l.post('docker/activate', {'addon': name})
+        await self.core.web_l.post('docker/deactivate', {'addon': name})
