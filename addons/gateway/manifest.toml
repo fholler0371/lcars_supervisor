@@ -2,5 +2,5 @@ name = "gateway"
 label = "LCARS Gateway"
 
 [docker]
-name = "lcars/python:%Y-%m"
+name = "lcars/python:%Y.%m"
 folder = 'python'

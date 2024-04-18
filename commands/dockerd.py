@@ -6,6 +6,7 @@ import pathlib
 import aiofiles
 import aiofiles.os as os
 from functools import partial
+from datetime import datetime as dt
 
 import corelib
 import constlib
@@ -40,7 +41,58 @@ async def check_network(core: corelib.Core, name: str, data: any) -> None:
             else:
                 core.running.set()
                 
+async def create_image(core: corelib.Core, image_name: str, image_folder: str) -> None:
+    docker_file = core.path.base / 'images' / image_folder / 'Dockerfile'
+    p = await asyncio.subprocess.create_subprocess_shell(
+            'lsb_release -a', 
+            stderr=asyncio.subprocess.PIPE, 
+            stdout=asyncio.subprocess.PIPE)
+    out, err = await p.communicate()
+    codename = ""
+    for line in out.decode().split('\n'):
+        if line.startswith('Codename'):
+            codename = line.split('\t')[-1]
+    lines = ''
+    async with aiofiles.open(docker_file) as f:
+        lines = await f.read()
+    lines = lines.replace('%codename%', codename)
+    docker_file = core.path.temp / f"{image_folder}.Dockerfile"
+    async with aiofiles.open(docker_file, 'w') as f:
+        await f.write(lines)
+    cfg_toml_file = core.path.base / 'images' / image_folder / "config.toml"
+    if cfg_toml_file.exists():
+        cfg_toml = await aiotomllib.loader(cfg_toml_file)
+        for file_name in cfg_toml.get('copy', []):
+            cmd = f"cp {core.path.base / 'images' / image_folder / file_name} { core.path.temp / file_name}"
+            p = await asyncio.subprocess.create_subprocess_shell(
+                cmd, 
+                stderr=asyncio.subprocess.PIPE, 
+                stdout=asyncio.subprocess.PIPE)
+            await p.wait()
+    cmd = f"docker build {core.path.temp} -t lcars/python:2024.04 -f {docker_file}"
+    p = await asyncio.subprocess.create_subprocess_shell(
+        cmd, 
+        stderr=asyncio.subprocess.PIPE, 
+        stdout=asyncio.subprocess.PIPE)
+    await p.wait()
+                
 async def container_add(core: corelib.Core, container: str) -> None:
+    #check image 
+    manifest = await aiotomllib.loader(core.path.base / 'addons' / container / 'manifest.toml')
+    if (img_name := manifest.get('docker', {}).get('name')):
+        if '%Y' in img_name:
+            d = dt.now()
+            img_name = d.strftime(img_name)
+        to_build = True
+        for image in await core.docker.images.list():
+            for tag in image.attrs['RepoTags']:
+                if tag == img_name:
+                    to_build = False
+                    break
+            if not to_build:
+                break
+        if to_build:
+            await create_image(core, img_name, manifest.get('docker', {}).get('folder'))
     toml = await aiotomllib.loader(core.path.base / 'addons' / container / 'docker_data.toml')
     comp = {}
     comp['services'] = {}
@@ -96,7 +148,7 @@ async def restart_container(name: str) -> None:
     print(cmd)
     p = await asyncio.subprocess.create_subprocess_shell(
         cmd, 
-#        stderr=asyncio.subprocess.PIPE, 
+        stderr=asyncio.subprocess.PIPE, 
         stdout=asyncio.subprocess.PIPE)
     await p.wait()
 
