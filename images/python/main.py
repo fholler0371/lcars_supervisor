@@ -12,4 +12,4 @@ for name, value in os.environ.items():
     print("{0}: {1}".format(name, value), flush=True)
 
 
-time.sleep(100)
+time.sleep(10_000)

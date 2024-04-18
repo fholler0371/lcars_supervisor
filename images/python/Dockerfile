@@ -13,6 +13,10 @@ RUN rm /etc/localtime && ln -s /usr/share/zoneinfo/Europe/Berlin /etc/localtime 
     dpkg-reconfigure locales
 
 COPY main.py /lcars/starter/main.py
+COPY health_check.py /lcars/starter/health_check.py
+
+HEALTHCHECK --interval=1m --timeout=30s --start-period=2m \
+            CMD python3 /lcars/starter/health_check.py
 
 CMD ["python3", "/lcars/starter/main.py"]
 

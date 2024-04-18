@@ -109,6 +109,8 @@ class Server(BaseObj):
                     continue
                 rec = {'name': cfg['label'], 'lcars': True}
             rec['status'] = container.status
+            if (state := container.attrs['State'].get('Health', {}).get('Status')) is not None:
+                rec['status'] = state
             rec['network'] = ''
             rec['ip'] = ''
             if 'Networks' in container.attrs['NetworkSettings']:
