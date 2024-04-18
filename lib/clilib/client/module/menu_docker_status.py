@@ -19,8 +19,8 @@ class MenuDockerStatus:
         resp = await self.core.web_l.get('docker/status')
         if resp is None:
             return
-        self.table = Table(show_header=True, header_style="bold magenta")
-        self.table.add_column("Name", width=15) #table.add_column("Date", style="dim", width=12)#
+        self.table = Table(show_header=True, header_style="bold magenta", title="Container Status")
+        self.table.add_column("Name", width=20) #table.add_column("Date", style="dim", width=12)#
         self.table.add_column("Status", width=10) 
         self.table.add_column("Lcars", width=6, justify="center") 
         self.table.add_column("Netzwerk", width=15) 

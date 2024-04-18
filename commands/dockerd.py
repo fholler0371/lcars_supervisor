@@ -90,6 +90,15 @@ async def container_add(core: corelib.Core, container: str) -> None:
             stderr=asyncio.subprocess.PIPE, 
             stdout=asyncio.subprocess.PIPE)
         await p.wait()
+        
+async def restart_container(name: str) -> None:
+    cmd = cmd = f'docker container start {name}'
+    print(cmd)
+    p = await asyncio.subprocess.create_subprocess_shell(
+        cmd, 
+#        stderr=asyncio.subprocess.PIPE, 
+        stdout=asyncio.subprocess.PIPE)
+    await p.wait()
 
 async def main() -> None:
     core = corelib.Core()
@@ -106,9 +115,12 @@ async def main() -> None:
     if not (core.path.temp / 'compose').exists():
         await os.mkdir(core.path.temp / 'compose', force=True)
     for container in container_data.get('apps', []):
-        if await core.docker.containers.get(container) is None:
+        if (cont_data := await core.docker.containers.get(container)) is None:
             await container_add(core, container)
             return
+        else:
+            if cont_data.status != "running":
+                await restart_container(container)
     for container in await core.docker.containers.list():
         if 'pro.holler.lcars.managed' in container.labels:
             if container.name not in container_data.get('apps', []):

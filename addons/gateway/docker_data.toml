@@ -1,0 +1,9 @@
+name = "gateway"
+
+image = "lcars/python:2024.04"
+restart = "unless-stopped"
+networks = ["local-bridge"]
+ports = ['1235:1235']
+
+[volumes]
+"%data_folder%" = "/lcars/data"
