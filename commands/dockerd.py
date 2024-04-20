@@ -120,6 +120,7 @@ async def container_add(core: corelib.Core, container: str) -> None:
         data_folder = pathlib.Path('/'.join(str(core.path.data).split('/')[:-1])) / toml['name'] 
         for source, dest in toml['volumes'].items():
             source = source.replace('%data_folder%', str(data_folder))
+            source = source.replace('%base_folder%', str(core.path.base))
             comp['services'][toml['name']]['volumes'].append(f"{source}:{dest}")
     if 'restart' in toml:
         comp['services'][toml['name']]['restart'] = toml['restart']
@@ -151,6 +152,18 @@ async def restart_container(name: str) -> None:
         stderr=asyncio.subprocess.PIPE, 
         stdout=asyncio.subprocess.PIPE)
     await p.wait()
+    if p.returncode != 0:
+        p = await asyncio.subprocess.create_subprocess_shell(
+            'systemctl restart docker', 
+            stderr=asyncio.subprocess.PIPE, 
+            stdout=asyncio.subprocess.PIPE)
+        await p.wait()
+        p = await asyncio.subprocess.create_subprocess_shell(
+            cmd, 
+            stderr=asyncio.subprocess.PIPE, 
+            stdout=asyncio.subprocess.PIPE)
+        await p.wait()
+        
 
 async def main() -> None:
     core = corelib.Core()

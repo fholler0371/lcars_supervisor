@@ -13,7 +13,7 @@ class LogDummy:
     LEVEL = {'critical', 'error', 'warning', 'info', 'debug'}
     
     def _log(self, msg: str, level:str ) -> None:
-        print(f'{level.upper()} {msg}')
+        print(f'{level.upper()} {msg}', flush=True)
 
     def __getattr__(self, name: str) -> Any:
         if name in self.LEVEL:

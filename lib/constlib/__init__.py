@@ -20,7 +20,7 @@ class Const(BaseObj):
         self.pid = os.getpid()
         self.reload = False
         self.app = sys.argv[0].split('/')[-1].split('.')[0]
-        self.is_docker = False
+        self.is_docker = os.getenv('LCARS_CONTAINER', default='0') == str(1)
         
     async def _ainit(self):
         self.loop = asyncio.get_event_loop()
@@ -34,20 +34,3 @@ class Const(BaseObj):
     async def _astop(self):
         if self.app == "supervisord":
             await aiofiles.os.remove(PIDFILE)
-
-        
-'''
-import os, re
-
-path = "/proc/self/cgroup"
-
-def is_docker():
-  if not os.path.isfile(path): return False
-  with open(path) as f:
-    for line in f:
-      if re.match("\d+:[\w=]+:/docker(-[ce]e)?/\w+", line):
-        return True
-    return False
-
-print(is_docker())
-'''

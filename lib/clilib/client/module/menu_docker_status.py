@@ -3,6 +3,8 @@ from functools import partial
 from rich.table import Table
 from datetime import datetime as dt
 
+import clilib.data as cd
+
 import time
 
 
@@ -27,11 +29,12 @@ class MenuDockerStatus:
         self.table.add_column("IP-Adresse", width=15) 
         self.table.add_column("Erstellt", width=10, style="dim") 
         self.table.add_column("Start", width=20) 
+        resp = [cd.CliStatus(**x) for x in resp]
         for entry in resp:
-            self.table.add_row(entry['name'], f"[yellow]{entry['status']}[/yellow]", f"[red]{'ja' if entry['lcars'] else 'nein'}[/red]",
-                               entry['network'], f"[green]{entry['ip']}[/green]",
-                               dt.fromtimestamp(entry['created']).strftime('%d.%m.%Y'),
-                               dt.fromtimestamp(entry['start']).strftime('%d.%m.%Y %H:%M:%S'))
+            self.table.add_row(entry.name, f"[yellow]{entry.status}[/yellow]", f"[red]{'ja' if entry.lcars else 'nein'}[/red]",
+                               entry.network, f"[green]{entry.ip}[/green]",
+                               dt.fromtimestamp(entry.created).strftime('%d.%m.%Y'),
+                               dt.fromtimestamp(entry.start).strftime('%d.%m.%Y %H:%M:%S'))
     
     async def add_addons(self, name: str) -> None:
         await self.core.web_l.post('docker/deactivate', {'addon': name})

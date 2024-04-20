@@ -3,7 +3,10 @@ import aiofiles.os as os
 from datetime import datetime as dt
 from datetime import UTC
 
+from ..data import CliStatus, CliContainer
+
 from corelib import BaseObj, Core
+
 
 import aiotomllib
 import aioyamllib
@@ -54,15 +57,17 @@ class Server(BaseObj):
         return False
     
     async def cli_docker_avaible(self) -> None:
-        data = {}
+        data = []
+        containers = await self.core.docker.containers.list()
         for entry in await os.scandir(str(self.core.path.base / 'addons')):
             cfg_file = self.core.path.base / 'addons' / entry.name / 'manifest.toml'
             cfg = await aiotomllib.loader(cfg_file)
-            data[cfg['name']] = cfg['label']
-        for container in await self.core.docker.containers.list():
-            if container.name in data:
-                del data[container.name]
-        return (True, web.json_response(data))
+            for container in containers:
+                if container.name in cfg['name']:
+                    break
+            else: 
+                data.append(CliContainer(name=cfg['name'], label=cfg['label']))
+        return (True, web.json_response([d.model_dump() for d in sorted(data, key=lambda x: x.label)]))
 
     async def cli_docker_activate(self, data: dict) -> None:
         file = self.core.path.data / "docker.yml"
@@ -75,7 +80,7 @@ class Server(BaseObj):
         return (True, web.json_response({}))
 
     async def cli_docker_running(self) -> tuple:
-        data = {}
+        data = []
         containers = await self.core.docker.containers.list()
         for container in containers:
             if 'pro.holler.lcars.managed' in container.labels:
@@ -83,8 +88,8 @@ class Server(BaseObj):
                 cfg = await aiotomllib.loader(cfg_file)
                 if cfg is None:
                     continue
-                data[cfg['name']] = cfg['label']
-        return (True, web.json_response(data))
+                data.append(CliContainer(name=cfg['name'], label=cfg['label']))
+        return (True, web.json_response([d.model_dump() for d in sorted(data, key=lambda x: x.label)]))
 
     async def cli_docker_deactivate(self, data: dict) -> None:
         file = self.core.path.data / "docker.yml"
@@ -101,26 +106,23 @@ class Server(BaseObj):
         containers = await self.core.docker.containers.list()
         for container in containers:
             if 'pro.holler.lcars.managed' not in container.labels:
-                rec = {'name': container.name, 'lcars': False}
+                d_rec = CliStatus(name=container.name)
             else:
                 cfg_file = self.core.path.base / 'addons' / container.name / 'manifest.toml'
                 cfg = await aiotomllib.loader(cfg_file)
                 if cfg is None:
                     continue
-                rec = {'name': cfg['label'], 'lcars': True}
-            rec['status'] = container.status
+                d_rec = CliStatus(name=cfg['label'], lcars=True)
+            d_rec.status = container.status
             if (state := container.attrs['State'].get('Health', {}).get('Status')) is not None:
-                rec['status'] = state
-            rec['network'] = ''
-            rec['ip'] = ''
+                d_rec.status = state
             if 'Networks' in container.attrs['NetworkSettings']:
                 for label, netdata in container.attrs['NetworkSettings']['Networks'].items():
-                    rec['network'] = label
+                    d_rec.network = label
                     if 'IPAddress' in netdata:
-                        rec['ip'] = netdata['IPAddress']
+                        d_rec.ip = netdata['IPAddress']
             epoch = dt.strptime('1970-01-01T00:00:00', '%Y-%m-%dT%H:%M:%S')
-            rec['start'] = int((dt.strptime(container.attrs['State']['StartedAt'][:19], '%Y-%m-%dT%H:%M:%S') - epoch).total_seconds())
-            rec['created'] = int((dt.strptime(container.attrs['Created'][:19], '%Y-%m-%dT%H:%M:%S') - epoch).total_seconds())
-            data.append(rec)
-        data = sorted(data, key=lambda x: x['name'])
-        return (True, web.json_response(data))
+            d_rec.start = int((dt.strptime(container.attrs['State']['StartedAt'][:19], '%Y-%m-%dT%H:%M:%S') - epoch).total_seconds())
+            d_rec.created = int((dt.strptime(container.attrs['Created'][:19], '%Y-%m-%dT%H:%M:%S') - epoch).total_seconds())
+            data.append(d_rec)
+        return (True, web.json_response([d.model_dump() for d in sorted(data, key=lambda x: x.name)]))

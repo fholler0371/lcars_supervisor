@@ -14,6 +14,8 @@ class Config(BaseObj):
     async def _ainit(self) -> None:
         if self._toml_name is not None:
             self.toml = await aiotomllib.loader(self._toml_name)
+            if self.core.const.is_docker:
+                self.core.const.app = self.toml.get('app', self.core.const.app)
 
     def __getattr__(self, name: str) -> Any:
         value = self.toml.get(name)

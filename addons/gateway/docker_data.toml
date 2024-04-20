@@ -2,8 +2,15 @@ name = "gateway"
 
 image = "lcars/python:2024.04"
 restart = "unless-stopped"
-networks = ["local-bridge"]
+networks = ["lcars-bridge"]
 ports = ['1235:1235']
 
 [volumes]
+"/var/run/docker.sock" = "/var/run/docker.sock"
+
 "%data_folder%" = "/lcars/data"
+"%base_folder%/lib" = "/lcars/lib"
+
+"%base_folder%/addons/gateway/src/run.py" = "/lcars/starter/run.py"
+
+"%base_folder%/addons/gateway/config" = "/lcars/config"
