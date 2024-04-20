@@ -97,7 +97,11 @@ async def container_add(core: corelib.Core, container: str) -> None:
     comp = {}
     comp['services'] = {}
     comp['services'][toml['name']] = {}
-    comp['services'][toml['name']]['image'] = toml['image']
+    img_name = toml['image'] 
+    if '%Y' in img_name:
+        d = dt.now()
+        img_name = d.strftime(img_name)
+    comp['services'][toml['name']]['image'] = img_name
     comp['services'][toml['name']]['container_name'] = toml['name']
     if 'ports' in toml:
         comp['services'][toml['name']]['ports'] = []
@@ -107,6 +111,11 @@ async def container_add(core: corelib.Core, container: str) -> None:
         comp['services'][toml['name']]['environment'] = []
         for environment in toml['environment']:
             comp['services'][toml['name']]['environment'].append(environment)
+    if toml.get('setup', {}).get('lcars'):
+        if 'environment' not in comp['services'][toml['name']]:
+            comp['services'][toml['name']]['environment'] = []
+        keys = await aioyamllib.save_load(pathlib.Path(sys.argv[2]) / 'data' / 'supervisor' / 'local_keys.yml')
+        comp['services'][toml['name']]['environment'].append(f"LCARS_KEY={keys.get('local', '')}")
     if 'networks' in toml:
         comp['networks'] = {}
         idx = 1

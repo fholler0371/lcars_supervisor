@@ -1,20 +1,19 @@
-name = "gateway"
+name = "web_base"
 
 image = "lcars/python:%Y.%m"
 restart = "unless-stopped"
 networks = ["lcars-bridge"]
-ports = ['1235:1235']
+ports = ['1236:80']
 
 [setup]
 lcars = true
 
 [volumes]
-"/var/run/docker.sock" = "/var/run/docker.sock"
 
 "%data_folder%" = "/lcars/data"
 "%base_folder%/lib" = "/lcars/lib"
 "%base_folder%/log" = "/lcars/log"
 
-"%base_folder%/addons/gateway/src/run.py" = "/lcars/starter/run.py"
+"%base_folder%/addons/web_base/src/run.py" = "/lcars/starter/run.py"
 
-"%base_folder%/addons/gateway/config" = "/lcars/config"
+"%base_folder%/addons/web_base/config" = "/lcars/config"

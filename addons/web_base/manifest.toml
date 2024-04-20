@@ -1,0 +1,6 @@
+name = "web_base"
+label = "LCARS WebBase"
+
+[docker]
+name = "lcars/python:%Y.%m"
+folder = 'python'

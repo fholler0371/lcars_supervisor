@@ -91,6 +91,8 @@ class Server(BaseObj):
                 if cfg is None:
                     continue
                 d_rec = CliStatus(name=cfg['label'], lcars=True)
+            if 'pro.holler.lcars.python' in container.labels:
+                d_rec.python = True
             d_rec.status = container.status
             if (state := container.attrs['State'].get('Health', {}).get('Status')) is not None:
                 d_rec.status = state
