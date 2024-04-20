@@ -4,6 +4,7 @@ from datetime import datetime as dt
 from datetime import UTC
 
 from ..data import CliStatus, CliContainer
+from httplib.data import HttpHandler, HttpRequestData
 
 from corelib import BaseObj, Core
 
@@ -17,41 +18,18 @@ class Server(BaseObj):
         BaseObj.__init__(self, core)
         
     async def _ainit(self):
-        await self.core.web.add_handler('/cli/', self.pre_handler)
+        await self.core.web.add_handler(HttpHandler(domain = 'cli', func = self.handler, auth='local'))
         
-    async def pre_handler(self, request: web.Request) -> bool:
-        data = {'version': 0, 'auth': False, 'path': ''}
-        try:
-            data['version'] = int(request.path.split('/')[2])
-        except:
-            self.core.log.error('Keine gültige Version im Pfad')
-        if 'X-Auth' in request.headers:
-            header = request.headers['X-Auth']
-            if header == self.core.web.local_keys.local:
-                data['auth'] = True
-            else:
-                self.core.log.error('Ungülter Auth Key')
-                return (True, web.Response(status=403, text='Nicht erlaubt'))
-        else:
-            self.core.log.error('Kein Autorisation Handler')
-            return (True, web.Response(status=403, text='Nicht erlaubt'))
-        data['path'] = '/'.join(str(request.path).split('/')[3:])
-        try:
-            data['json'] = await request.json()
-        except:
-            data['json'] = {}
-        return await self.handler(request, data)
-
-    async def handler(self, request: web.Request, data: dict) -> bool:
-        match data['path']:
+    async def handler(self, request: web.Request, rd: HttpRequestData) -> bool:
+        match '/'.join(rd.path):
             case 'docker/avaible':
                 return await self.cli_docker_avaible()
             case 'docker/activate':
-                return await self.cli_docker_activate(data['json'])
+                return await self.cli_docker_activate(rd.data)
             case 'docker/running':
                 return await self.cli_docker_running()
             case 'docker/deactivate':
-                return await self.cli_docker_deactivate(data['json'])
+                return await self.cli_docker_deactivate(rd.data)
             case 'docker/status':
                 return await self.cli_docker_status()
         return False

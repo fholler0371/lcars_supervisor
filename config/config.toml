@@ -56,6 +56,13 @@ backupCount = 9
 [pre.requirements]
 aioretry = "==5.0.2"
 docker = "==7.0.0"
+simple_term_menu = "==1.6.4"
+rich = "==13.7.1"
+pydantic = "==2.7.0"
+netaddr = "==1.2.1"
+
+[acl]
+lcars = '192.168.0.0/24'
 
 [networks.lcars-bridge]
 #type = "bridge"

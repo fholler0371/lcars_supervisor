@@ -12,7 +12,7 @@ RUN rm /etc/localtime && ln -s /usr/share/zoneinfo/Europe/Berlin /etc/localtime 
     apt update && apt install -y locales locales-all && \
     dpkg-reconfigure locales
 
-RUN pip install aiofiles aiohttp docker pyyaml
+RUN pip install aiofiles aiohttp docker pyyaml pydantic netaddr
 
 COPY main.py /lcars/starter/main.py
 COPY health_check.py /lcars/starter/health_check.py
