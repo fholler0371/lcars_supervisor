@@ -32,7 +32,12 @@ class MenuDockerStatus:
         self.table.add_column("Start", width=20) 
         resp = [cd.CliStatus(**x) for x in resp]
         for entry in resp:
-            self.table.add_row(entry.name, f"[yellow]{entry.status}[/yellow]", f"[red]{'ja' if entry.lcars else 'nein'}[/red]",
+            state_color = 'yellow'
+            if entry.status in ['running', 'healthy']:
+                state_color = 'green'
+            elif entry.status in ['exited', 'unhealthy']:
+                state_color = 'red'
+            self.table.add_row(entry.name, f"[{state_color}]{entry.status}[/{state_color}]", f"[red]{'ja' if entry.lcars else 'nein'}[/red]",
                                f"[red]{'ja' if entry.python else 'nein'}[/red]",
                                entry.network, f"[green]{entry.ip}[/green]",
                                dt.fromtimestamp(entry.created).strftime('%d.%m.%Y'),

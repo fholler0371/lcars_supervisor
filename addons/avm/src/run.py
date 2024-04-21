@@ -23,7 +23,6 @@ async def main() -> None:
     await core.add('log', loggerlib.Logger)
     await core.add('running', asyncio.Event())
     await core.add('signal', signallib.Signal)
-    await core.add('web', httplib.HTTP)
     await core.add('web_l', httplib.ClientLocal)
     await core.add('com', addon_com.Com)
     core.log.info(f'starte {core.const.app} (pid: {core.const.pid})')
@@ -36,6 +35,4 @@ async def main() -> None:
 if __name__ == '__main__':
     asyncio.run(main())
 
-time.sleep(100)
-print('is_running end x1', flush=True)
     

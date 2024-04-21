@@ -16,8 +16,14 @@ class HTTP(BaseObj):
         self._sv = sv
         self._handlers = []
         self.acl_lcars = ['127.0.0.1/32']
-        if (ip := self.core.cfg.acl.get('lcars')) is not None:
+        self.acl_lcars_docker = ['127.0.0.1/32']
+        if self.core.cfg.acl is not None and (ip := self.core.cfg.acl.get('lcars')) is not None:
             self.acl_lcars.append(ip)
+            self.acl_lcars_docker.append(ip)
+        self.acl_docker = []
+        if self.core.cfg.acl is not None and (ip := self.core.cfg.acl.get('docker')) is not None:
+            self.acl_docker.append(ip)
+            self.acl_lcars_docker.append(ip)
         
     async def add_handler(self, h : HttpHandler) -> None:
         self.core.log.debug(f'Registrier Handler für: {h.domain}')
@@ -63,6 +69,10 @@ class HTTP(BaseObj):
         match acl:
             case 'lcars':
                 ranges = self.acl_lcars
+            case 'docker':
+                ranges = self.acl_docker
+            case 'lcars_docker':
+                ranges = self.acl_lcars_docker
         try:
             _ip = IPAddress(ip)
             for acl_ip in ranges:
@@ -74,6 +84,7 @@ class HTTP(BaseObj):
         
 
     async def _ainit(self):
+        self.core.log.debug('starte WebServer')
         try:
             port = 1234 if self._sv else 1235
             self.site = await server_start(port, self._handler)

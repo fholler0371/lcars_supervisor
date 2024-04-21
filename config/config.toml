@@ -62,7 +62,8 @@ pydantic = "==2.7.0"
 netaddr = "==1.2.1"
 
 [acl]
-lcars = '192.168.0.0/24'
+lcars = '192.168.0.0/23'
+docker = '10.0.0.0/16'
 
 [networks.lcars-bridge]
 #type = "bridge"

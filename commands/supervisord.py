@@ -27,11 +27,7 @@ async def main() -> None:
     await core.add('web', httplib.HTTP, sv=True)
     await core.add('cli_s', clilib.Server)
     core.log.info(f'alles geladen, wird Hauptschleife startet ({core.const.pid})')
-    try:
-        async with asyncio.timeout(3600):
-            await core.running.wait()
-    except:
-        pass
+    await core.running.wait()
     core.log.info('Hauptschleife beendet')
     await core.const._astop()
     await core.web._astop()

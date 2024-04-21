@@ -1,9 +1,8 @@
-name = "web_base"
+name = "avm"
 
 image = "lcars/python:%Y.%m"
 restart = "unless-stopped"
 networks = ["lcars-bridge"]
-ports = ['1236:80']
 
 [setup]
 lcars = true
@@ -15,8 +14,9 @@ lcars = true
 "%base_folder%/lib" = "/lcars/lib"
 "%log_folder%" = "/lcars/log"
 "%temp_folder%" = "/lcars/temp"
-"%base_folder%/addons/web_base/lib" = "/lcars/lib2"
+"%base_folder%/addons/avm/lib" = "/lcars/lib2"
 
-"%base_folder%/addons/web_base/src/run.py" = "/lcars/starter/run.py"
 
-"%base_folder%/addons/web_base/config" = "/lcars/config"
+"%base_folder%/addons/avm/src/run.py" = "/lcars/starter/run.py"
+
+"%base_folder%/addons/avm/config" = "/lcars/config"

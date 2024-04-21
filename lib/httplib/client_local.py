@@ -1,7 +1,9 @@
+import asyncio
 import aioretry
 import aiohttp
 
 from corelib import BaseObj, Core
+from corelib.aio_property import aproperty
 
 from .local_keys import LocalKeys
 
@@ -14,6 +16,8 @@ def retry_policy(info: aioretry.RetryInfo) -> aioretry.RetryPolicyStrategy:
 class ClientLocal(BaseObj):
     def __init__(self, core: Core, sv: bool= False) -> None:
         BaseObj.__init__(self, core)
+        self._hostname = None
+        self._parent_ip = None
         
     async def _ainit(self):
         self.local_keys = LocalKeys(self.core)
@@ -25,6 +29,20 @@ class ClientLocal(BaseObj):
         try:
             if dest == 'local':
                 host = '127.0.0.1:1234'
+                key = self.local_keys.local
+            elif dest == 'gateway':
+                host = 'gateway:1235'
+                key = self.local_keys.local
+            elif dest == 'parent':
+                if self._parent_ip is None:
+                    cmd = "ip route | grep default | awk '{ print $3 }'"
+                    p = await asyncio.subprocess.create_subprocess_shell(
+                                  cmd, 
+                                  stderr=asyncio.subprocess.PIPE, 
+                                  stdout=asyncio.subprocess.PIPE)
+                    stdout, _ = await p.communicate()
+                    self._parent_ip = stdout.decode().split('\n')[0]
+                host = f'{self._parent_ip}:1234'
                 key = self.local_keys.local
             async with aiohttp.ClientSession(headers={'X-Auth':key}, timeout=self.session_timeout) as session:
                 async with session.get(f'http://{host}/{url}') as response:
@@ -39,9 +57,9 @@ class ClientLocal(BaseObj):
             raise(e)
         return None
         
-    async def get(self, url: str, dest: str = 'local', version: int = 1) -> any:
+    async def get(self, url: str, dest: str = 'local', version: int = 1, endpoint: str = 'cli') -> any:
         try:
-            return await self._get(f'cli/{version}/{url}', dest)
+            return await self._get(f'{endpoint}/{version}/{url}', dest)
         except Exception as e:
             self.core.log.error(e)
         return None
@@ -71,3 +89,10 @@ class ClientLocal(BaseObj):
         except Exception as e:
             self.core.log.error(e)
         return None
+
+    @aproperty
+    async def hostname(self):
+        if self._hostname is None:
+            resp = await self.get('network/hostname', dest='gateway', endpoint='com')
+            self._hostname = resp.get('hostname')
+        return self._hostname

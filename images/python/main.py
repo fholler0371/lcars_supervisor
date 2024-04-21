@@ -22,9 +22,11 @@ async def main() -> None:
     await updater.wait()
     run = await asyncio.subprocess.create_subprocess_shell(f'python {core.path.base}/starter/run.py')
     await core.running.wait()
-    if run.returncode is None:
-        core.log.info('sigterm zu run')
-        run.terminate()
+    try:
+        with open(constlib.DOCKER_PIDFILE) as f:
+            os.kill(int(f.read()), 15)
+    except Exception as e:
+        print(e, flush=True)
     await run.wait()
 
 if __name__ == '__main__':

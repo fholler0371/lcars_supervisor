@@ -1,0 +1,6 @@
+name = "avm"
+label = "LCARS AVM"
+
+[docker]
+name = "lcars/python:%Y.%m"
+folder = 'python'

@@ -9,11 +9,14 @@ ports = ['1235:1235']
 lcars = true
 
 [volumes]
-"/var/run/docker.sock" = "/var/run/docker.sock"
+#"/var/run/docker.sock" = "/var/run/docker.sock"
 
+# standard Ordner
 "%data_folder%" = "/lcars/data"
 "%base_folder%/lib" = "/lcars/lib"
-"%base_folder%/log" = "/lcars/log"
+"%log_folder%" = "/lcars/log"
+"%temp_folder%" = "/lcars/temp"
+"%base_folder%/addons/gateway/lib" = "/lcars/lib2"
 
 "%base_folder%/addons/gateway/src/run.py" = "/lcars/starter/run.py"
 

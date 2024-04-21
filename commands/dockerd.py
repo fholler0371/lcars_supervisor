@@ -127,8 +127,12 @@ async def container_add(core: corelib.Core, container: str) -> None:
     if 'volumes' in toml:
         comp['services'][toml['name']]['volumes'] = []
         data_folder = pathlib.Path('/'.join(str(core.path.data).split('/')[:-1])) / toml['name'] 
+        log_folder = pathlib.Path('/'.join(str(core.path.log).split('/')[:-1])) / toml['name'] 
+        temp_folder = pathlib.Path('/'.join(str(core.path.temp).split('/')[:-1])) / toml['name'] 
         for source, dest in toml['volumes'].items():
             source = source.replace('%data_folder%', str(data_folder))
+            source = source.replace('%log_folder%', str(log_folder))
+            source = source.replace('%temp_folder%', str(temp_folder))
             source = source.replace('%base_folder%', str(core.path.base))
             comp['services'][toml['name']]['volumes'].append(f"{source}:{dest}")
     if 'restart' in toml:
@@ -154,7 +158,7 @@ async def container_add(core: corelib.Core, container: str) -> None:
         await p.wait()
         
 async def restart_container(name: str) -> None:
-    cmd = cmd = f'docker container start {name}'
+    cmd = f'docker container restart {name}'
     print(cmd)
     p = await asyncio.subprocess.create_subprocess_shell(
         cmd, 
@@ -195,6 +199,10 @@ async def main() -> None:
         else:
             if cont_data.status != "running":
                 await restart_container(container)
+            elif (state := cont_data.attrs['State'].get('Health', {}).get('Status')) is not None:
+                print(state)
+                if state == 'unhealthy':
+                    await restart_container(container)
     for container in await core.docker.containers.list():
         if 'pro.holler.lcars.managed' in container.labels:
             if container.name not in container_data.get('apps', []):

@@ -34,6 +34,8 @@ class Path(BaseObj):
                     'data': '/lcars/data'}
         
     def __getattr__(self, propName: str) -> any:
+        if propName.startswith('_'):
+            raise AttributeError
         try:
             if path := self.cfg.get(propName, None):
                 return pathlib.Path(path)

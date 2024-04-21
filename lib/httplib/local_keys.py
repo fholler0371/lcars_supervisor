@@ -1,5 +1,6 @@
 import secrets
 import pathlib
+import os
 
 import aioyamllib
 
@@ -15,6 +16,8 @@ class LocalKeys:
             self.file = self.core.path.data / 'local_keys.yml'
         if self.file.exists():
             self.data = await aioyamllib.save_load(self.file)
+        elif self.core.const.is_docker:
+            self.data = {'local': os.getenv('LCARS_KEY')}
         else:
             self.data = {'local': secrets.token_hex(32)}
             await self._save()

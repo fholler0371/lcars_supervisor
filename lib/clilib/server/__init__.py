@@ -2,6 +2,7 @@ from aiohttp import web
 import aiofiles.os as os
 from datetime import datetime as dt
 from datetime import UTC
+import socket
 
 from ..data import CliStatus, CliContainer
 from httplib.data import HttpHandler, HttpRequestData
@@ -18,7 +19,7 @@ class Server(BaseObj):
         BaseObj.__init__(self, core)
         
     async def _ainit(self):
-        await self.core.web.add_handler(HttpHandler(domain = 'cli', func = self.handler, auth='local'))
+        await self.core.web.add_handler(HttpHandler(domain = 'cli', func = self.handler, auth='local', acl='lcars_docker'))
         
     async def handler(self, request: web.Request, rd: HttpRequestData) -> bool:
         match '/'.join(rd.path):
@@ -32,6 +33,8 @@ class Server(BaseObj):
                 return await self.cli_docker_deactivate(rd.data)
             case 'docker/status':
                 return await self.cli_docker_status()
+            case 'network/hostname':
+                return (True, web.json_response({'hostname': socket.getfqdn()}))
         return False
     
     async def cli_docker_avaible(self) -> None:
@@ -94,7 +97,7 @@ class Server(BaseObj):
             if 'pro.holler.lcars.python' in container.labels:
                 d_rec.python = True
             d_rec.status = container.status
-            if (state := container.attrs['State'].get('Health', {}).get('Status')) is not None:
+            if d_rec.status == 'running' and (state := container.attrs['State'].get('Health', {}).get('Status')) is not None:
                 d_rec.status = state
             if 'Networks' in container.attrs['NetworkSettings']:
                 for label, netdata in container.attrs['NetworkSettings']['Networks'].items():

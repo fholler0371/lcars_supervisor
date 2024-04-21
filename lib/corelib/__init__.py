@@ -2,7 +2,6 @@ from typing import Any
 from functools import partial
 import time
 
-
 Core = object
 
 class BaseObj:
@@ -22,7 +21,27 @@ class LogDummy:
 class Core:
     def __init__(self) -> None:
         self.log = LogDummy()    
+        
+    async def start(self):
+        for entry in self.__dir__():
+            if entry.startswith('__'):
+                continue
+            if not hasattr((obj := getattr(self, entry)), 'core'):
+                continue
+            if hasattr(obj, '_astart'):
+                if (func := getattr(obj, '_astart')) is not None:
+                    await self.call(func)
     
+    async def stop(self):
+        for entry in self.__dir__():
+            if entry.startswith('__'):
+                continue
+            if not hasattr((obj := getattr(self, entry)), 'core'):
+                continue
+            if hasattr(obj, '_astop'):
+                if (func := getattr(obj, '_astop')) is not None:
+                    await func()
+
     async def add(self, name: str, obj: object, *args, **kwargs) -> None:
         try:
             setattr(self, name, _obj := obj(self, *args, **kwargs))
@@ -33,3 +52,9 @@ class Core:
             #print(name, repr(e))
             pass
         setattr(self, name, obj)
+        
+    async def call(self, callback, *args, **kwargs):
+        self.const.loop.call_soon(self._run, callback, *args, **kwargs)
+
+    def _run(self, callback, *args, **kwargs):
+        self.const.loop.create_task(callback(*args, **kwargs))
