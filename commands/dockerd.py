@@ -184,7 +184,8 @@ async def main() -> None:
     core = corelib.Core()
     await core.add('const', constlib.Const)
     await core.add('path', sv_pathlib.Path, pathlib.Path(sys.argv[2]) / 'data' / 'supervisor' / 'folder.yml')
-    await core.add('cfg', configlib.Config, toml=core.path.config / core.const.hostname / 'config.toml')
+    await core.add('cfg', configlib.Config, toml=core.path.config / core.const.hostname / 'config.toml'
+                                            acl=core.path.lcars / 'config/acl.toml')
     await core.add('running', asyncio.Event())
     await core.add('docker', aiodockerlib.Docker)
     for name, data in core.cfg.toml.get('networks', {}).items():

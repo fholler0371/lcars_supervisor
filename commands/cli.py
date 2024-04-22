@@ -21,7 +21,8 @@ async def main() -> None:
     await core.add('const', constlib.Const)
     await core.add('path', sv_pathlib.Path, pathlib.Path(sys.argv[2]) / 'data' / 'supervisor' / 'folder.yml')
     await core.path.replace_app('supervisor')
-    await core.add('cfg', configlib.Config, toml=core.path.config / core.const.hostname / 'config.toml')
+    await core.add('cfg', configlib.Config, toml=core.path.config / core.const.hostname / 'config.toml',
+                                            acl=core.path.lcars / 'config/acl.toml')
     await core.add('log', loggerlib.Logger)
     await core.add('docker', aiodockerlib.Docker)
     await core.add('web_l', httplib.ClientLocal)
