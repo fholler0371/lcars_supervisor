@@ -87,13 +87,13 @@ class Server(BaseObj):
         containers = await self.core.docker.containers.list()
         for container in containers:
             if 'pro.holler.lcars.managed' not in container.labels:
-                d_rec = CliStatus(name=container.name)
+                d_rec = CliStatus(name=container.name, docker_name=container.name)
             else:
                 cfg_file = self.core.path.base / 'addons' / container.name / 'manifest.toml'
                 cfg = await aiotomllib.loader(cfg_file)
                 if cfg is None:
                     continue
-                d_rec = CliStatus(name=cfg['label'], lcars=True)
+                d_rec = CliStatus(name=cfg['label'], docker_name=cfg['name'], lcars=True)
             if 'pro.holler.lcars.python' in container.labels:
                 d_rec.python = True
             d_rec.status = container.status

@@ -1,6 +1,9 @@
 import aiofiles.os as os
 from functools import partial
-from rich.table import Table
+try:
+    from rich.table import Table
+except:
+    pass
 from datetime import datetime as dt
 
 import clilib.data as cd

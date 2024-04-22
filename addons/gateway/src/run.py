@@ -19,7 +19,8 @@ async def main() -> None:
     core = corelib.Core()
     await core.add('path', aiopathlib.Path)
     await core.add('const', constlib.Const)
-    await core.add('cfg', configlib.Config, toml=core.path.config / 'config.toml')
+    await core.add('cfg', configlib.Config, toml=core.path.config / 'config.toml',
+                                            acl=core.path.config / 'acl.toml')
     await core.add('log', loggerlib.Logger)
     await core.add('running', asyncio.Event())
     await core.add('signal', signallib.Signal)

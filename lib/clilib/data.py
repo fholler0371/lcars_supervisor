@@ -3,6 +3,7 @@ import pydantic
 
 class CliStatus(pydantic.BaseModel):
     name : str
+    docker_name : str
     python : bool = False
     lcars : bool = False
     status : str = 'unbekannt'

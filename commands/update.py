@@ -105,6 +105,7 @@ async def install_config(core: dict, source: str, dest: str) -> None:
                                                         stdout=asyncio.subprocess.PIPE)
     await p.wait()
     cmd = f"cp {core.path.base}/.git/lcars_supervisor/config/{source} {dest_file}"
+    print(cmd)
     p = await asyncio.subprocess.create_subprocess_shell(cmd, 
                                                         stderr=asyncio.subprocess.PIPE, 
                                                         stdout=asyncio.subprocess.PIPE)

@@ -3,7 +3,7 @@ name = "web_base"
 image = "lcars/python:%Y.%m"
 restart = "unless-stopped"
 networks = ["lcars-bridge"]
-ports = ['1236:80']
+ports = ['1236:1235']
 
 [setup]
 lcars = true
@@ -19,4 +19,5 @@ lcars = true
 
 "%base_folder%/addons/web_base/src/run.py" = "/lcars/starter/run.py"
 
-"%base_folder%/addons/web_base/config" = "/lcars/config"
+"%base_folder%/addons/web_base/config/config.toml" = "/lcars/config/config.toml"
+"%base_config_folder%/acl.toml" = "/lcars/config/acl.toml"

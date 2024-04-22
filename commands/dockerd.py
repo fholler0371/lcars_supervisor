@@ -128,12 +128,14 @@ async def container_add(core: corelib.Core, container: str) -> None:
         comp['services'][toml['name']]['volumes'] = []
         data_folder = pathlib.Path('/'.join(str(core.path.data).split('/')[:-1])) / toml['name'] 
         log_folder = pathlib.Path('/'.join(str(core.path.log).split('/')[:-1])) / toml['name'] 
-        temp_folder = pathlib.Path('/'.join(str(core.path.temp).split('/')[:-1])) / toml['name'] 
+        temp_folder = pathlib.Path('/'.join(str(core.path.temp).split('/')[:-1])) / toml['name']
+        base_config_folder = core.path.lcars / 'config'
         for source, dest in toml['volumes'].items():
             source = source.replace('%data_folder%', str(data_folder))
             source = source.replace('%log_folder%', str(log_folder))
             source = source.replace('%temp_folder%', str(temp_folder))
             source = source.replace('%base_folder%', str(core.path.base))
+            source = source.replace('%base_config_folder%', str(base_config_folder))
             comp['services'][toml['name']]['volumes'].append(f"{source}:{dest}")
     if 'restart' in toml:
         comp['services'][toml['name']]['restart'] = toml['restart']

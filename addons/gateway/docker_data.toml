@@ -20,4 +20,5 @@ lcars = true
 
 "%base_folder%/addons/gateway/src/run.py" = "/lcars/starter/run.py"
 
-"%base_folder%/addons/gateway/config" = "/lcars/config"
+"%base_folder%/addons/gateway/config/config.toml" = "/lcars/config/config.toml"
+"%base_config_folder%/acl.toml" = "/lcars/config/acl.toml"

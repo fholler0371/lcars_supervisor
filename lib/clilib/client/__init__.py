@@ -1,6 +1,9 @@
-from simple_term_menu import TerminalMenu
-from rich import console as con
-from rich.console import Console
+try:
+    from simple_term_menu import TerminalMenu
+    from rich import console as con
+    from rich.console import Console
+except:
+    pass
 import time
 
 from corelib import BaseObj, Core

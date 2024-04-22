@@ -4,7 +4,7 @@ from netaddr import IPAddress, IPNetwork
 from .webserver import server_start
 from .local_keys import LocalKeys
 from .client_local import ClientLocal
-from .data import HttpHandler, HttpRequestData
+from .data import HttpHandler, HttpRequestData, HttpMsgData
 
 from corelib import BaseObj, Core
 
@@ -17,17 +17,28 @@ class HTTP(BaseObj):
         self._handlers = []
         self.acl_lcars = ['127.0.0.1/32']
         self.acl_lcars_docker = ['127.0.0.1/32']
+        self.acl_home = ['127.0.0.1/32']
+        self.acl_docker = []
         if self.core.cfg.acl is not None and (ip := self.core.cfg.acl.get('lcars')) is not None:
             self.acl_lcars.append(ip)
             self.acl_lcars_docker.append(ip)
-        self.acl_docker = []
+            self.acl_home.append(ip)
         if self.core.cfg.acl is not None and (ip := self.core.cfg.acl.get('docker')) is not None:
             self.acl_docker.append(ip)
             self.acl_lcars_docker.append(ip)
+            self.acl_home.append(ip)
+        if self.core.cfg.acl is not None and (ip := self.core.cfg.acl.get('home')) is not None:
+            self.acl_home.append(ip)
         
     async def add_handler(self, h : HttpHandler) -> None:
         self.core.log.debug(f'Registrier Handler für: {h.domain}')
-        self._handlers.append(h)
+        idx_found = -1
+        for idx, item in enumerate(self._handlers):
+            if item.domain == h.domain:
+                self._handlers[idx] = h
+                break
+        else:
+            self._handlers.append(h)
         
     async def _handler(self, request: web.Request):
         self.core.log.debug(f'{request.remote} {request.method} {request.path}')
@@ -59,8 +70,19 @@ class HTTP(BaseObj):
                     except Exception as e:
                         #print(e)
                         pass
-                if resp := await entry.func(request, rd):
-                    return resp[1]
+                if request.method == 'GET':
+                    try:
+                        rd.data = dict(request.rel_url.query)
+                    except Exception as e:
+                        pass
+                if entry.func is not None:
+                    if resp := await entry.func(request, rd):
+                        return resp[1]
+                if entry.remote is not None:
+                    data = HttpMsgData(dest= entry.remote, type= f'messages/relay', 
+                                       data= rd.model_dump_json())
+                    resp = await self.core.web_l.msg_send(data)
+                    self.core.log.debug(resp)
         else:
             return web.Response(text="OK")
         
@@ -73,6 +95,8 @@ class HTTP(BaseObj):
                 ranges = self.acl_docker
             case 'lcars_docker':
                 ranges = self.acl_lcars_docker
+            case 'home':
+                ranges = self.acl_home
         try:
             _ip = IPAddress(ip)
             for acl_ip in ranges:

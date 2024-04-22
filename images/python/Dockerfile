@@ -7,6 +7,7 @@ EXPOSE 1235 1234
 ENV LCARS_CONTAINER=1
 ENV LANG=de_DE.UTF-8
 ENV LANGUAGE=de_DE.UTF-8
+ENV PYTHONPATH=/lcars/lib:/lcars/lib2
 
 RUN rm /etc/localtime && ln -s /usr/share/zoneinfo/Europe/Berlin /etc/localtime && \
     apt update && apt install -y locales locales-all iproute2 && \
