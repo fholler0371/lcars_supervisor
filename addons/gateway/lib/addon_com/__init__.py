@@ -3,7 +3,9 @@ import time
 
 import clilib.data as cd
 from corelib import BaseObj, Core
-from httplib.data import HttpHandler, HttpRequestData
+from httplib.models import HttpHandler, HttpRequestData
+from models.basic import StringList
+from models.network import Hostname
 
 
 class Com(BaseObj):
@@ -20,24 +22,23 @@ class Com(BaseObj):
                 if resp is not None:
                     self.core.web_l._hostname = resp.get('hostname')
                 if self.core.web_l._hostname:
-                    return (True, web.json_response({'hostname': self.core.web_l._hostname}))
+                    return (True, web.json_response(Hostname(hostname=self.core.web_l._hostname).model_dump()))
             case 'network/app_list':
-                out = []
+                _out = StringList()
                 for host in self.core.web_l.local_keys.data.keys():
                     app_data = self._apps.setdefault(host, {'valid': 0, 'apps': []}) 
                     if app_data['valid'] < time.time():
                         if host == 'local':
-                            resp = await self.core.web_l.get('docker/status', dest='parent')
-                            resp = [cd.CliStatus(**x) for x in resp]
-                        try:
-                            self._apps[host] = app_data = {'valid': time.time()+self.core.random(600),
-                                                       'apps': [d.docker_name for d in resp if d.python]}
-                        except Exception as e:
-                            print(e, flush=True)
+                            apps = []
+                            for container in await self.core.docker.containers.list():
+                                if 'pro.holler.lcars.python' in container.labels:
+                                    apps.append(container.name)
+                        self._apps[host] = app_data = {'valid': time.time()+self.core.random(600),
+                                                       'apps': apps}
                     if host == 'local':
                         hostname = await self.core.web_l.hostname
-                    out.extend([f'{hostname}.{name}' for name in app_data['apps']])
-                return (True, web.json_response(out))
+                    _out.data.extend([f'{hostname}.{name}' for name in app_data['apps']])
+                return (True, web.json_response(_out.model_dump()))
         return False
         
     async def _ainit(self):

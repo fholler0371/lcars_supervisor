@@ -1,10 +1,11 @@
 from aiohttp import web
 from netaddr import IPAddress, IPNetwork
+import json
 
 from .webserver import server_start
 from .local_keys import LocalKeys
 from .client_local import ClientLocal
-from .data import HttpHandler, HttpRequestData, HttpMsgData
+from .models import HttpMsgData, HttpHandler, HttpRequestData 
 
 from corelib import BaseObj, Core
 
@@ -67,6 +68,13 @@ class HTTP(BaseObj):
                 if request.method == 'POST':
                     try:
                         rd.data = await request.json()
+                        try: 
+                            rd.data = HttpMsgData.model_validate(rd.data)
+                        except Exception as e:
+                            try:
+                                rd.data = await request.text()
+                            except:
+                                pass
                     except Exception as e:
                         #print(e)
                         pass
@@ -79,8 +87,8 @@ class HTTP(BaseObj):
                     if resp := await entry.func(request, rd):
                         return resp[1]
                 if entry.remote is not None:
-                    data = HttpMsgData(dest= entry.remote, type= f'messages/relay', 
-                                       data= rd.model_dump_json())
+                    data = HttpMsgData(dest= entry.remote, type= f'relay', 
+                                       data= rd.model_dump())
                     resp = await self.core.web_l.msg_send(data)
                     self.core.log.debug(resp)
         else:

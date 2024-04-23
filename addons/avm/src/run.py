@@ -1,11 +1,7 @@
-import sys
-sys.path.append('/lcars/lib')
-sys.path.append('/lcars/lib2')
 import asyncio
 
 import corelib
 import constlib
-import aiopathlib
 import configlib
 import loggerlib
 import signallib
@@ -17,7 +13,8 @@ import time
 
 async def main() -> None:
     core = corelib.DockerCore()
-    await core.add('path', aiopathlib.Path)
+    await core.run_it()
+    
     await core.add('const', constlib.Const)
     await core.add('cfg', configlib.Config, toml=core.path.config / 'config.toml',
                                             acl=core.path.config / 'acl.toml')

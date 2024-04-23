@@ -5,9 +5,11 @@ import time
 
 from corelib import BaseObj, Core
 from corelib.aio_property import aproperty
+from models.basic import StringList
+from models.network import Hostname
 
 from .local_keys import LocalKeys
-from .data import HttpMsgData
+from .models import HttpMsgData
 
 
 MAX_RETRY = 7
@@ -118,7 +120,8 @@ class ClientLocal(BaseObj):
     async def hostname(self):
         if self._hostname is None:
             resp = await self.get('network/hostname', dest='gateway', endpoint='com')
-            self._hostname = resp.get('hostname')
+            data = Hostname.model_validate(resp)
+            self._hostname = data.hostname
         return self._hostname
 
     @aproperty
@@ -126,7 +129,8 @@ class ClientLocal(BaseObj):
         if self._app_list_valid < time.time():
             resp = await self.get('network/app_list', dest='gateway', endpoint='com')
             if resp is not None:
-                self._app_list = resp
+                data = StringList.model_validate(resp)
+                self._app_list = data.data
                 self._app_list_valid = time.time() + self.core.random(600)
         return self._app_list
     
@@ -143,5 +147,5 @@ class ClientLocal(BaseObj):
         hostname = dest_app.split('.')[0]
         if hostname == await self.core.web_l.hostname:
             app = dest_app.split('.')[1]
-            resp = await self.post(f'messages/{data.type}', data=data.data, dest=app, endpoint='com')
+            resp = await self.post(f'messages/{data.type}', data=data.model_dump(), dest=app, endpoint='com')
             self.core.log.debug(resp)

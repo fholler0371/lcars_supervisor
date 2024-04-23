@@ -5,7 +5,7 @@ from datetime import UTC
 import socket
 
 from ..data import CliStatus, CliContainer
-from httplib.data import HttpHandler, HttpRequestData
+from httplib.models import HttpHandler, HttpRequestData
 
 from corelib import BaseObj, Core
 

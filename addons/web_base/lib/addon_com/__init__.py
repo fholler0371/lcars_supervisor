@@ -4,10 +4,8 @@ import json
 
 import clilib.data as cd
 from corelib import BaseObj, Core
-from httplib.data import HttpHandler, HttpRequestData
+from httplib.models import HttpHandler, HttpRequestData, SendOk
 
-class xx(pydantic.BaseModel):
-    pass
 
 class Com(BaseObj):
     def __init__(self, core: Core) -> None:
@@ -17,10 +15,10 @@ class Com(BaseObj):
     async def handler(self, request: web.Request, rd: HttpRequestData) -> bool:
         match '/'.join(rd.path):
             case 'messages/register_web_app':
-                if isinstance(rd.data, str):
-                    rd.data = json.loads(rd.data)
-                await self.core.web.add_handler(HttpHandler(**rd.data))
-                return (True, web.json_response({}))
+                msg = rd.data
+                data = HttpHandler.model_validate(msg.data)
+                await self.core.web.add_handler(data)
+                return (True, web.json_response(SendOk().model_dump()))
         
     async def _ainit(self):
         self.core.log.debug('Initaliesiere com')
