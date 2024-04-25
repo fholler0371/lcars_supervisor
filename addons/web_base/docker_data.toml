@@ -17,6 +17,10 @@ dest = "/lcars/config/config.toml"
 source = "%base_config_folder%/acl.toml"
 dest = "/lcars/config/acl.toml"
 
+[[volumes.config]]
+source = "%base_folder%/addons/web_base/manifest.toml"
+dest = "/lcars/config/manifest.toml"
+
 [volumes.data]
 
 # standard Ordner

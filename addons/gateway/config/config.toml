@@ -1,9 +1,5 @@
 app = 'gateway'
 
-[acl]
-lcars = '192.168.0.0/23'
-docker = '10.0.0.0/16'
-
 [logger]
 version = 1
 disable_existing_loggers = true
@@ -31,7 +27,7 @@ handlers = ["stdout", "file", "json"]
 [logger.handlers.stdout]
 class = "logging.StreamHandler"
 formatter = "simple"
-level = "DEBUG"
+level = "INFO"
 stream = "ext://sys.stdout"
 
 [logger.handlers.file]

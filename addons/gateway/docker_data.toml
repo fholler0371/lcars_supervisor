@@ -17,6 +17,10 @@ dest = "/lcars/config/config.toml"
 source = "%base_config_folder%/acl.toml"
 dest = "/lcars/config/acl.toml"
 
+[[volumes.config]]
+source = "%base_folder%/addons/gateway/manifest.toml"
+dest = "/lcars/config/manifest.toml"
+
 [volumes.data]
 "/var/run/docker.sock" = "/var/run/docker.sock"
 
