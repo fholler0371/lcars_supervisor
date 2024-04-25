@@ -1,6 +1,8 @@
 from aiohttp import web
-from corelib import BaseObj, Core
+import pathlib
+import aioyamllib
 
+from corelib import BaseObj, Core
 from httplib.models import HttpMsgData, HttpHandler, HttpRequestData, SendOk
 
 from .models import AvmDynDns, IpState
@@ -9,8 +11,21 @@ class Com(BaseObj):
     def __init__(self, core: Core) -> None:
         BaseObj.__init__(self, core)
         self._state = IpState()
+        self._state_name = pathlib.Path('/lcars/data/ip_state.yml')
         
-    async def on_change(self) -> None:
+    async def save(self, repeat: bool = True) -> None:
+        if repeat:
+            await self.core.call_random(1800, self.save)
+        try:
+            if self._state.changed:
+                self.core.log.debug('speichere aktuellen Status in Datei')
+                await aioyamllib.dump(self._state_name, self._state.model_dump())
+                self._state.changed = False
+        except Exception:
+            self.core.log.error(Exception)
+
+    async def on_update(self) -> None:
+        self.core.log.info('Aktion bei neuen Daten')
         self.core.log.debug(self._state)
         
     async def handler(self, request: web.Request, rd: HttpRequestData) -> bool:
@@ -25,12 +40,18 @@ class Com(BaseObj):
                             self._state.update(**{key: value})
                     self.core.log.debug(dyndns_data)
                     self.core.log.debug(self._state)
-                    await self.core.call(self.on_change)
+                    await self.core.call(self.on_update)
                     return (True, web.json_response(SendOk().model_dump()))
         
     async def _ainit(self):
         self.core.log.debug('Initaliesiere com')
         await self.core.web.add_handler(HttpHandler(domain = 'com', func = self.handler, auth='local', acl='lcars_docker'))
+        if self._state_name.exists():
+            try:
+                self._state = IpState(**(await aioyamllib.save_load(self._state_name)))
+                self._state.changed = False
+            except Exception as e:
+                self.core.log.error(e)
 
     async def register_web_app(self)->None:
         self.core.log.debug('do register')
@@ -45,3 +66,8 @@ class Com(BaseObj):
     async def _astart(self):
         self.core.log.debug('starte com')
         await self.core.call_random(10, self.register_web_app)
+        await self.core.call_random(1800, self.save)
+
+    async def _astop(self):
+        self.core.log.debug('stoppe com')
+        await self.save(repeat=False)
