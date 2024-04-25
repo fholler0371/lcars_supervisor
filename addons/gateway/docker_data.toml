@@ -21,8 +21,10 @@ dest = "/lcars/config/acl.toml"
 source = "%base_folder%/addons/gateway/manifest.toml"
 dest = "/lcars/config/manifest.toml"
 
-[volumes.data]
+[volumes.device]
 "/var/run/docker.sock" = "/var/run/docker.sock"
+
+[volumes.data]
 
 # standard Ordner
 "%data_folder%" = "/lcars/data"

@@ -167,6 +167,9 @@ async def container_add(core: corelib.Core, container: str) -> None:
                 source = source.replace('%base_folder%', str(core.path.base))
                 source = source.replace('%base_config_folder%', str(base_config_folder))
                 comp['services'][toml['name']]['volumes'].append(f"{source}:{dest}")
+        if 'device' in toml['volumes']:
+            for source, dest in toml['volumes']['device'].items():
+                comp['services'][toml['name']]['volumes'].append(f"{source}:{dest}")
     if 'restart' in toml:
         comp['services'][toml['name']]['restart'] = toml['restart']
     comp['services'][toml['name']]['labels'] = ["pro.holler.lcars.managed=true"]
