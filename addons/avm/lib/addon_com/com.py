@@ -1,11 +1,17 @@
 from aiohttp import web
 from corelib import BaseObj, Core
 
-from httplib.models import HttpMsgData, HttpHandler, HttpRequestData
+from httplib.models import HttpMsgData, HttpHandler, HttpRequestData, SendOk
+
+from .models import AvmDynDns, IpState
 
 class Com(BaseObj):
     def __init__(self, core: Core) -> None:
         BaseObj.__init__(self, core)
+        self._state = IpState()
+        
+    async def on_change(self) -> None:
+        self.core.log.debug(self._state)
         
     async def handler(self, request: web.Request, rd: HttpRequestData) -> bool:
         if rd.path[0] == 'messages':
@@ -13,7 +19,14 @@ class Com(BaseObj):
             if rd.path[1] == 'relay':
                 relay_rd = HttpRequestData.model_validate(msg.data)
                 if relay_rd.path[0] == 'dyndns':
-                    self.core.log.info(relay_rd.data)
+                    dyndns_data = AvmDynDns.model_validate(relay_rd.data)
+                    for key, value in dyndns_data.model_dump().items():
+                        if hasattr(self._state, key):
+                            self._state.update(**{key: value})
+                    self.core.log.debug(dyndns_data)
+                    self.core.log.debug(self._state)
+                    await self.core.call(self.on_change)
+                    return (True, web.json_response(SendOk().model_dump()))
         
     async def _ainit(self):
         self.core.log.debug('Initaliesiere com')
