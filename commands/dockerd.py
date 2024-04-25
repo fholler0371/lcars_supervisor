@@ -125,18 +125,48 @@ async def container_add(core: corelib.Core, container: str) -> None:
             comp['services'][toml['name']]['networks'].append(f'net{idx}')
             idx += 1
     if 'volumes' in toml:
-        comp['services'][toml['name']]['volumes'] = []
         data_folder = pathlib.Path('/'.join(str(core.path.data).split('/')[:-1])) / toml['name'] 
         log_folder = pathlib.Path('/'.join(str(core.path.log).split('/')[:-1])) / toml['name'] 
         temp_folder = pathlib.Path('/'.join(str(core.path.temp).split('/')[:-1])) / toml['name']
         base_config_folder = core.path.lcars / 'config'
-        for source, dest in toml['volumes'].items():
-            source = source.replace('%data_folder%', str(data_folder))
-            source = source.replace('%log_folder%', str(log_folder))
-            source = source.replace('%temp_folder%', str(temp_folder))
-            source = source.replace('%base_folder%', str(core.path.base))
-            source = source.replace('%base_config_folder%', str(base_config_folder))
-            comp['services'][toml['name']]['volumes'].append(f"{source}:{dest}")
+        config_folder = base_config_folder / toml['name']
+        comp['services'][toml['name']]['volumes'] = []
+        if 'config' in toml['volumes']:
+            for entry in toml['volumes']['config']:
+                source = entry['source']
+                source = source.replace('%data_folder%', str(data_folder))
+                source = source.replace('%log_folder%', str(log_folder))
+                source = source.replace('%temp_folder%', str(temp_folder))
+                source = source.replace('%base_folder%', str(core.path.base))
+                source = source.replace('%base_config_folder%', str(base_config_folder))
+                source = source.replace('%config_folder%', str(config_folder))
+                if not pathlib.Path(source).exists():
+                    p = await asyncio.subprocess.create_subprocess_shell(
+                        f'mkdir -p {str(config_folder)}', 
+                        stderr=asyncio.subprocess.PIPE, 
+                        stdout=asyncio.subprocess.PIPE)
+                    await p.wait()
+                    base = entry['base']
+                    base = base.replace('%data_folder%', str(data_folder))
+                    base = base.replace('%log_folder%', str(log_folder))
+                    base = base.replace('%temp_folder%', str(temp_folder))
+                    base = base.replace('%base_folder%', str(core.path.base))
+                    base = base.replace('%base_config_folder%', str(base_config_folder))
+                    base = base.replace('%config_folder%', str(config_folder))
+                    p = await asyncio.subprocess.create_subprocess_shell(
+                        f'cp {base} {source}', 
+                        stderr=asyncio.subprocess.PIPE, 
+                        stdout=asyncio.subprocess.PIPE)
+                    await p.wait()
+                comp['services'][toml['name']]['volumes'].append(f"{source}:{entry['dest']}:ro")
+        if 'data' in toml['volumes']:
+            for source, dest in toml['volumes']['data'].items():
+                source = source.replace('%data_folder%', str(data_folder))
+                source = source.replace('%log_folder%', str(log_folder))
+                source = source.replace('%temp_folder%', str(temp_folder))
+                source = source.replace('%base_folder%', str(core.path.base))
+                source = source.replace('%base_config_folder%', str(base_config_folder))
+                comp['services'][toml['name']]['volumes'].append(f"{source}:{dest}")
     if 'restart' in toml:
         comp['services'][toml['name']]['restart'] = toml['restart']
     comp['services'][toml['name']]['labels'] = ["pro.holler.lcars.managed=true"]
@@ -203,7 +233,6 @@ async def main() -> None:
             if cont_data.status != "running":
                 await restart_container(container)
             elif (state := cont_data.attrs['State'].get('Health', {}).get('Status')) is not None:
-                print(state)
                 if state == 'unhealthy':
                     await restart_container(container)
     for container in await core.docker.containers.list():

@@ -8,7 +8,16 @@ ports = ['1236:1235']
 [setup]
 lcars = true
 
-[volumes]
+[[volumes.config]]
+base = "%base_folder%/addons/web_base/config/config.toml"
+source = "%config_folder%/config.toml"
+dest = "/lcars/config/config.toml"
+
+[[volumes.config]]
+source = "%base_config_folder%/acl.toml"
+dest = "/lcars/config/acl.toml"
+
+[volumes.data]
 
 # standard Ordner
 "%data_folder%" = "/lcars/data"
@@ -18,6 +27,3 @@ lcars = true
 "%base_folder%/addons/web_base/lib" = "/lcars/lib2"
 
 "%base_folder%/addons/web_base/src/run.py" = "/lcars/starter/run.py"
-
-"%base_folder%/addons/web_base/config/config.toml" = "/lcars/config/config.toml"
-"%base_config_folder%/acl.toml" = "/lcars/config/acl.toml"
