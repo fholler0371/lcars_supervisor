@@ -93,6 +93,7 @@ class HTTP(BaseObj):
                                        data= rd.model_dump())
                     resp = await self.core.web_l.msg_send(data)
                     self.core.log.debug(resp)
+                    return
         else:
             if self._static_handler is not None:
                 if resp := await self._static_handler.func(request, rd):

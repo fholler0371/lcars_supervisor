@@ -131,6 +131,9 @@ async def container_add(core: corelib.Core, container: str) -> None:
         base_config_folder = core.path.lcars / 'config'
         config_folder = base_config_folder / toml['name']
         comp['services'][toml['name']]['volumes'] = []
+        if 'device' in toml['volumes']:
+            for source, dest in toml['volumes']['device'].items():
+                comp['services'][toml['name']]['volumes'].append(f"{source}:{dest}")
         if 'config' in toml['volumes']:
             for entry in toml['volumes']['config']:
                 source = entry['source']
@@ -159,16 +162,29 @@ async def container_add(core: corelib.Core, container: str) -> None:
                         stdout=asyncio.subprocess.PIPE)
                     await p.wait()
                 comp['services'][toml['name']]['volumes'].append(f"{source}:{entry['dest']}:ro")
-        if 'data' in toml['volumes']:
-            for source, dest in toml['volumes']['data'].items():
+        if 'base' in toml['volumes']:
+            for source, dest in toml['volumes']['base'].items():
                 source = source.replace('%data_folder%', str(data_folder))
                 source = source.replace('%log_folder%', str(log_folder))
                 source = source.replace('%temp_folder%', str(temp_folder))
                 source = source.replace('%base_folder%', str(core.path.base))
                 source = source.replace('%base_config_folder%', str(base_config_folder))
                 comp['services'][toml['name']]['volumes'].append(f"{source}:{dest}")
-        if 'device' in toml['volumes']:
-            for source, dest in toml['volumes']['device'].items():
+        if 'run' in toml['volumes']:
+            for source, dest in toml['volumes']['run'].items():
+                source = source.replace('%data_folder%', str(data_folder))
+                source = source.replace('%log_folder%', str(log_folder))
+                source = source.replace('%temp_folder%', str(temp_folder))
+                source = source.replace('%base_folder%', str(core.path.base))
+                source = source.replace('%base_config_folder%', str(base_config_folder))
+                comp['services'][toml['name']]['volumes'].append(f"{source}:{dest}")
+        if 'web' in toml['volumes']:
+            for source, dest in toml['volumes']['web'].items():
+                source = source.replace('%data_folder%', str(data_folder))
+                source = source.replace('%log_folder%', str(log_folder))
+                source = source.replace('%temp_folder%', str(temp_folder))
+                source = source.replace('%base_folder%', str(core.path.base))
+                source = source.replace('%base_config_folder%', str(base_config_folder))
                 comp['services'][toml['name']]['volumes'].append(f"{source}:{dest}")
     if 'restart' in toml:
         comp['services'][toml['name']]['restart'] = toml['restart']

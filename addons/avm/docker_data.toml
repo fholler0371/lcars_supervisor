@@ -20,15 +20,13 @@ dest = "/lcars/config/acl.toml"
 source = "%base_folder%/addons/avm/manifest.toml"
 dest = "/lcars/config/manifest.toml"
 
-[volumes.data]
-
-# standard Ordner
+[volumes.base]
 "%data_folder%" = "/lcars/data"
-"%base_folder%/lib" = "/lcars/lib"
 "%log_folder%" = "/lcars/log"
 "%temp_folder%" = "/lcars/temp"
-"%base_folder%/addons/avm/lib" = "/lcars/lib2"
+"%base_folder%/lib" = "/lcars/lib"
 
-
+[volumes.run]
 "%base_folder%/addons/avm/src/run.py" = "/lcars/starter/run.py"
+"%base_folder%/addons/avm/lib" = "/lcars/lib2"
 

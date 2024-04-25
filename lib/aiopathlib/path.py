@@ -14,7 +14,8 @@ class Path(BaseObj):
     async def _ainit(self) -> any:
         self.cfg = {'base': '/lcars',
                     'lcars': '/lcars',
-                    'data': '/lcars/data'}
+                    'data': '/lcars/data',
+                    'web': '/lcars/web'}
         
     def __getattr__(self, propName: str) -> any:
         if propName.startswith('_'):
