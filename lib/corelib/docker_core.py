@@ -28,3 +28,8 @@ class DockerCore(Core):
                 mod = importlib.import_module(mod_name)
                 cls = getattr(mod, cl_name)
                 await self.add(key, cls)
+        self.log.info(f'starte {self.const.app} (pid: {self.const.pid})')
+        await self.start()
+        await self.running.wait()
+        await self.stop()
+        self.log.info(f'stoppe {self.const.app}')
