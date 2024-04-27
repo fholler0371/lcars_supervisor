@@ -110,6 +110,23 @@ async def install_config(core: dict, source: str, dest: str) -> None:
                                                         stderr=asyncio.subprocess.PIPE, 
                                                         stdout=asyncio.subprocess.PIPE)
     await p.wait()
+    
+async def update_repository(core: dict, name: str, source: str) -> dict:
+    git_folder = core.path.base / '.git'
+    respository_folder = git_folder / name
+    if respository_folder.exists():
+        cmd = f"cd {respository_folder} ; git pull"
+        print(cmd, flush=True)
+        p = await asyncio.subprocess.create_subprocess_shell(cmd, 
+                                                            stderr=asyncio.subprocess.PIPE, 
+                                                            stdout=asyncio.subprocess.PIPE)
+        await p.wait()
+    else:
+        cmd = f"cd {git_folder} ; git clone {source}"
+        p = await asyncio.subprocess.create_subprocess_shell(cmd, 
+                                                            stderr=asyncio.subprocess.PIPE, 
+                                                            stdout=asyncio.subprocess.PIPE)
+        await p.wait()
 
 async def main() -> None:
     core = corelib.Core()
@@ -132,6 +149,8 @@ async def main() -> None:
             await create_systemend(core, entry)
     await reload_systemend()
     await acivate_docker()
+    for name, source in core.cfg.toml.get('repositories').items():
+        await update_repository(core, name, source)
 
 if __name__ == "__main__":
     asyncio.run(main())

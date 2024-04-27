@@ -61,6 +61,9 @@ rich = "==13.7.1"
 pydantic = "==2.7.0"
 netaddr = "==1.2.1"
 
+[repositories] # im Moment nur private Quellen
+requirejs = "https://git.holler.pro/fholler/requirejs.git"
+
 [networks.lcars-bridge]
 #type = "bridge"
 #subnet = "10.0.0.0/16"
