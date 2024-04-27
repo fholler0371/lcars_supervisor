@@ -11,7 +11,7 @@ environment = ["TZ=Europe/Berlin",
               "WATCHTOWER_SCHEDULE=0 0 5 * * 6"]
 #              "WATCHTOWER_NOTIFICATIONS=gotify"]
 
-[volumes.data]
+[volumes.device]
 "/var/run/docker.sock" = "/var/run/docker.sock"
 #"%data_folder%/config.json" = "/config.json"
 

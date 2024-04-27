@@ -5,6 +5,8 @@ restart = "unless-stopped"
 ports = ['9000:9000']
 networks = ["local-bridge"]
 
-[volumes.data]
+[volumes.device]
 "/var/run/docker.sock" = "/var/run/docker.sock"
+
+[volumes.base]
 "%data_folder%" = "/data"
