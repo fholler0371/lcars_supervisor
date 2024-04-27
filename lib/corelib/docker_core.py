@@ -19,15 +19,18 @@ class DockerCore(Core):
         await self.add('cfg', configlib.Config, toml=self.path.config / 'config.toml',
                                                 acl=self.path.config / 'acl.toml',
                                                 manifest=self.path.config / 'manifest.toml')
-        await self.add('log', loggerlib.Logger)
-        await self.add('running', asyncio.Event())
-        await self.add('signal', signallib.Signal)
+        # laden der Bibliotheken vor dem Start von Logger um die internen Logger zu Kontrollieren
+        classes = {}
         if self.cfg.manifest is not None:
             for key, cl_name in self.cfg.manifest.get('lib', {}).items():
                 mod_name, cl_name = cl_name.split('.', 1)
                 mod = importlib.import_module(mod_name)
-                cls = getattr(mod, cl_name)
-                await self.add(key, cls)
+                classes[key] = getattr(mod, cl_name)
+        await self.add('log', loggerlib.Logger)
+        await self.add('running', asyncio.Event())
+        await self.add('signal', signallib.Signal)
+        for key, cls in classes.items():
+            await self.add(key, cls)
         self.log.info(f'starte {self.const.app} (pid: {self.const.pid})')
         await self.start()
         await self.running.wait()

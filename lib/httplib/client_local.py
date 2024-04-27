@@ -58,8 +58,10 @@ class ClientLocal(BaseObj):
                     if response.status == 200:
                         return await response.json()
                     else:
+                        self.core.log.debug(response.status)
                         self.core.log.error(f'Abfrage von {url} gibt Kode {response.status} zurück')
                     if str(response.status).startswith('4'):
+                        self.core.log.debug(response.status)
                         return None
         except Exception as e:
             self.core.log.error(e)
