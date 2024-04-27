@@ -1,0 +1,11 @@
+name = "web_auth"
+label = "LCARS WebAuth"
+
+[docker]
+name = "lcars/python:%Y.%m"
+folder = 'python'
+
+[lib]
+web = "httplib.HTTP"
+web_l = "httplib.ClientLocal"
+com = "addon_com.Com"

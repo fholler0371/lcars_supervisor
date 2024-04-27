@@ -1,4 +1,4 @@
-app = 'web_base'
+app = 'default'
 
 [logger]
 version = 1

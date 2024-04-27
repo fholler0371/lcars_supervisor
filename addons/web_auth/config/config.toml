@@ -1,4 +1,4 @@
-app = 'web_base'
+app = 'web_auth'
 
 [logger]
 version = 1
