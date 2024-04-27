@@ -130,6 +130,7 @@ async def container_add(core: corelib.Core, container: str) -> None:
         temp_folder = pathlib.Path('/'.join(str(core.path.temp).split('/')[:-1])) / toml['name']
         base_config_folder = core.path.lcars / 'config'
         config_folder = base_config_folder / toml['name']
+        git_folder = core.path.base / '.git'
         comp['services'][toml['name']]['volumes'] = []
         if 'device' in toml['volumes']:
             for source, dest in toml['volumes']['device'].items():
@@ -185,6 +186,7 @@ async def container_add(core: corelib.Core, container: str) -> None:
                 source = source.replace('%temp_folder%', str(temp_folder))
                 source = source.replace('%base_folder%', str(core.path.base))
                 source = source.replace('%base_config_folder%', str(base_config_folder))
+                source = source.replace('%git_folder%', str(git_folder))
                 comp['services'][toml['name']]['volumes'].append(f"{source}:{dest}")
     if 'restart' in toml:
         comp['services'][toml['name']]['restart'] = toml['restart']

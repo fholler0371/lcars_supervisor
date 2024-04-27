@@ -1,0 +1,274 @@
+@font-face { 
+    font-family: "LCARS"; 
+    src: url("lcars.ttf"); 
+  }
+  
+  :root {
+    --main-color_gr:#3c9;
+    --main-color_or:#f90;
+    --main-color_pl:#c69;
+    --main-color_be:#fc9;
+    --main-color_bg:#99c;
+    --main-color_bl:#000;
+  }
+  
+  body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+  
+  html {
+    margin: 0;
+    height: 100%;
+    background-color: var(--main-color_bl);
+  }
+  
+  .header {
+    height: 64px;
+    width: 100%;
+  }
+  .header_l1 {
+    height: 56px;
+    width: 56px;
+    background-color: var(--main-color_be);
+    position: relative;
+  }
+  .header_l2 {
+    height: 16px;
+    width: 16px;
+    background-color: var(--main-color_be);
+    position: relative;
+    top: 40px;
+    left: 56px
+  }
+  .header_l2i {
+    height: 16px;
+    width: 16px;
+    background-color:var(--main-color_bl);
+    border-radius: 0 0 0 16px;
+  }
+  .header_l3 {
+    height: 32px;
+    width: 32px;
+    background-color:var(--main-color_bl);
+    position: absolute;
+    top: 32px;
+  }
+  .header_l3i {
+    height: 32px;
+    width: 32px;
+    background-color: var(--main-color_be);
+    border-radius: 0 0 0 16px;
+  }
+  .header_l4 {
+    height: 8px;
+    width: calc( 100% - 32px );
+    background-color: var(--main-color_be);
+    position: absolute;
+    top: 56px;
+    left: 32px;
+    border-radius: 0 4px 4px 0;
+  }
+  .header_content {
+    position: absolute;
+    width: calc( 100% - 64px );
+    height: 56px;
+    top: 0px;
+    left: 64px
+  }
+  .header_right {
+    color: var(--main-color_be);
+    font-family: 'LCARS';
+    font-size: 32px;
+    position: absolute;
+    right: 12px;
+    top: 12px;
+  }
+  .header_right tr {
+    height: 28px;
+  }
+  #header_fullscreen, #login_icon {
+    width: 48px;
+    position: relative;
+    cursor: pointer;
+  }
+  #header_appname {
+    color: var(--main-color_be);
+    font-family: 'LCARS';
+    font-size: 32px;
+    position: absolute;
+    left: 12px;
+    top: 12px;
+  }
+  
+  .left {
+    position: absolute;
+    top: 72px;
+    height: calc( 100% - 72px );
+    width: 100%;
+  }
+  .left_l1 {
+    background-color: var(--main-color_bg);
+    position: absolute;
+    height: 100%;
+    width: 56px;
+    border-radius: 16px 0 0;
+  }
+  .left_l2 {
+    background-color: var(--main-color_bg);
+    position: absolute;
+    height: 8px;
+    width: calc( 100% - 56px );
+    top: 0;
+    left: 56px;
+    border-radius: 0 4px 4px 0;
+  }
+  .left_l3 {
+    background-color: var(--main-color_bg);
+    position: absolute;
+    height: 16px;
+    width: 16px;
+    top: 8px;
+    left: 56px;
+  }
+  .left_l3i {
+    background-color:var(--main-color_bl);
+    height: 100%;
+    width: 100%;
+    border-radius: 16px 0 0;
+  }
+  
+  .main_button_area_up {
+    background-color:var(--main-color_bl);
+    height: 4px;
+    width: 100%;
+    top: 20px;
+    position: absolute;
+  }
+  .main_button_area_down {
+    background-color:var(--main-color_bl);
+    height: 184px;
+    width: 100%;
+    bottom: 8px;
+    position: absolute;
+  }
+  .button_left {
+    background-color:var(--main-color_bg);
+    width: 100%;
+    height: 56px;
+    position: absolute;
+    cursor: pointer;
+  }
+  .button_32 {
+    height: 32px;
+    width: 32px;
+    position: absolute;
+    top: 12px;
+    left: 12px;
+  }
+  #button_fullscreen {
+    top: 4px;
+  }
+  #button_user_settings {
+    top: 64px
+  }
+  #button_login {
+    top: 124px
+  }
+  
+  .main_content {
+    width: calc( 100% - 66px );
+    height: calc( 100% - 12px );
+    position: absolute;
+    left: 64px;
+    top: 10px;
+    overflow: hidden
+  }
+  .content_modul {
+    height: 100%;
+    width: 100%;
+  }
+  
+  /* for login */
+  .loading_outer {
+    display: table;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+  }
+  
+  .loading_middle {
+    display: table-cell;
+    vertical-align: middle;
+  }  
+  
+  .loading_inner {
+    margin-left: auto;
+    margin-right: auto;
+    width: 400px;
+    color: var(--main-color_or);
+    font-size: 32px;
+      /* Whatever width you want */
+  }
+  
+  #go_home {
+    cursor: pointer;
+  }
+  
+  /*//////////////////////////////////////////////
+  / smarthome
+  //////////////////////////////////////////////*/
+  
+  .sh_card {
+    color: var(--main-color_be);
+    fill: var(--main-color_be);
+    font-family: 'LCARS';
+    font-size: 24px;
+    height: 32px;
+    width: 250px;
+    border: 2px solid;
+    border-color: var(--main-color_be);
+    border-radius: 16px;
+  }
+  
+  .sh_card_label {
+    width: 100%;
+    text-align: center;  
+    position: relative;
+    top: 5px;
+  }
+  
+  .sh_card_item_labels {
+    font-size: 20px;
+  }
+  
+  .sh_card_item_img {
+    top: 2px;
+    position: relative;
+  }
+  
+  .sh_card_item_highlight {
+    color: #f90;
+    font-weight: bold;
+  }
+  
+  .sh_card_item_value {
+    position: relative;
+    right: 5px;
+    top: 2px;
+    float: right;
+    font-size: 20px;
+  }
+  
+  .sh_table {
+    width: fit-content;
+    border: 0
+  }
+  

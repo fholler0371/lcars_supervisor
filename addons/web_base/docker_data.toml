@@ -32,4 +32,12 @@ dest = "/lcars/config/manifest.toml"
 "%base_folder%/addons/web_base/lib" = "/lcars/lib2"
 
 [volumes.web]
-"%base_folder%/addons/web_base/web" = "/lcars/web"
+"%base_folder%/addons/web_base/web/index.html" = "/lcars/web/index.html"
+"%base_folder%/addons/web_base/web/main.js" = "/lcars/web/main.js"
+"%base_folder%/addons/web_base/web/js" = "/lcars/web/js"
+"%base_folder%/addons/web_base/web/css" = "/lcars/web/css"
+"%git_folder%/requirejs/require.js" = "/lcars/web/js_lib/require.js"
+"%git_folder%/external_libaries/jquery/jquery-3.7.0.min.js" = "/lcars/web/js_lib/jquery/jquery-3.7.0.js"
+"%git_folder%/external_libaries/SVGInject/svg-inject.js" = "/lcars/web/js_lib/svg-inject.js"
+"%git_folder%/jQWidgets/jqwidgets" = "/lcars/web/js_lib/jqwidgets"
+"%git_folder%/MaterialDesign-SVG/svg" = "/lcars/web/img/mdi"

@@ -63,6 +63,9 @@ netaddr = "==1.2.1"
 
 [repositories] # im Moment nur private Quellen
 requirejs = "https://git.holler.pro/fholler/requirejs.git"
+external_libaries = "https://git.holler.pro/fholler/external_libaries.git"
+jQWidgets = "https://git.holler.pro/fholler/jQWidgets.git"
+MaterialDesign-SVG = "https://git.holler.pro/fholler/MaterialDesign-SVG.git"
 
 [networks.lcars-bridge]
 #type = "bridge"
