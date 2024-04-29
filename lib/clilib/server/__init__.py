@@ -3,6 +3,7 @@ import aiofiles.os as os
 from datetime import datetime as dt
 from datetime import UTC
 import socket
+import json
 
 from ..data import CliStatus, CliContainer
 from httplib.models import HttpHandler, HttpRequestData
@@ -52,12 +53,17 @@ class Server(BaseObj):
 
     async def cli_docker_activate(self, data: dict) -> None:
         file = self.core.path.data / "docker.yml"
-        cfg = await aioyamllib.save_load(file)
-        if cfg is None:
-            cfg = {'apps':[]}
-        if data['addon'] not in cfg['apps']:
-            cfg['apps'].append(data['addon'])
-        await aioyamllib.dump(file, cfg)
+        try:
+            cfg = await aioyamllib.save_load(file)
+            if isinstance(data, str):
+                data = json.loads(data)
+            if cfg is None:
+                cfg = {'apps':[]}
+            if data['addon'] not in cfg['apps']:
+                cfg['apps'].append(data['addon'])
+            await aioyamllib.dump(file, cfg)
+        except Exception as e:
+            self.core.log.error(e)
         return (True, web.json_response({}))
 
     async def cli_docker_running(self) -> tuple:
@@ -75,6 +81,8 @@ class Server(BaseObj):
     async def cli_docker_deactivate(self, data: dict) -> None:
         file = self.core.path.data / "docker.yml"
         cfg = await aioyamllib.save_load(file)
+        if isinstance(data, str):
+            data = json.loads(data)
         if cfg is None:
             cfg = {'apps':[]}
         if data['addon'] in cfg['apps']:

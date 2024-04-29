@@ -151,3 +151,4 @@ class ClientLocal(BaseObj):
             app = dest_app.split('.')[1]
             resp = await self.post(f'messages/{data.type}', data=data.model_dump(), dest=app, endpoint='com')
             self.core.log.debug(resp)
+            return resp

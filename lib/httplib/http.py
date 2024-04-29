@@ -44,12 +44,16 @@ class HTTP(BaseObj):
             self._handlers.append(h)
         
     async def _handler(self, request: web.Request):
-        self.core.log.debug(f'{request.remote} {request.method} {request.path}')
-        rd = HttpRequestData(path=request.path.split('/'))
+        try:
+            rd = HttpRequestData(path=request.path.split('/'),
+                                 ip=x if (x := request.headers.get('X-Real-IP')) else request.remote)
+            self.core.log.debug(f'{rd.ip} {request.method} {request.path}')
+        except Exception as e:
+            self.core.log.error(e)
         for entry in self._handlers:
             if entry.domain == rd.path[1]:
                 rd.path = rd.path[2:]
-                rd.acl_check = self.acl_check(request.remote, entry.acl)
+                rd.acl_check = self.acl_check(rd.ip, entry.acl)
                 if not rd.acl_check:
                     self.core.log.error(f'acl sagt nicht erlaubt')
                     return web.Response(status=403)
@@ -64,9 +68,9 @@ class HTTP(BaseObj):
                         case 'local':
                             if 'X-Auth' in request.headers:
                                 rd.auth = request.headers['X-Auth'] == self.core.web.local_keys.local
-                    if not rd.auth:
-                        self.core.log.error(f'Authentication nicht gültig')
-                        return web.Response(status=403)
+                            if not rd.auth:
+                                self.core.log.error(f'Authentication nicht gültig')
+                                return web.Response(status=403)
                 if request.method == 'POST':
                     try:
                         rd.data = await request.json()
@@ -101,6 +105,8 @@ class HTTP(BaseObj):
             return web.Response(text="OK")
         
     def acl_check(self, ip: str, acl: str) -> bool:
+        if acl is None:
+            return True
         allowed = False
         match acl:
             case 'lcars':
