@@ -1,8 +1,6 @@
 from aiodatabase.fields import Integer
 from aiodatabase.statements import QuerySingle, QueryInsert
 
-from icecream import ic
-
 
 class Table:
     def __init__(self, name):

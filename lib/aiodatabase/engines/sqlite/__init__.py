@@ -3,8 +3,6 @@ import aiosqlite
 import aiodatabase
 from aiodatabase.statements import single_query, insert_query, multi_query
 
-from icecream import ic
-
 
 class DB:
     def __init__(self, name, db):
@@ -49,7 +47,6 @@ class DB:
 
     async def alter_table_add_column(self, name, field):
         _field = self._db.table(name)._fields[field]
-        ic(_field)
         statement = f'{_field.name} {_field.type}'
         if _field.type == 'INTEGER' and hasattr(_field, '_autoincrement') and _field._autoincrement:
             statement += ' PRIMARY KEY AUTOINCREMENT'  
@@ -83,8 +80,6 @@ class DB:
                 await db.execute(sql, parameters=parameters)
                 await db.commit()
                 return None
-        ic()
-        ic(sql)
         return None
 
     async def execute_all(self, table, statement, values):

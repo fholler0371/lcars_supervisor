@@ -5,9 +5,6 @@ from aiodatabase.tables import Table, TableVersion
 import aiodatabase.engines.sqlite as sqlite
 
 
-from icecream import ic
-
-
 class DB:
     def __init__(self, name, use_version=True):
         self.engine = None

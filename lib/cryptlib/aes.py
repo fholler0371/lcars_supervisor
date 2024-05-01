@@ -15,10 +15,10 @@ class Aes:
         hlib.update(passcode)
         return base64.urlsafe_b64encode(hlib.hexdigest().encode('latin-1'))
 
-    def encode(self, data):
+    def encrypt(self, data):
         if isinstance(data, str):
             data = data.encode()
-        return self.f.encrypt(data)
+        return self.f.encrypt(data).decode()
     
-    def decode(self, data):
+    def decrypt(self, data):
         return self.f.decrypt(data).decode()

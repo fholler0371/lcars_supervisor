@@ -150,5 +150,5 @@ class ClientLocal(BaseObj):
         if hostname == await self.core.web_l.hostname:
             app = dest_app.split('.')[1]
             resp = await self.post(f'messages/{data.type}', data=data.model_dump(), dest=app, endpoint='com')
-            self.core.log.debug(resp)
+            #self.core.log.debug(resp)
             return resp

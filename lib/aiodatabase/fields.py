@@ -1,6 +1,3 @@
-from icecream import ic
-
-
 class Field:
     def __init__(self, name, **kwargs) -> None:
         self._name = name
