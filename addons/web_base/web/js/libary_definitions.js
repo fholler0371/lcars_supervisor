@@ -52,10 +52,10 @@ window.api_call = function(url='', token=true, data={}, sync=false) {
     }
     if (sync) {
     } else {
-        return window.api_call.sync(url=url, token=token, data=data)
+        return window.api_call.async(url=url, token=token, data=data)
     }
 }
-window.api_call.sync = function(url='', token=true, data={}) {
+window.api_call.async = function(url='', token=true, data={}) {
     var headers = {}
     if (token) {
       var token = localStorage.getItem('access_token')
@@ -66,6 +66,7 @@ window.api_call.sync = function(url='', token=true, data={}) {
     url = location.protocol + '//' + location.host + "/" + url
     url = url.replaceAll('//', '/').replace(':/', '://')
     return fetch(url, {
+        timeout: 5000,
         headers: headers,
         method: 'POST',
         mode: 'cors',
@@ -209,7 +210,7 @@ login = {
                 }
                 let d = new Date()
                 localStorage.setItem('last_redirect_state', d.getTime())
-                window.location.replace(resp.link+d.getTime())
+                window.location.replace(resp.redirect_url+d.getTime())
             })
         }
     }
