@@ -84,6 +84,9 @@ class ClientLocal(BaseObj):
             elif dest == 'gateway':
                 host = 'gateway:1235'
                 key = self.local_keys.local
+            elif dest == 'gateway_ip':
+                host = '127.0.0.1:1235'
+                key = self.local_keys.local
             elif dest == 'parent':
                 if self._parent_ip is None:
                     cmd = "ip route | grep default | awk '{ print $3 }'"

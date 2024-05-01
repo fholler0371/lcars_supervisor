@@ -91,7 +91,7 @@ class HTTP(BaseObj):
                         pass
                 if entry.func is not None:
                     if resp := await entry.func(request, rd):
-                        print('94', resp[1], flush=True)
+                        #print('94', resp[1], flush=True)
                         return resp[1]
                 if entry.remote is not None:
                     data = HttpMsgData(dest= entry.remote, type= f'relay', 

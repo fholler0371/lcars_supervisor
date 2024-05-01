@@ -11,6 +11,7 @@ import aiodatabase
 from corelib import BaseObj, Core
 from httplib.models import HttpHandler, HttpRequestData, SendOk, HttpMsgData
 from aioauth.models import GetClientId, ClientIdSecret
+from aioauth.models import UserData
 
 import addon_com.db as db_settings
 
@@ -63,7 +64,16 @@ class Com(BaseObj):
                 except Exception as e:
                     self.core.log.error(e)
                 #await self.core.web.add_handler(data)
-                return (True, web.json_response(SendOk().model_dump()))            
+                return (True, web.json_response(SendOk().model_dump()))  
+            case 'messages/user_add':
+                msg = HttpMsgData.model_validate(rd.data)
+                data = UserData.model_validate_json(msg.data)
+                self.core.log.debug(data) #>>>>>>>>>>>>>>>>
+                return (True, web.json_response(SendOk().model_dump()))
+            case _:   
+                msg = HttpMsgData.model_validate(rd.data)
+                self.core.log.debug(rd)
+                return (True, web.json_response(SendOk().model_dump()))       
                             
     async def _ainit(self):
         self.core.log.debug('Initaliesiere com')
