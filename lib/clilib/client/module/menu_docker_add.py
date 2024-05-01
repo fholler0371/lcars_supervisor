@@ -10,7 +10,7 @@ import clilib.data as cd
 class MenuDockerAdd:
     def __init__(self, core):
         self.core = core
-        self.step = 'main/doc_add'
+        self.step = 'main/docker/doc_add'
         self.menu_entries = []
         self.table = None
         

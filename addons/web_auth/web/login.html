@@ -1,1 +1,21 @@
->>> login <<<
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg" href="/img/icons/mdi/account.svg">
+    <title>LCARS</title>
+    <!link rel="stylesheet" href="style.css">
+    <script data-main="/auth/main_login" src="/js_lib/require.js"></script>
+    <script>
+      window.config = {
+        app_name : 'auth',
+        modul_login : false,
+        modul_clock : false
+      }
+    </script>
+  </head>
+  <body style="min-height: 100vh; overflow: hidden; background-color: black;">
+    <div style="color: #f90; position: absolute; top: 50%; left: 50%; font-family: 'LCARS'; font-size: 32px; transform: translate(-50%, -50%)">LCARS loading</div>
+  </body>
+</html>

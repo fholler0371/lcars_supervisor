@@ -8,7 +8,7 @@ import time
 
 from corelib import BaseObj, Core
 
-from .module import MenuMain, MenuDockerAdd, MenuDockerRemove, MenuDockerStatus
+from .module import MenuMain, MenuDockerAdd, MenuDockerRemove, MenuDockerStatus, MenuDocker, MenuAuth
 
 
 class ClientCtrl(BaseObj):
@@ -42,9 +42,11 @@ class ClientCtrl(BaseObj):
                 
     async def _ainit(self):
         self.add_entry(MenuMain(self.core))
+        self.add_entry(MenuDocker(self.core))
         self.add_entry(MenuDockerAdd(self.core))
         self.add_entry(MenuDockerRemove(self.core))
         self.add_entry(MenuDockerStatus(self.core))
+        self.add_entry(MenuAuth(self.core))
         step = 'main'
         while step != '':
             page = self._steps[step]

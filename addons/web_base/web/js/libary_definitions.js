@@ -324,8 +324,10 @@ setup_core = function() {
         window.modul = {}
     }
     window.modul['helper'] = helper
-    window.modul['clock'] = modul_clock
-    window.modul.clock.init()
+    if (window.config.modul_login == undefined || window.config.modul_login) {
+        window.modul['clock'] = modul_clock
+        window.modul.clock.init()
+    }
     window.modul['fullscreen'] = fullscreen
     fullscreen.init()
     window.modul['notification'] = notification

@@ -14,7 +14,7 @@ import time
 class MenuDockerStatus:
     def __init__(self, core):
         self.core = core
-        self.step = 'main/doc_status'
+        self.step = 'main/docker/doc_status'
         self.menu_entries = []
         self.table = None
     

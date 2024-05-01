@@ -12,7 +12,7 @@ import time
 class MenuDockerRemove:
     def __init__(self, core):
         self.core = core
-        self.step = 'main/doc_remove'
+        self.step = 'main/docker/doc_remove'
         self.menu_entries = []
         self.table = None
     
