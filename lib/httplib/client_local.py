@@ -9,7 +9,7 @@ from models.basic import StringList
 from models.network import Hostname
 
 from .local_keys import LocalKeys
-from .models import HttpMsgData
+from .models import HttpMsgData, RespRaw
 
 
 MAX_RETRY = 7
@@ -101,7 +101,17 @@ class ClientLocal(BaseObj):
             async with aiohttp.ClientSession(headers={'X-Auth':key}, timeout=self.session_timeout) as session:
                 async with session.post(f'http://{host}/{url}', json=data) as response:
                     if response.status == 200:
-                        return await response.json()
+                        if 'X-Raw' in response.headers:
+                            headers = {}
+                            for key, value in response.headers.items():
+                                if key in ['X-Raw', 'Server']:
+                                    continue
+                                headers[key] = value
+                            return RespRaw(headers=headers, content=await response.read())   
+                        else:
+                            return await response.json()
+                    elif response.status == 418:
+                        return None
                     else:
                         self.core.log.error(f'Abfrage von {url} gibt Kode {response.status} zurück')
                     if str(response.status).startswith('4'):

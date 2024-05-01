@@ -3,7 +3,7 @@ from netaddr import IPAddress, IPNetwork
 
 from corelib import BaseObj, Core
 
-from .models import HttpMsgData, HttpHandler, HttpRequestData 
+from .models import HttpMsgData, HttpHandler, HttpRequestData, RespRaw
 from .webserver import server_start
 from .local_keys import LocalKeys
 
@@ -97,6 +97,8 @@ class HTTP(BaseObj):
                     data = HttpMsgData(dest= entry.remote, type= f'relay', 
                                        data= rd.model_dump())
                     resp = await self.core.web_l.msg_send(data)
+                    if isinstance(resp, RespRaw):
+                        return web.Response(body=resp.content, headers=resp.headers)
                     self.core.log.debug(resp)
                     return
         else:

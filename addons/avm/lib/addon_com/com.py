@@ -39,9 +39,9 @@ class Com(BaseObj):
                         if hasattr(self._state, key):
                             self._state.update(**{key: value})
                     self.core.log.debug(dyndns_data)
-                    self.core.log.debug(self._state)
                     await self.core.call(self.on_update)
                     return (True, web.json_response(SendOk().model_dump()))
+                
         
     async def _ainit(self):
         self.core.log.debug('Initaliesiere com')
@@ -61,8 +61,8 @@ class Com(BaseObj):
         try:
             await self.core.web_l.msg_send(HttpMsgData(dest='web_base', type='register_web_app', data=data))
         except Exception as e:
-            print(e, flush=True)
-        
+           self.core.log.error(e)
+           
     async def _astart(self):
         self.core.log.debug('starte com')
         await self.core.call_random(10, self.register_web_app)

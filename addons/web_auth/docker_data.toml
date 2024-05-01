@@ -36,4 +36,5 @@ dest = "/lcars/config/manifest.toml"
 "%base_folder%/addons/web_auth/src/update.py" = "/lcars/starter/update.py"
 "%base_folder%/addons/web_auth/lib" = "/lcars/lib2"
 
-#[volumes.web]
+[volumes.web]
+"%base_folder%/addons/web_auth/web" = "/lcars/web"

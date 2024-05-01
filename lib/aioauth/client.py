@@ -36,9 +36,7 @@ class Client:
                     self.callback += 'callback.html' if self.core.const.app == 'web_base' else f'{self.core.const.app}/callback.html'
                     url += f'auth/login.html?response_type=code&redirect_uri={up.quote(self.callback)}'
                     url += f'&client_id={await self.clientid}&scope=openid+profile+role&state='
-                    self.core.log.debug(RedirectUrl(url=url).model_dump())
                     return (True, web.json_response(RedirectUrl(url=url).model_dump()))
                 except Exception as e:
                     self.core.log.debug(e) 
-                #return (True, web.Response(RedirectUrl(url=url).model_dump(), content_type="application/json"))
         return (False, None)

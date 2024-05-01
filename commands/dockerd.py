@@ -69,7 +69,9 @@ async def create_image(core: corelib.Core, image_name: str, image_folder: str) -
                 stderr=asyncio.subprocess.PIPE, 
                 stdout=asyncio.subprocess.PIPE)
             await p.wait()
-    cmd = f"docker build {core.path.temp} -t lcars/python:2024.04 -f {docker_file}"
+    d = dt.now()
+    tag = d.strftime('%Y.%m')
+    cmd = f"docker build {core.path.temp} -t lcars/python:{tag} -f {docker_file}"
     p = await asyncio.subprocess.create_subprocess_shell(
         cmd, 
         stderr=asyncio.subprocess.PIPE, 
@@ -230,7 +232,6 @@ async def restart_container(name: str) -> None:
             stdout=asyncio.subprocess.PIPE)
         await p.wait()
         
-
 async def main() -> None:
     core = corelib.Core()
     await core.add('const', constlib.Const)
