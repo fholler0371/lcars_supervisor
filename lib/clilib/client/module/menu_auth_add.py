@@ -23,6 +23,8 @@ class MenuAuthAdd:
         self.menu_entries.clear()
         console = Console()
         console.clear()
-        data = UserData(name=console.input(prompt="Nutzername: "),
-                        password=console.input(prompt="Passwort:   ", password=True))
+        data = UserData(name=console.input(prompt="Nutzername:      "),
+                        roles=console.input(prompt="Rollen:          "),
+                        roles_secure=console.input(prompt="Rollen (sicher): "),
+                        password=console.input(prompt="Passwort:        ", password=True))
         await self.core.web_l.post('auth/add_user', data.model_dump(), dest='gateway_ip')
