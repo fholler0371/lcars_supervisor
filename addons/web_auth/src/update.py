@@ -3,7 +3,8 @@ import importlib
 
 LIBS = {
    "cryptography" : "cryptography",
-   "aiosqlite" : "aiosqlite"
+   "aiosqlite" : "aiosqlite",
+   "bcrypt" : "bcrypt"
 }
 
 async def main() -> None:

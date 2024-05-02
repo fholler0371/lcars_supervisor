@@ -14,6 +14,8 @@ QuerySingle = Statement
 class QueryInsert(Statement):
     def __init__(self, sql, values=None):
         super().__init__(sql, None, values, insert_query)
+        
+QueryUpdate = QueryInsert
 
 class QueryMulti(Statement):
     def __init__(self, sql, fields=None, values=None):

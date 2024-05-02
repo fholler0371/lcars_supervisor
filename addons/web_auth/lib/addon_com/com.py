@@ -1,7 +1,10 @@
 from aiohttp import web
 import mimetypes
 import aiofiles
-import pydantic
+try:
+    import bcrypt
+except Exception as e:
+    print(e, flush=True)
 import json
 
 import aiotomllib
@@ -22,8 +25,11 @@ class Com(BaseObj):
     def __init__(self, core: Core) -> None:
         BaseObj.__init__(self, core)
         self._apps = {}
+        self._salt = ''
         self._aes = None
         self._apps_db = aiodatabase.DB(f"sqlite:///{self.core.path.data}/apps.sqlite3")
+        self._users_db = aiodatabase.DB(f"sqlite:///{self.core.path.data}/users.sqlite3")
+        self._pw_db = aiodatabase.DB(f"sqlite:///{self.core.path.data}/pw.sqlite3")
              
     async def static(self, path: str) -> tuple:
         if path == '':
@@ -68,7 +74,30 @@ class Com(BaseObj):
             case 'messages/user_add':
                 msg = HttpMsgData.model_validate(rd.data)
                 data = UserData.model_validate_json(msg.data)
-                self.core.log.debug(data) #>>>>>>>>>>>>>>>>
+                result = await self._users_db.table('users').exec('get_user_by_name', {'name': data.name})
+                if result is None: #Neuer Nutzer
+                    while True:
+                        user_id_s = cryptlib.key_gen(16)
+                        if await self._users_db.table('users').exec('get_id_by_user_id', {'user_id': user_id_s}) is None:
+                            break
+                    await self._users_db.table('users').exec('insert', {'user_id': user_id_s,
+                                                                        'name': data.name})
+                    result = await self._users_db.table('users').exec('get_user_by_name', {'name': data.name})
+                user_id = result['id']
+                user_id_s = result['user_id']
+                if data.roles != '-':
+                    await self._users_db.table('users').exec('update_roles_by_user_id', {'user_id': user_id_s,
+                                                                                     'roles': data.roles,
+                                                                                     'roles_sec': data.roles_secure})
+                if data.password != '':
+                    result = await self._pw_db.table('pw').exec('get_password_by_id', {'id': user_id})
+                    pw_hash = bcrypt.hashpw((self._salt+data.password).encode(), bcrypt.gensalt()).decode()
+                    if result is None:
+                         await self._pw_db.table('pw').exec('insert', {'id': user_id,
+                                                                          'password': pw_hash})
+                    else:
+                         await self._pw_db.table('pw').exec('update', {'id': user_id,
+                                                                          'password': pw_hash})
                 return (True, web.json_response(SendOk().model_dump()))
             case _:   
                 msg = HttpMsgData.model_validate(rd.data)
@@ -86,12 +115,25 @@ class Com(BaseObj):
                 self.core.running.set()
                 return
             self._aes = cryptlib.Aes(_aes_key)
+            self._salt = toml.get('pw_salt', '')
         except Exception as e:
             self.core.log.error(e)
         try:
             db = self._apps_db
             db.add_table(db_settings.App())
             db.add_table(db_settings.Oauth())
+            await db.setup()
+        except Exception as e:
+            self.core.log.error(e)
+        try:
+            db = self._users_db
+            db.add_table(db_settings.Users())
+            await db.setup()
+        except Exception as e:
+            self.core.log.error(e)
+        try:
+            db = self._pw_db
+            db.add_table(db_settings.Pw())
             await db.setup()
         except Exception as e:
             self.core.log.error(e)
