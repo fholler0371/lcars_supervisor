@@ -4,7 +4,7 @@ import json
 
 import clilib.data as cd
 from corelib import BaseObj, Core
-from httplib.models import HttpHandler, HttpRequestData, SendOk
+from httplib.models import HttpHandler, HttpRequestData, HttpMsgData
 import aioauth
 
 class Api(BaseObj):
@@ -13,10 +13,20 @@ class Api(BaseObj):
         self._auth = aioauth.Client(self.core)
         
     async def handler(self, request: web.Request, rd: HttpRequestData) -> bool:
+        #Umleiten von api calls
+        for entry in self.core.web._handlers:
+            if entry.remote and entry.domain == rd.path[0]:
+                rd.path = rd.path[1:]
+                data = HttpMsgData(dest= entry.remote, type= '/'.join(rd.path), 
+                                   data= rd.model_dump())
+                resp = await self.core.web_l.api_send(data)
+                self.core.log.debug(resp)
+        #prüfen ob einträge für allgemeine auth handler ist
         auth_resp = await self._auth.handler(request, rd)
         if auth_resp[0]:
             return auth_resp
         self.core.log.debug("/".join(rd.path))
+        self.core.log.debug(rd)
         return
         
     async def _ainit(self):

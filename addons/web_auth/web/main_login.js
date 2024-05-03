@@ -71,6 +71,14 @@ window.modul['login'] = {
         data['name'] = $("#name").val()
         data['password'] = $("#password").val()
         data['totp'] = $("#totp").val()
+        if (data['name'].length < 3) {
+            notification.show('error', 'Nutzername zu kurz (3)')
+            return
+        }
+        if (data['password'].length < 6) {
+            notification.show('error', 'Passwort zu kurz (6)')
+            return
+        }
         window.api_call(url='do_login', token=false, data=data).then(resp => {
             if (resp.error != undefined) {
                 console.error(resp.error)

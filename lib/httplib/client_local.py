@@ -165,3 +165,20 @@ class ClientLocal(BaseObj):
             resp = await self.post(f'messages/{data.type}', data=data.model_dump(), dest=app, endpoint='com')
             #self.core.log.debug(resp)
             return resp
+        
+    async def api_send(self, data: HttpMsgData):
+        dest_app = None
+        if '.' in data.dest:
+            dest_app = data.dest
+        else:
+            for app in await self.app_list:
+                if app.endswith(f'.{data.dest}'):
+                    dest_app = app
+        if dest_app is None:
+            return
+        hostname = dest_app.split('.')[0]
+        if hostname == await self.core.web_l.hostname:
+            app = dest_app.split('.')[1]
+            resp = await self.post(data.type, data=data.model_dump(), dest=app, endpoint='api')
+            #self.core.log.debug(resp)
+            return resp
