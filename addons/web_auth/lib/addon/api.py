@@ -6,7 +6,7 @@ try:
 except Exception as e:
     print(e, flush=True)
 import json
-
+import base64
 
 from corelib import BaseObj, Core
 import aiotomllib
@@ -15,7 +15,7 @@ from httplib.models import HttpHandler, HttpRequestData, SendOk, HttpMsgData
 from models.network import IpData
 import cryptlib
 
-from addon.models import UserLogin, LoginResponce, CodeData
+from addon.models import UserLogin, LoginResponce, CodeData, TokenByCode
 import addon.db as db_settings
 
 class Api(BaseObj):
@@ -82,10 +82,15 @@ class Api(BaseObj):
         return self.core.com._aes.encrypt(data)
     
     async def get_code(self, cd: CodeData) -> str:
-        await self._code_db.table('code').exec('delete', {'timestamp': int(time.time()-10)})
-        code = cryptlib.key_gen(32)
-        await self._code_db.table('code').exec('insert', {'code': code, 'data': cd.model_dump_json(), 'timestamp': int(time.time())})
-        return code
+        try:
+            await self._code_db.table('codes').exec('delete', {'timestamp': int(time.time()-10)})
+            code = cryptlib.key_gen(32)
+            await self._code_db.table('codes').exec('insert', {'code': code, 
+                                                               'data': cd.model_dump_json(), 
+                                                               'timestamp': int(time.time())})
+            return code
+        except Exception as e:
+            self.core.log.error(e)
     
     async def doLogin(self, rd:HttpRequestData, ldata: UserLogin) -> tuple:
         ldata.secure = await self.check_ip(ldata.ip) # prüfen der ip
@@ -97,6 +102,19 @@ class Api(BaseObj):
                                redirect_url=f"{ldata.callback}?code={await self.get_code(cd)}&state={ldata.state}")
             return (True, web.json_response(lr.model_dump()))
         return (True, web.json_response(SendOk(ok=False).model_dump()))
+    
+    async def get_ldata_by_token(self, tc:TokenByCode) -> UserLogin:
+        try:
+            if tc.code:
+                await self._code_db.table('codes').exec('delete', {'timestamp': int(time.time()-10)})
+                data = await self._code_db.table('codes').exec('data', {'code': tc.code})
+                if data:
+                    return UserLogin.model_validate_json(data['data'])
+        except Exception as e:
+            self.core.log.error(e)
+
+    async def validate_oauth_app(self, ldata: UserLogin, tc:TokenByCode):
+        pass
 
     async def handler(self, request: web.Request, rd: HttpRequestData) -> bool:
         match '/'.join(rd.path):
@@ -109,7 +127,11 @@ class Api(BaseObj):
             case 'token':
                 msg = HttpMsgData.model_validate(rd.data)
                 msg2 = HttpRequestData.model_validate(msg.data)
+                tc = TokenByCode.model_validate(msg2.data)
+                ldata = await self.get_ldata_by_token(tc)
                 self.core.log.debug(msg2)
+                self.core.log.debug(tc)
+                self.core.log.debug(ldata)
 
     async def _ainit(self):
         self.core.log.debug('Initaliesiere api')

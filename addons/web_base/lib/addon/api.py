@@ -14,7 +14,6 @@ class Api(BaseObj):
         
     async def handler(self, request: web.Request, rd: HttpRequestData) -> bool:
         #Umleiten von api calls
-        self.core.log.debug("/".join(rd.path))
         for entry in self.core.web._handlers:
             if entry.remote and entry.domain == rd.path[0]:
                 rd.path = rd.path[1:]
