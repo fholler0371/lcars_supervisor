@@ -84,8 +84,11 @@ window.modul['login'] = {
                 console.error(resp.error)
                 return
             }
-            if (resp.link != undefined) {
-                window.location.replace(resp.link)
+            if (resp.login_token != undefined) {
+                localStorage.setItem('login_token', resp.login_token)
+            }
+            if (resp.redirect_url != undefined) {
+                window.location.replace(resp.redirect_url)
             }
         })
         

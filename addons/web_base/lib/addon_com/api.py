@@ -20,7 +20,8 @@ class Api(BaseObj):
                 data = HttpMsgData(dest= entry.remote, type= '/'.join(rd.path), 
                                    data= rd.model_dump())
                 resp = await self.core.web_l.api_send(data)
-                self.core.log.debug(resp)
+                if resp is not None:
+                    return (True, web.json_response(resp))
         #prüfen ob einträge für allgemeine auth handler ist
         auth_resp = await self._auth.handler(request, rd)
         if auth_resp[0]:

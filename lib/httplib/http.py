@@ -91,7 +91,7 @@ class HTTP(BaseObj):
                 if entry.func is not None:
                     try:
                         if resp := await entry.func(request, rd):
-                            #print('94', resp[1], flush=True)
+                            print('94', resp, flush=True)
                             return resp[1]
                     except Exception as e:
                         self.core.log.error(e)

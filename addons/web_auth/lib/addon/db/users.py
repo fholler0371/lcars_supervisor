@@ -16,3 +16,5 @@ class Users(Table):
         self.add_statement('insert', QueryInsert("INSERT INTO {table} (user_id, name) VALUES (?, ?)", 
                                                  ['user_id', 'name']))
         self.add_statement('update_roles_by_user_id', QueryUpdate("UPDATE {table} SET roles=?, roles_sec=? WHERE user_id=?", ['roles', 'roles_sec', 'user_id']))        
+        self.add_statement('get_role_by_id', QuerySingle("SELECT {fields} FROM {table} WHERE id=?", ['roles'], ['id']))        
+        self.add_statement('get_role_sec_by_id', QuerySingle("SELECT {fields} FROM {table} WHERE id=?", ['roles_sec'], ['id']))        
