@@ -90,9 +90,12 @@ class HTTP(BaseObj):
                     except Exception as e:
                         pass
                 if entry.func is not None:
-                    if resp := await entry.func(request, rd):
-                        #print('94', resp[1], flush=True)
-                        return resp[1]
+                    try:
+                        if resp := await entry.func(request, rd):
+                            #print('94', resp[1], flush=True)
+                            return resp[1]
+                    except Exception as e:
+                        self.core.log.error(e)
                 if entry.remote is not None:
                     data = HttpMsgData(dest= entry.remote, type= f'relay', 
                                        data= rd.model_dump())
@@ -100,7 +103,7 @@ class HTTP(BaseObj):
                     if isinstance(resp, RespRaw):
                         return web.Response(body=resp.content, headers=resp.headers)
                     self.core.log.debug(resp)
-                    return
+                    return resp[1]
         else:
             if self._static_handler is not None:
                 if resp := await self._static_handler.func(request, rd):

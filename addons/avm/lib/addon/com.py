@@ -31,15 +31,19 @@ class Com(BaseObj):
     async def handler(self, request: web.Request, rd: HttpRequestData) -> bool:
         if rd.path[0] == 'messages':
             msg = HttpMsgData.model_validate(rd.data)
-            if rd.path[1] == 'relay':
-                relay_rd = HttpRequestData.model_validate(msg.data)
-                if relay_rd.path[0] == 'dyndns':
-                    dyndns_data = AvmDynDns.model_validate(relay_rd.data)
-                    for key, value in dyndns_data.model_dump().items():
-                        if hasattr(self._state, key):
-                            self._state.update(**{key: value})
-                    self.core.log.debug(dyndns_data)
-                    await self.core.call(self.on_update)
+            match rd.path[1]:
+                case 'relay':
+                    relay_rd = HttpRequestData.model_validate(msg.data)
+                    if relay_rd.path[0] == 'dyndns':
+                        dyndns_data = AvmDynDns.model_validate(relay_rd.data)
+                        for key, value in dyndns_data.model_dump().items():
+                            if hasattr(self._state, key):
+                                self._state.update(**{key: value})
+                        self.core.log.debug(dyndns_data)
+                        await self.core.call(self.on_update)
+                        return (True, web.json_response(SendOk().model_dump()))
+                case 'get_ip':
+                    self.core.log.debug('someone need ip')
                     return (True, web.json_response(SendOk().model_dump()))
                 
         

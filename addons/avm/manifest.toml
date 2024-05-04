@@ -8,4 +8,4 @@ folder = 'python'
 [lib]
 web = "httplib.HTTP"
 web_l = "httplib.ClientLocal"
-com = "addon_com.Com"
+com = "addon.Com"
