@@ -93,7 +93,7 @@ class Api(BaseObj):
         if ldata.valid:
             cd = CodeData.model_validate(ldata.model_dump())
             lr = LoginResponce(login_token=await self.get_login_token(ldata),
-                               redirect_url=f"{ldata.callback}?code={await self.get_code(cd)}")
+                               redirect_url=f"{ldata.callback}?code={await self.get_code(cd)}&state={ldata.state}")
             return (True, web.json_response(lr.model_dump()))
         return (True, web.json_response(SendOk(ok=False).model_dump()))
 

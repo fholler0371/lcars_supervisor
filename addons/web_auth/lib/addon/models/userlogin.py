@@ -6,7 +6,7 @@ class UserLogin(pydantic.BaseModel):
     callback: str|None = pydantic.Field(alias='redirect_uri', default=None)
     clientid: str|None = pydantic.Field(alias='client_id', default=None)
     scope: str|None = None
-    state: str|None = None
+    state: str|None = ''
     name: str|None = None
     password: str|None = None
     totp: str|None = None

@@ -28,11 +28,12 @@ dest = "/lcars/config/manifest.toml"
 "%base_folder%/lib" = "/lcars/lib"
 
 [volumes.run]
-"%base_folder%/addons/web_base/src/run.py" = "/lcars/starter/run.py"
+"%base_folder%/addons/web_base/src/run.py" = "/lcars/starter/run.py:ro"
 "%base_folder%/addons/web_base/lib" = "/lcars/lib2"
 
 [volumes.web]
 "%base_folder%/addons/web_base/web/index.html" = "/lcars/web/index.html"
+"%base_folder%/addons/web_base/web/callback.html" = "/lcars/web/callback.html"
 "%base_folder%/addons/web_base/web/main.js" = "/lcars/web/main.js"
 "%base_folder%/addons/web_base/web/js" = "/lcars/web/js"
 "%base_folder%/addons/web_base/web/css" = "/lcars/web/css"
