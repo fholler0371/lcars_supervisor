@@ -16,7 +16,7 @@ from httplib.models import HttpHandler, HttpRequestData, SendOk, HttpMsgData
 from aioauth.models import GetClientId, ClientIdSecret
 from aioauth.models import UserData
 
-import addon_com.db as db_settings
+import addon.db as db_settings
 
 
 TEXT_FILES = ['text/html', 'text/javascript'] 

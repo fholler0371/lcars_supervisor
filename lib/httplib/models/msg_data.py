@@ -5,4 +5,4 @@ from typing import Any
 class HttpMsgData(pydantic.BaseModel):
     dest: str
     type: str
-    data: Any
+    data: Any|None = None
