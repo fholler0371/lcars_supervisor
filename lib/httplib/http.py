@@ -1,5 +1,6 @@
 from aiohttp import web
 from netaddr import IPAddress, IPNetwork
+import urllib.parse
 
 from corelib import BaseObj, Core
 
@@ -81,8 +82,18 @@ class HTTP(BaseObj):
                             except:
                                 pass
                     except Exception as e:
+                        rd.data = await request.text()
                         #print(e)
                         pass
+                    if isinstance(rd.data, str):
+                        try:
+                            data = {}
+                            for values in urllib.parse.parse_qsl(rd.data):
+                                data[values[0]] = values[1]
+                            if data:
+                                rd.data = data
+                        except:
+                            pass
                 if request.method == 'GET':
                     try:
                         rd.data = dict(request.rel_url.query)
@@ -91,7 +102,7 @@ class HTTP(BaseObj):
                 if entry.func is not None:
                     try:
                         if resp := await entry.func(request, rd):
-                            print('94', resp, flush=True)
+                            #print('94', resp, flush=True)
                             return resp[1]
                     except Exception as e:
                         self.core.log.error(e)

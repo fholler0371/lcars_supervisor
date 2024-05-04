@@ -7,6 +7,7 @@ except Exception as e:
     print(e, flush=True)
 import json
 
+
 from corelib import BaseObj, Core
 import aiotomllib
 import aiodatabase
@@ -105,6 +106,10 @@ class Api(BaseObj):
                 ldata = UserLogin.model_validate_json(msg2.data)
                 ldata.ip = msg2.ip
                 return await self.doLogin(rd, ldata)
+            case 'token':
+                msg = HttpMsgData.model_validate(rd.data)
+                msg2 = HttpRequestData.model_validate(msg.data)
+                self.core.log.debug(msg2)
 
     async def _ainit(self):
         self.core.log.debug('Initaliesiere api')

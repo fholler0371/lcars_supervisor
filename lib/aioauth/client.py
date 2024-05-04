@@ -1,11 +1,12 @@
 from aiohttp import web
+import aiohttp
 import urllib.parse as up
 
 from corelib import Core
 from corelib.aio_property import aproperty
 from httplib.models import HttpRequestData, SendOk
 
-from aioauth.models import GetClientId, ClientIdSecret
+from aioauth.models import GetClientId, ClientIdSecret, Code
 from httplib.models import HttpMsgData, RedirectUrl
 
 class Client:
@@ -38,5 +39,23 @@ class Client:
                     url += f'&client_id={await self.clientid}&scope=openid+profile+role&state='
                     return (True, web.json_response(RedirectUrl(url=url).model_dump()))
                 except Exception as e:
-                    self.core.log.debug(e) 
+                    self.core.log.error(e) 
+            case "validate_code":
+                try:
+                    url = x if (x := request.headers.get('X-Forwarded-Scheme')) else request.scheme
+                    self.callback = url = f"{url}://{request.host}/"
+                    self.callback += 'callback.html' if self.core.const.app == 'web_base' else f'{self.core.const.app}/callback.html'
+                    data = Code.model_validate_json(rd.data)
+                    post_data = (('client_id', await self.clientid),
+                                 ('client_secret', self._secret),
+                                 ('redirect_uri', self.callback),
+                                 ('code', data.code))
+                    try:
+                        async with aiohttp.ClientSession() as session:
+                            response = await session.post(url=f"{url}api/auth/token", data=post_data)
+                            self.core.log.debug(response)
+                    except Exception as e:
+                        self.core.log.error(e)                 
+                except Exception as e:
+                    self.core.log.error(e)                 
         return (False, None)
