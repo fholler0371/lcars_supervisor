@@ -10,6 +10,7 @@ class App(Table):
         self.add_field(Text('type'))
         #
         self.add_statement('get_app', QuerySingle("SELECT {fields} FROM {table} WHERE name=?", ['id', 'type'], ['name']))        
+        self.add_statement('get_app_by_id', QuerySingle("SELECT {fields} FROM {table} WHERE id=?", ['name', 'type'], ['id']))        
         self.add_statement('insert', QueryInsert("INSERT INTO {table} (name, type) VALUES (?, ?)", 
                                                  ['name', 'type']))
         self.add_statement('get_name_by_id', QuerySingle("SELECT {fields} FROM {table} WHERE id=?", ['name'], ['id']))        

@@ -114,8 +114,16 @@ class Api(BaseObj):
             self.core.log.error(e)
 
     async def validate_oauth_app(self, ldata: UserLogin, tc:TokenByCode):
-        pass
-
+        try:
+            o_data = await self._apps_db.table('oauth').exec('get_client_data', {'app_id': ldata.app_id})
+            if self.core.com._aes.decrypt(o_data['secret']) != tc.secret or o_data['callback'] != tc.callback:
+                ldata.app_id = -1
+            else:
+                a_data = await self._apps_db.table('app').exec('get_app_by_id', {'id': ldata.app_id})
+                ldata.app_name = a_data['name']
+        except Exception as e:
+            self.core.log.error(e)
+        
     async def handler(self, request: web.Request, rd: HttpRequestData) -> bool:
         match '/'.join(rd.path):
             case 'do_login':
@@ -129,8 +137,8 @@ class Api(BaseObj):
                 msg2 = HttpRequestData.model_validate(msg.data)
                 tc = TokenByCode.model_validate(msg2.data)
                 ldata = await self.get_ldata_by_token(tc)
+                await self.validate_oauth_app(ldata, tc)
                 self.core.log.debug(msg2)
-                self.core.log.debug(tc)
                 self.core.log.debug(ldata)
 
     async def _ainit(self):
