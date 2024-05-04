@@ -4,15 +4,19 @@ from netaddr import IPAddress, IPNetwork
 
 from corelib import BaseObj, Core
 import aiotomllib
+import aiodatabase
 from httplib.models import HttpHandler, HttpRequestData, SendOk, HttpMsgData
 from models.network import IpData
 
 from addon.models import UserLogin
-
+import addon.db as db_settings
 
 class Api(BaseObj):
     def __init__(self, core: Core) -> None:
         BaseObj.__init__(self, core)
+        self._apps_db = aiodatabase.DB(f"sqlite:///{self.core.path.data}/apps.sqlite3")
+        self._apps_db.add_table(db_settings.App())
+        self._apps_db.add_table(db_settings.Oauth())
         self._acl = None
         self._local_ip_valid = 0
         
@@ -40,8 +44,16 @@ class Api(BaseObj):
             self.core.log.error(e)
         return False
         
+    async def check_app(self, ldata: UserLogin) -> None:
+        app_id = None
+        if ldata.response_type == 'code':
+            app_id = await self._apps_db.table('oauth').exec('get_id_by_clientid_callback', {'clientid': ldata.clientid, 'callback': ldata.callback})
+            if app_id is not None:
+                ldata.app_id = app_id['app_id']
+
     async def doLogin(self, rd:HttpRequestData, ldata: UserLogin) -> tuple:
-        ldata.secure = await self.check_ip(ldata.ip)
+        ldata.secure = await self.check_ip(ldata.ip) # prüfen der ip
+        await self.check_app(ldata)
         self.core.log.debug(ldata)
 
     async def handler(self, request: web.Request, rd: HttpRequestData) -> bool:

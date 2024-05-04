@@ -12,6 +12,7 @@ class App(Table):
         self.add_statement('get_app', QuerySingle("SELECT {fields} FROM {table} WHERE name=?", ['id', 'type'], ['name']))        
         self.add_statement('insert', QueryInsert("INSERT INTO {table} (name, type) VALUES (?, ?)", 
                                                  ['name', 'type']))
+        self.add_statement('get_name_by_id', QuerySingle("SELECT {fields} FROM {table} WHERE id=?", ['name'], ['id']))        
         
 class Oauth(Table):
     def __init__(self):
@@ -24,3 +25,5 @@ class Oauth(Table):
         self.add_statement('get_client_data', QuerySingle("SELECT {fields} FROM {table} WHERE app_id=?", ['clientid', 'secret', 'callback'], ['app_id']))        
         self.add_statement('insert', QueryInsert("INSERT INTO {table} (app_id, clientid, secret, callback) VALUES (?, ?, ?, ?)", 
                                                  ['app_id', 'clientid', 'secret', 'callback']))
+        self.add_statement('get_id_by_clientid_callback', QuerySingle("SELECT {fields} FROM {table} WHERE clientid=? and callback=?", 
+                                                                      ['app_id'], ['clientid', 'callback']))        
