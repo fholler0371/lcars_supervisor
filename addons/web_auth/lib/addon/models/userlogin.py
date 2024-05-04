@@ -16,3 +16,10 @@ class UserLogin(pydantic.BaseModel):
     
     app_id: int = -1
     app_name: str = ''
+    
+    user_id: int = -1
+    user_id_s: str = ''
+    
+    @property
+    def valid(self):
+        return self.app_id > 0 and self.user_id > 0
