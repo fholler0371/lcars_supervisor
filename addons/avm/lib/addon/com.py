@@ -6,6 +6,7 @@ from corelib import BaseObj, Core
 from httplib.models import HttpMsgData, HttpHandler, HttpRequestData, SendOk
 
 from .models import AvmDynDns, IpState
+from models.network import IpData
 
 class Com(BaseObj):
     def __init__(self, core: Core) -> None:
@@ -43,8 +44,8 @@ class Com(BaseObj):
                         await self.core.call(self.on_update)
                         return (True, web.json_response(SendOk().model_dump()))
                 case 'get_ip':
-                    self.core.log.debug('someone need ip')
-                    return (True, web.json_response(SendOk().model_dump()))
+                    data = IpData(ip4=self._state.ip4)
+                    return (True, web.json_response(data.model_dump()))
                 
         
     async def _ainit(self):

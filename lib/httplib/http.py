@@ -8,7 +8,6 @@ from .webserver import server_start
 from .local_keys import LocalKeys
 
 
-
 class HTTP(BaseObj):
     def __init__(self, core: Core, sv: bool= False) -> None:
         BaseObj.__init__(self, core)

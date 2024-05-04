@@ -10,5 +10,4 @@ class UserLogin(pydantic.BaseModel):
     password: str|None = None
     totp: str|None = None
     ip: str|None = None
-
-    
+    secure: bool = False
