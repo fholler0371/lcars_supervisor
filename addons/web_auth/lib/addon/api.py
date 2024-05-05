@@ -71,12 +71,25 @@ class Api(BaseObj):
                 ldata.app_id = app_id['app_id']
 
     async def check_user_login(self, ldata: UserLogin) -> None:
-        user = await self._users_db.table('users').exec('get_user_by_name', {'name': ldata.name})
         ok = False
-        if user is not None:
-            pw = await self._pw_db.table('pw').exec('get_password_by_id', {'id': user['id']})
-            if pw is not None:
-                ok = bcrypt.checkpw((self.core.com._salt+ldata.password).encode(), pw['password'].encode())
+        if ldata.login_token:
+            try:
+                token_data = json.loads(self.core.com._aes.decrypt(ldata.login_token))
+                if token_data['t'] < time.time():
+                    return
+                user = await self._users_db.table('users').exec('get_user_by_user_id', {'user_id': token_data['u']})
+                if user is not None:
+                    ok = True
+            except Exception as e:
+                self.core.log.error(e)
+        else:            
+            user = await self._users_db.table('users').exec('get_user_by_name', {'name': ldata.name})
+
+            if user is not None:
+                pw = await self._pw_db.table('pw').exec('get_password_by_id', {'id': user['id']})
+                if pw is not None:
+                    ok = bcrypt.checkpw((self.core.com._salt+ldata.password).encode(), pw['password'].encode())
+
         if ok:
             ldata.user_id = user['id']
             ldata.user_id_s = user['user_id']
@@ -165,6 +178,12 @@ class Api(BaseObj):
     async def handler(self, request: web.Request, rd: HttpRequestData) -> bool:
         match '/'.join(rd.path):
             case 'do_login':
+                msg = HttpMsgData.model_validate(rd.data)
+                msg2 = HttpRequestData.model_validate(msg.data)
+                ldata = UserLogin.model_validate_json(msg2.data)
+                ldata.ip = msg2.ip
+                return await self.doLogin(rd, ldata)
+            case 'do_auto_login':
                 msg = HttpMsgData.model_validate(rd.data)
                 msg2 = HttpRequestData.model_validate(msg.data)
                 ldata = UserLogin.model_validate_json(msg2.data)

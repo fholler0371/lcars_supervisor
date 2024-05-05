@@ -9,6 +9,7 @@ class UserLogin(pydantic.BaseModel):
     state: str|None = ''
     name: str|None = None
     password: str|None = None
+    login_token: str|None = None
     totp: str|None = None
     ip: str|None = None
     

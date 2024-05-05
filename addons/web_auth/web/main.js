@@ -10,25 +10,25 @@ window.modul = {}
 window.modul['login'] = {
     init : function(){
         $('#header_appname').text('Anmelden')
-        let queryParams = new URLSearchParams(window.location.search)
-        let redirect = queryParams.get('redirect_uri')
-        if (redirect != null) {
-            redirect = redirect.split('/')
-            let data = {client_id: queryParams.get('client_id', ''),
-                        scope: queryParams.get('scope', ''),
-                        redirect_uri: queryParams.get('redirect_uri', ''),
-                        state: queryParams.get('state', '')}
-            if (window.location.hostname == redirect[2] && redirect.length < 5) {
-                window.api_call(url='pre_login_check', token=false, data=data).then(resp => {
-                    if (resp.error != undefined) {
-                        console.error(resp.error)
-                        return
-                    }
-                    if (resp.link != undefined) {
-                        location.replace(resp.link)
-                    }
-                })
-            }
+        if (!(localStorage.getItem('login_token') === null)) {
+            let queryParams = new URLSearchParams(window.location.search)
+            let data = {}
+            for (const key of queryParams.keys()) data[key] = queryParams.get(key)
+            data['login_token'] = localStorage.getItem('login_token')
+            console.log(data)    
+            window.api_call(url='do_auto_login', token=false, data=data).then(resp => {
+                if (resp.error != undefined) {
+                    console.error(resp.error)
+                    return
+                }
+                console.log(resp)
+                if (resp.login_token != undefined) {
+                    localStorage.setItem('login_token', resp.login_token)
+                }
+                if (resp.redirect_url != undefined) {
+                    window.location.replace(resp.redirect_url)
+                }
+            })
         }
         require(['jqxinput', 'jqxpassword', 'jqxbutton', 'jqxnotification'], function() {
             $('.main_content').append('<div class="loading_outer"><div class="loading_middle"><form class="loading_inner"></form></div></div>')
