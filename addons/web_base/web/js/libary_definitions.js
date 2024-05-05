@@ -142,7 +142,7 @@ login = {
                 } else {
                     localStorage.setItem('access_token', data.access_token)                    
                     localStorage.setItem('refresh_token', data.refresh_token)
-                    localStorage.setItem('expires', new Date().getTime() / 1000 + data.expires)
+                    localStorage.setItem('access_token_timeout', new Date().getTime() / 1000 + data.access_token_timeout)
                     window.modul.login.update_state()
                     console.log('got new token', new Date())
                 }
@@ -175,7 +175,7 @@ login = {
     do_logout: function() {
         localStorage.removeItem('access_token')
         localStorage.removeItem('refresh_token')
-        localStorage.removeItem('expires')
+        localStorage.removeItem('access_token_timeout')
         let login = window.modul.login
         clearTimeout(login.token_timer)
         login.update_state()
@@ -183,7 +183,7 @@ login = {
     left_access_token: function() {
         let left = -1
         let sec = new Date().getTime() / 1000
-        let token_sec = localStorage.getItem('expires')
+        let token_sec = localStorage.getItem('access_token_timeout')
         if (token_sec == null) {
             token_sec = 0
         }
