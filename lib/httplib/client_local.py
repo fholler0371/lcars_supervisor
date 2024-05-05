@@ -29,6 +29,27 @@ class ClientLocal(BaseObj):
         self.local_keys = LocalKeys(self.core)
         await self.local_keys._ainit(sv=True)
         self.session_timeout = aiohttp.ClientTimeout(total=None,sock_connect=1,sock_read=5)
+        
+    @aioretry.retry(retry_policy)        
+    async def _get_raw(self, url: str) -> any:
+        try:
+            async with aiohttp.ClientSession(timeout=self.session_timeout) as session:
+                async with session.get(url) as response:
+                    if response.status != 200:
+                        raise()
+                    else:
+                        return await response.text()
+        except Exception as e:
+            self.core.log.error(e)
+            raise(e)
+        return None
+                
+    async def get_raw(self, url: str) -> any:
+        try:
+            return await self._get_raw(url)
+        except Exception as e:
+            self.core.log.error(e)
+        return None
 
     @aioretry.retry(retry_policy)        
     async def _get(self, url: str, dest: str) -> None:

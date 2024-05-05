@@ -40,6 +40,11 @@ class Com(BaseObj):
             if mime in TEXT_FILES:
                 async with aiofiles.open(file_name) as f:
                     return (True, web.Response(text=await f.read(), content_type=mime, headers={'X-Raw': '1'})) 
+        elif path == 'pem':
+            file_name = self.core.path.data / 'rsa_public.pem'
+            if file_name.exists():
+                async with aiofiles.open(str(file_name)) as f:
+                    return (True, web.Response(text=await f.read(), headers={'X-Raw': '1'})) 
         else:
             return (True, web.Response(status=418))
         

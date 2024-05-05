@@ -1,8 +1,11 @@
+import asyncio
 from aiohttp import web
+import aiohttp
 from netaddr import IPAddress, IPNetwork
 import urllib.parse
 
 from corelib import BaseObj, Core
+import cryptlib
 
 from .models import HttpMsgData, HttpHandler, HttpRequestData, RespRaw
 from .webserver import server_start
@@ -13,6 +16,7 @@ class HTTP(BaseObj):
     def __init__(self, core: Core, sv: bool= False) -> None:
         BaseObj.__init__(self, core)
         self._sv = sv
+        self._jwt = None
         self._handlers = []
         self._static_handler = None
         self.acl_lcars = ['127.0.0.1/32']
@@ -101,10 +105,17 @@ class HTTP(BaseObj):
                         rd.data = dict(request.rel_url.query)
                     except Exception as e:
                         pass
+                if 'Authorization' in request.headers:
+                    token = request.headers.get('Authorization').split(' ')[-1]
+                    if self._jwt is None:
+                        url = f'{rd.scheme}://{rd.host}/auth/pem'
+                        self._jwt = cryptlib.Jwt(await self.core.web_l.get_raw(url))
+                    if self._jwt:
+                        rd.openid = self._jwt.validate(token)
                 if entry.func is not None:
                     try:
                         if resp := await entry.func(request, rd):
-                            #print('94', resp, flush=True)
+                            print('94', resp, flush=True)
                             return resp[1]
                     except Exception as e:
                         self.core.log.error(e)

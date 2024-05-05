@@ -26,8 +26,14 @@ class Api(BaseObj):
         auth_resp = await self._auth.handler(request, rd)
         if auth_resp[0]:
             return auth_resp
-        self.core.log.debug("/".join(rd.path))
-        self.core.log.debug(rd)
+        #call für dieses Modul
+        match "/".join(rd.path):
+            case 'get_allowed_moduls':
+                self.core.log.debug("/".join(rd.path))
+                self.core.log.debug(rd)
+            case _:
+                self.core.log.debug("/".join(rd.path))
+                self.core.log.debug(rd)
         return
         
     async def _ainit(self):

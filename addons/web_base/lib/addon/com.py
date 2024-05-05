@@ -19,6 +19,8 @@ class Com(BaseObj):
                 data = HttpHandler.model_validate(msg.data)
                 await self.core.web.add_handler(data)
                 return (True, web.json_response(SendOk().model_dump()))
+            case _:
+                self.core.log.critical('/'.join(rd.path))
         
     async def _ainit(self):
         self.core.log.debug('Initaliesiere com')

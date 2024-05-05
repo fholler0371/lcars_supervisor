@@ -171,6 +171,9 @@ login = {
             $('#login_icon').html('<img class="button_32" src="/img/mdi/login.svg" onload="SVGInject(this)" style="top: 0">')
             $('#header_username').text('')
         }
+        if (window.modul['manager'] != undefined) {
+            window.modul['manager'].update()
+        }
     },
     do_logout: function() {
         localStorage.removeItem('access_token')
@@ -319,6 +322,30 @@ modul_clock = {
     }
 }
 
+modul_manager = {
+    activ : true,
+    moduls : [],
+    init : function () {
+        window.modul['manager'].update()
+    },
+    activate : function() {
+        window.modul['manager'].activ = true
+    },
+    update : function () {
+        if (window.modul['manager'].activ) {
+            window.modul['manager'].activ = false
+            window.modul['manager'].moduls = ['clock']
+            if (!(localStorage.getItem('access_token') === null)) {
+                window.api_call(url='get_allowed_moduls').then(resp => {
+                    console.log(resp)
+                })
+            }
+            console.log('modul_update')
+        }
+        setTimeout(window.modul['manager'].activate, 1000)
+    }
+}
+
 setup_core = function() {
     if (window.modul == undefined) {
         window.modul = {}
@@ -337,5 +364,7 @@ setup_core = function() {
     } else {
         $('#header_username, #login_icon').remove()
     }
+    window.modul['manager'] = modul_manager
+    window.modul['manager'].init()
     window.modul.login.init()
 }

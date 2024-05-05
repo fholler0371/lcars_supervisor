@@ -6,14 +6,9 @@ requirejs.config({
     }
 })
 
-test = function() {
-    console.log('tst')
-}
-
 requirejs(['jquery', 'libary_definitions'], function($){
     desktop_layout()
     requirejs(['svginject'], function() {
         setup_core()
     })
-    test()
 })

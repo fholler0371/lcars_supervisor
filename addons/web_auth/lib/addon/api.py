@@ -203,6 +203,8 @@ class Api(BaseObj):
                     return resp
                 self.core.log.debug(msg2)
                 self.core.log.debug(ldata)
+            case _:
+                self.core.log.critical('/'.join(rd.path))
     
     async def _ainit(self):
         self.core.log.debug('Initaliesiere api')
@@ -225,7 +227,10 @@ class Api(BaseObj):
                 self.core.log.debug('ertelle rsa keys')
                 self.rsa_private_key = rsa.generate_private_key(
                     public_exponent=65537,
-                    key_size=2048  
+                    key_size=2048,
+                    alg='RSA-OAEP-256', 
+                    use='enc', 
+                    kid='12345'
                 )
                 private_key_pem = self.rsa_private_key.private_bytes(
                     encoding=serialization.Encoding.PEM,
