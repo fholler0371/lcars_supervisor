@@ -9,3 +9,5 @@ class HttpRequestData(pydantic.BaseModel):
     auth : bool = False
     data : Any = None
     ip : str = None
+    host : str = None
+    scheme : str = None

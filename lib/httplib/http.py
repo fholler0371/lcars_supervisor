@@ -46,7 +46,9 @@ class HTTP(BaseObj):
     async def _handler(self, request: web.Request):
         try:
             rd = HttpRequestData(path=request.path.split('/'),
-                                 ip=x if (x := request.headers.get('X-Real-IP')) else request.remote)
+                                 ip=x if (x := request.headers.get('X-Real-IP')) else request.remote,
+                                 host=x if (x := request.headers.get('X-Host')) else request.host,
+                                 scheme=x if (x := request.headers.get('X-Forwarded-Scheme')) else request.scheme)
             self.core.log.debug(f'{rd.ip} {request.method} {request.path}')
         except Exception as e:
             self.core.log.error(e)
@@ -111,7 +113,7 @@ class HTTP(BaseObj):
                                        data= rd.model_dump())
                     resp = await self.core.web_l.msg_send(data)
                     if isinstance(resp, RespRaw):
-                        return web.Response(body=resp.content, headers=resp.headers)
+                        return web.Response(body=resp.content, headers=resp.headers, status=resp.status)
                     self.core.log.debug(resp)
                     return resp[1]
         else:

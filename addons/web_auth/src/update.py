@@ -4,7 +4,8 @@ import importlib
 LIBS = {
    "cryptography" : "cryptography",
    "aiosqlite" : "aiosqlite",
-   "bcrypt" : "bcrypt"
+   "bcrypt" : "bcrypt",
+   "pyjwt" : "jwt"
 }
 
 async def main() -> None:
@@ -14,7 +15,7 @@ async def main() -> None:
         except:
             cmd = f'pip install {_import}'
             p = await asyncio.subprocess.create_subprocess_shell(cmd, 
-                                                                stderr=asyncio.subprocess.PIPE, 
+                                                                #stderr=asyncio.subprocess.PIPE, 
                                                                 stdout=asyncio.subprocess.PIPE)
             await p.wait()
             print(f'{_import} wurde installiert')

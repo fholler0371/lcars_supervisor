@@ -118,7 +118,12 @@ class ClientLocal(BaseObj):
                     else:
                         self.core.log.error(f'Abfrage von {url} gibt Kode {response.status} zurück')
                     if str(response.status).startswith('4'):
-                        return None
+                        headers = {}
+                        for key, value in response.headers.items():
+                            if key in ['X-Raw', 'Server']:
+                                continue
+                            headers[key] = value
+                        return RespRaw(headers=headers, content=await response.read(), status=response.status)
         except Exception as e:
             self.core.log.error(e)
             raise(e)

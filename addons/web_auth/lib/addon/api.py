@@ -6,7 +6,11 @@ try:
 except Exception as e:
     print(e, flush=True)
 import json
-import base64
+import pathlib
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+import aiofiles
+import jwt
 
 from corelib import BaseObj, Core
 import aiotomllib
@@ -15,7 +19,7 @@ from httplib.models import HttpHandler, HttpRequestData, SendOk, HttpMsgData
 from models.network import IpData
 import cryptlib
 
-from addon.models import UserLogin, LoginResponce, CodeData, TokenByCode
+from addon.models import UserLogin, LoginResponce, CodeData, TokenByCode, OpenId
 import addon.db as db_settings
 
 class Api(BaseObj):
@@ -32,6 +36,7 @@ class Api(BaseObj):
         self._code_db.add_table(db_settings.Code())
         self._acl = None
         self._local_ip_valid = 0
+        self.rsa_private_key = None
         
     async def check_ip(self, ip: str) -> None:
         try:
@@ -123,6 +128,28 @@ class Api(BaseObj):
                 ldata.app_name = a_data['name']
         except Exception as e:
             self.core.log.error(e)
+    
+    async def craete_token(self, request: HttpRequestData, ldata: UserLogin) -> None:
+        try:
+            cur_time = int(time.time())
+            exp_time = cur_time + 900
+            if ldata.secure:
+                exp_time = cur_time + 10800
+            openid = OpenId(user_id_s= ldata.user_id_s,
+                            iss= f"{request.scheme}://{request.host}/auth",
+                            iat= cur_time,
+                            exp= exp_time,
+                            aud= f"{request.scheme}://{request.host}/api")
+            if 'name' in ldata.scope:
+                user_data = await self._users_db.table('users').exec('get_name_by_id', {'id': ldata.user_id})
+                if user_data is not None:
+                    openid.name = user_data['name']
+            if 'role' in ldata.scope:
+                openid.role = ldata.roles
+            openid_token = jwt.encode(openid.model_dump(exclude_none=True), self.rsa_private_key, algorithm='RS256')
+            self.core.log.debug(openid_token)
+        except Exception as e:
+            self.core.log.error(e)
         
     async def handler(self, request: web.Request, rd: HttpRequestData) -> bool:
         match '/'.join(rd.path):
@@ -137,10 +164,14 @@ class Api(BaseObj):
                 msg2 = HttpRequestData.model_validate(msg.data)
                 tc = TokenByCode.model_validate(msg2.data)
                 ldata = await self.get_ldata_by_token(tc)
+                if ldata is None:
+                    return (True, web.Response(status=403))
                 await self.validate_oauth_app(ldata, tc)
+                if ldata.valid:
+                    await self.craete_token(msg2, ldata)
                 self.core.log.debug(msg2)
                 self.core.log.debug(ldata)
-
+    
     async def _ainit(self):
         self.core.log.debug('Initaliesiere api')
         await self.core.web.add_handler(HttpHandler(domain = 'api', func = self.handler, auth='remote', acl=None))
@@ -148,4 +179,35 @@ class Api(BaseObj):
         
     async def _astart(self):
         self.core.log.debug('starte api')
-        await self.core.call_random(10, self.register_web_app)
+        try:
+            self.rsa_private_file = pathlib.Path('/lcars/data/rsa_private.pem')
+            self.rsa_public_file = pathlib.Path('/lcars/data/rsa_public.pem')
+            if self.rsa_private_file.exists():
+                self.core.log.debug('lade rsa keys')
+                async with aiofiles.open(str(self.rsa_private_file)) as f:
+                    key_data = await f.read()
+                    key_data = self.core.com._aes.decrypt(key_data)
+                    self.rsa_private_key =  serialization.load_pem_private_key(key_data.encode(), password=None)
+            else:
+                self.core.log.debug('ertelle rsa keys')
+                self.rsa_private_key = rsa.generate_private_key(
+                    public_exponent=65537,
+                    key_size=2048  
+                )
+                private_key_pem = self.rsa_private_key.private_bytes(
+                    encoding=serialization.Encoding.PEM,
+                    format=serialization.PrivateFormat.TraditionalOpenSSL,
+                    encryption_algorithm=serialization.NoEncryption()
+                ).decode()
+                private_key_pem = self.core.com._aes.encrypt(private_key_pem)
+                async with aiofiles.open(str(self.rsa_private_file), 'w') as f:
+                    await f.write(private_key_pem)
+                public_key = self.rsa_private_key.public_key()
+                pem_public = public_key.public_bytes(
+                    encoding=serialization.Encoding.PEM,
+                    format=serialization.PublicFormat.SubjectPublicKeyInfo
+                ).decode()
+                async with aiofiles.open(str(self.rsa_public_file), 'w') as f:
+                    await f.write(pem_public)
+        except Exception as e:
+            self.core.log.error(e)

@@ -4,15 +4,6 @@ sys.path.append('/lcars/lib2')
 import asyncio
 
 import corelib
-import constlib
-import aiopathlib
-import configlib
-import loggerlib
-import signallib
-import httplib
-import addon_com
-
-import time
 
 
 async def main() -> None:
