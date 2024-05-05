@@ -19,7 +19,7 @@ from httplib.models import HttpHandler, HttpRequestData, SendOk, HttpMsgData
 from models.network import IpData
 import cryptlib
 
-from addon.models import UserLogin, LoginResponce, CodeData, TokenByCode, OpenId
+from addon.models import UserLogin, LoginResponce, CodeData, TokenByCode, OpenId, TokenResponce
 import addon.db as db_settings
 
 class Api(BaseObj):
@@ -34,6 +34,8 @@ class Api(BaseObj):
         self._pw_db.add_table(db_settings.Pw())
         self._code_db = aiodatabase.DB(f"sqlite:///{self.core.path.data}/code.sqlite3")
         self._code_db.add_table(db_settings.Code())
+        self._token_db = aiodatabase.DB(f"sqlite:///{self.core.path.data}/token.sqlite3")
+        self._token_db.add_table(db_settings.RefreshToken())
         self._acl = None
         self._local_ip_valid = 0
         self.rsa_private_key = None
@@ -132,13 +134,13 @@ class Api(BaseObj):
     async def craete_token(self, request: HttpRequestData, ldata: UserLogin) -> None:
         try:
             cur_time = int(time.time())
-            exp_time = cur_time + 900
+            exp_time = 900
             if ldata.secure:
-                exp_time = cur_time + 10800
+                exp_time = 10_800
             openid = OpenId(user_id_s= ldata.user_id_s,
                             iss= f"{request.scheme}://{request.host}/auth",
                             iat= cur_time,
-                            exp= exp_time,
+                            exp= exp_time+cur_time,
                             aud= f"{request.scheme}://{request.host}/api")
             if 'name' in ldata.scope:
                 user_data = await self._users_db.table('users').exec('get_name_by_id', {'id': ldata.user_id})
@@ -147,7 +149,16 @@ class Api(BaseObj):
             if 'role' in ldata.scope:
                 openid.role = ldata.roles
             openid_token = jwt.encode(openid.model_dump(exclude_none=True), self.rsa_private_key, algorithm='RS256')
-            self.core.log.debug(openid_token)
+            #refresh_token
+            await self._token_db.table('refresh_token').exec('delete', {'timestamp': int(time.time()-604_800)})
+            refresh_token = cryptlib.key_gen(64)
+            await self._token_db.table('refresh_token').exec('insert', {'token': refresh_token, 
+                                                                        'data': ldata.model_dump_json(), 
+                                                                        'timestamp': int(time.time())})
+            token = TokenResponce(access_token=openid_token,
+                                  expires_in = exp_time,
+                                  refresh_token = refresh_token)
+            return (True, web.json_response(token.model_dump()))
         except Exception as e:
             self.core.log.error(e)
         
@@ -168,7 +179,9 @@ class Api(BaseObj):
                     return (True, web.Response(status=403))
                 await self.validate_oauth_app(ldata, tc)
                 if ldata.valid:
-                    await self.craete_token(msg2, ldata)
+                    resp = await self.craete_token(msg2, ldata)
+                    self.core.log.debug(resp)
+                    return resp
                 self.core.log.debug(msg2)
                 self.core.log.debug(ldata)
     
@@ -176,6 +189,7 @@ class Api(BaseObj):
         self.core.log.debug('Initaliesiere api')
         await self.core.web.add_handler(HttpHandler(domain = 'api', func = self.handler, auth='remote', acl=None))
         await self._code_db.setup()
+        await self._token_db.setup()
         
     async def _astart(self):
         self.core.log.debug('starte api')

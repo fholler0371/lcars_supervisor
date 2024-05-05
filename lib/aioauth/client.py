@@ -53,6 +53,12 @@ class Client:
                     try:
                         async with aiohttp.ClientSession() as session:
                             response = await session.post(url=f"{url}api/auth/token", data=post_data)
+                            if response.status == 502:
+                                self.core.log.error(f"Error code: 502")
+                                self.core.running.set()
+                                return (True, web.json_response(SendOk(ok=False).model_dump()))
+                            if response.status == 200:
+                                return (True, web.json_response(await response.json()))
                             self.core.log.debug(response)
                     except Exception as e:
                         self.core.log.error(e)                 
