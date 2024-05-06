@@ -115,7 +115,7 @@ class HTTP(BaseObj):
                 if entry.func is not None:
                     try:
                         if resp := await entry.func(request, rd):
-                            print('94', resp, flush=True)
+                            #print('118', resp, flush=True)
                             return resp[1]
                     except Exception as e:
                         self.core.log.error(e)
@@ -131,6 +131,8 @@ class HTTP(BaseObj):
             if self._static_handler is not None:
                 if resp := await self._static_handler.func(request, rd):
                     return resp[1]
+            self.core.log.critical("not handled")
+            self.core.log.critical(request.path)
             return web.Response(text="OK")
         
     def acl_check(self, ip: str, acl: str) -> bool:

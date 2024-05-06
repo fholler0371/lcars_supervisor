@@ -16,8 +16,9 @@ class Cli(BaseObj):
         match '/'.join(rd.path):
             case 'auth/add_user':
                 await self.core.web_l.msg_send(HttpMsgData(dest='web_auth', type='user_add', data=rd.data))
-                return (True, web.json_response(SendOk.model_dump()))
+                return (True, web.json_response(SendOk().model_dump()))
         return False
+    
         
     async def _ainit(self):
         self.core.log.debug('Initaliesiere cli')

@@ -77,33 +77,40 @@ class Com(BaseObj):
                 #await self.core.web.add_handler(data)
                 return (True, web.json_response(SendOk().model_dump()))  
             case 'messages/user_add':
-                msg = HttpMsgData.model_validate(rd.data)
-                data = UserData.model_validate_json(msg.data)
-                result = await self._users_db.table('users').exec('get_user_by_name', {'name': data.name})
-                if result is None: #Neuer Nutzer
-                    while True:
-                        user_id_s = cryptlib.key_gen(16)
-                        if await self._users_db.table('users').exec('get_id_by_user_id', {'user_id': user_id_s}) is None:
-                            break
-                    await self._users_db.table('users').exec('insert', {'user_id': user_id_s,
-                                                                        'name': data.name})
+                try:
+                    msg = HttpMsgData.model_validate(rd.data)
+                    data = UserData.model_validate_json(msg.data)
                     result = await self._users_db.table('users').exec('get_user_by_name', {'name': data.name})
-                user_id = result['id']
-                user_id_s = result['user_id']
-                if data.roles != '-':
-                    await self._users_db.table('users').exec('update_roles_by_user_id', {'user_id': user_id_s,
-                                                                                     'roles': data.roles,
-                                                                                     'roles_sec': data.roles_secure})
-                if data.password != '':
-                    result = await self._pw_db.table('pw').exec('get_password_by_id', {'id': user_id})
-                    pw_hash = bcrypt.hashpw((self._salt+data.password).encode(), bcrypt.gensalt()).decode()
-                    if result is None:
-                         await self._pw_db.table('pw').exec('insert', {'id': user_id,
-                                                                          'password': pw_hash})
-                    else:
-                         await self._pw_db.table('pw').exec('update', {'id': user_id,
-                                                                          'password': pw_hash})
-                return (True, web.json_response(SendOk().model_dump()))
+                    if result is None: #Neuer Nutzer
+                        while True:
+                            user_id_s = cryptlib.key_gen(16)
+                            if await self._users_db.table('users').exec('get_id_by_user_id', {'user_id': user_id_s}) is None:
+                                break
+                        await self._users_db.table('users').exec('insert', {'user_id': user_id_s,
+                                                                            'name': data.name})
+                        result = await self._users_db.table('users').exec('get_user_by_name', {'name': data.name})
+                    user_id = result['id']
+                    user_id_s = result['user_id']
+                    if data.roles != '-':
+                        await self._users_db.table('users').exec('update_roles_by_user_id', {'user_id': user_id_s,
+                                                                                        'roles': data.roles,
+                                                                                        'roles_sec': data.roles_secure})
+                    if data.apps != '-':
+                        await self._users_db.table('users').exec('update_apps_by_user_id', {'user_id': user_id_s,
+                                                                                        'apps': data.apps,
+                                                                                        'apps_sec': data.apps_secure})
+                    if data.password != '':
+                        result = await self._pw_db.table('pw').exec('get_password_by_id', {'id': user_id})
+                        pw_hash = bcrypt.hashpw((self._salt+data.password).encode(), bcrypt.gensalt()).decode()
+                        if result is None:
+                            await self._pw_db.table('pw').exec('insert', {'id': user_id,
+                                                                            'password': pw_hash})
+                        else:
+                            await self._pw_db.table('pw').exec('update', {'id': user_id,
+                                                                            'password': pw_hash})
+                    return (True, web.json_response(SendOk().model_dump()))
+                except Exception as e:
+                    self.core.log.error(e)
             case _:   
                 msg = HttpMsgData.model_validate(rd.data)
                 self.core.log.debug(rd)

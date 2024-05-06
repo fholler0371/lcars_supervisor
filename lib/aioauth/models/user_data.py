@@ -6,3 +6,5 @@ class UserData(pydantic.BaseModel):
     password: str
     roles: str    
     roles_secure: str
+    apps: str    
+    apps_secure: str
