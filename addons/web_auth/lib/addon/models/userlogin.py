@@ -21,6 +21,7 @@ class UserLogin(pydantic.BaseModel):
     user_id: int = -1
     user_id_s: str = ''
     roles: str = ''
+    apps: str = ''
     
     @property
     def valid(self):

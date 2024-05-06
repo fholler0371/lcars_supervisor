@@ -9,4 +9,5 @@ class OpenId(BaseModel):
     aud : str
     name : str|None = None
     role : str|None = None
+    app : str|None = None
     email : str|None = None

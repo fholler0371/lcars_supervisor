@@ -23,3 +23,5 @@ class Users(Table):
         self.add_statement('get_role_by_id', QuerySingle("SELECT {fields} FROM {table} WHERE id=?", ['roles'], ['id']))        
         self.add_statement('get_role_sec_by_id', QuerySingle("SELECT {fields} FROM {table} WHERE id=?", ['roles_sec'], ['id']))        
         self.add_statement('update_apps_by_user_id', QueryUpdate("UPDATE {table} SET apps=?, apps_sec=? WHERE user_id=?", ['apps', 'apps_sec', 'user_id']))        
+        self.add_statement('get_app_by_id', QuerySingle("SELECT {fields} FROM {table} WHERE id=?", ['apps'], ['id']))        
+        self.add_statement('get_app_sec_by_id', QuerySingle("SELECT {fields} FROM {table} WHERE id=?", ['apps_sec'], ['id']))        

@@ -91,11 +91,18 @@ class Api(BaseObj):
                     ok = bcrypt.checkpw((self.core.com._salt+ldata.password).encode(), pw['password'].encode())
 
         if ok:
-            ldata.user_id = user['id']
-            ldata.user_id_s = user['user_id']
-            ldata.roles = ((await self._users_db.table('users').exec('get_role_sec_by_id', {'id': ldata.user_id}))['roles_sec']
-                           if ldata.secure else
-                           (await self._users_db.table('users').exec('get_role_by_id', {'id': ldata.user_id}))['roles'])
+            try:
+                ldata.user_id = user['id']
+                ldata.user_id_s = user['user_id']
+                ldata.roles = ((await self._users_db.table('users').exec('get_role_sec_by_id', {'id': ldata.user_id}))['roles_sec']
+                            if ldata.secure else
+                            (await self._users_db.table('users').exec('get_role_by_id', {'id': ldata.user_id}))['roles'])
+                ldata.apps = ((await self._users_db.table('users').exec('get_app_sec_by_id', {'id': ldata.user_id}))['apps_sec']
+                            if ldata.secure else
+                            (await self._users_db.table('users').exec('get_app_by_id', {'id': ldata.user_id}))['apps'])
+            except Exception as e:
+                self.core.log.error(e)
+ 
 
     async def get_login_token(self, ldata: UserLogin) -> None:
         data = json.dumps({'t': int(time.time()) + (604_800 if ldata.secure else 28_000), 'u':ldata.user_id_s})
@@ -168,8 +175,10 @@ class Api(BaseObj):
                 user_data = await self._users_db.table('users').exec('get_name_by_id', {'id': ldata.user_id})
                 if user_data is not None:
                     openid.name = user_data['name']
-            if 'role' in ldata.scope:
+            if 'role' in ldata.scope.split(' '):
                 openid.role = ldata.roles
+            if 'app' in ldata.scope.split(' '):
+                openid.app = ldata.apps
             openid_token = jwt.encode(openid.model_dump(exclude_none=True), self.rsa_private_key, algorithm='RS256')
             #refresh_token
             await self._token_db.table('refresh_token').exec('delete', {'timestamp': int(time.time()-604_800)})
