@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
 
 
-class Code(BaseModel):
-    code: str 
+class Token(BaseModel):
+    token: str 

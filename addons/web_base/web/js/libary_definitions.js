@@ -136,13 +136,13 @@ login = {
     get_access_token: function() {
         let refresh_token = localStorage.getItem('refresh_token')
         if (refresh_token != null) {
-            window.api_call(url='get_token', token=false, data={token: refresh_token}).then(data => {
+            window.api_call(url='refresh_token', token=false, data={token: refresh_token}).then(data => {
                 if (data.refresh_token == undefined) {
                     window.modul.login.do_logout()
                 } else {
-                    localStorage.setItem('access_token', data.access_token)                    
+                    localStorage.setItem('access_token', data.access_token)
                     localStorage.setItem('refresh_token', data.refresh_token)
-                    localStorage.setItem('access_token_timeout', new Date().getTime() / 1000 + data.access_token_timeout)
+                    localStorage.setItem('access_token_timeout',  Math.round(new Date() / 1000 + data.expires_in))
                     window.modul.login.update_state()
                     console.log('got new token', new Date())
                 }
@@ -151,6 +151,7 @@ login = {
     },
     update_state: function() {
         let login = window.modul.login
+        let last = login.state
         if (window.modul.login.check_access_token()) {
             login.state = true
             $('#login_icon').html('<img class="button_32" src="/img/mdi/logout.svg" onload="SVGInject(this)" style="top: 0">')
@@ -172,7 +173,9 @@ login = {
             $('#header_username').text('')
         }
         if (window.modul['manager'] != undefined) {
-            window.modul['manager'].update()
+            if (login.state != last) {
+                window.modul['manager'].update()
+            }
         }
     },
     do_logout: function() {

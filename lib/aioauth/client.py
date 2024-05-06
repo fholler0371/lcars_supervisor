@@ -7,7 +7,7 @@ from corelib import Core
 from corelib.aio_property import aproperty
 from httplib.models import HttpRequestData, SendOk
 
-from aioauth.models import GetClientId, ClientIdSecret, Code
+from aioauth.models import GetClientId, ClientIdSecret, Code, Token
 from httplib.models import HttpMsgData, RedirectUrl
 
 class Client:
@@ -47,10 +47,30 @@ class Client:
                     self.callback = url = f"{url}://{rd.host}/"
                     self.callback += 'callback.html' if self.core.const.app == 'web_base' else f'{self.core.const.app}/callback.html'
                     data = Code.model_validate_json(rd.data)
-                    post_data = (('client_id', await self.clientid),
+                    post_data = (('grant_type', 'code'),
+                                 ('client_id', await self.clientid),
                                  ('client_secret', self._secret),
                                  ('redirect_uri', self.callback),
                                  ('code', data.code))
+                    try:
+                        resp = await self.core.web_l.post_raw_url(f"{url}api/auth/token", post_data)
+                        if resp is None:
+                            return (True, web.json_response(SendOk(ok=False).model_dump()))
+                        else:
+                            return (True, web.json_response(json.loads(resp)))
+                    except Exception as e:
+                        self.core.log.error(e)                 
+                except Exception as e:
+                    self.core.log.error(e)                 
+            case "refresh_token":
+                try:
+                    url = rd.scheme
+                    url = f"{url}://{rd.host}/"                    
+                    data = Token.model_validate_json(rd.data)
+                    post_data = (('grant_type', 'refresh_token'),
+                                 ('client_id', await self.clientid),
+                                 ('client_secret', self._secret),
+                                 ('code', data.token))
                     try:
                         resp = await self.core.web_l.post_raw_url(f"{url}api/auth/token", post_data)
                         if resp is None:

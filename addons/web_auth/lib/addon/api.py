@@ -125,9 +125,14 @@ class Api(BaseObj):
     
     async def get_ldata_by_token(self, tc:TokenByCode) -> UserLogin:
         try:
-            if tc.code:
+            if tc.grant_type == 'code':
                 await self._code_db.table('codes').exec('delete', {'timestamp': int(time.time()-10)})
                 data = await self._code_db.table('codes').exec('data', {'code': tc.code})
+                if data:
+                    return UserLogin.model_validate_json(data['data'])
+            elif tc.grant_type == 'refresh_token':
+                await self._token_db.table('refresh_token').exec('delete', {'timestamp': int(time.time()-604_800)})
+                data = await self._token_db.table('refresh_token').exec('data', {'token': tc.code})
                 if data:
                     return UserLogin.model_validate_json(data['data'])
         except Exception as e:
@@ -136,7 +141,11 @@ class Api(BaseObj):
     async def validate_oauth_app(self, ldata: UserLogin, tc:TokenByCode):
         try:
             o_data = await self._apps_db.table('oauth').exec('get_client_data', {'app_id': ldata.app_id})
-            if self.core.com._aes.decrypt(o_data['secret']) != tc.secret or o_data['callback'] != tc.callback:
+            if tc.grant_type not in ['code', 'refresh_token']:
+                ldata.app_id = -1
+            elif tc.grant_type == 'code' and (self.core.com._aes.decrypt(o_data['secret']) != tc.secret or o_data['callback'] != tc.callback):
+                ldata.app_id = -1
+            elif tc.grant_type == 'refresh_token' and (self.core.com._aes.decrypt(o_data['secret']) != tc.secret):
                 ldata.app_id = -1
             else:
                 a_data = await self._apps_db.table('app').exec('get_app_by_id', {'id': ldata.app_id})
@@ -190,6 +199,7 @@ class Api(BaseObj):
                 ldata.ip = msg2.ip
                 return await self.doLogin(rd, ldata)
             case 'token':
+               try: 
                 msg = HttpMsgData.model_validate(rd.data)
                 msg2 = HttpRequestData.model_validate(msg.data)
                 tc = TokenByCode.model_validate(msg2.data)
@@ -201,6 +211,8 @@ class Api(BaseObj):
                     return await self.craete_token(msg2, ldata)
                 self.core.log.debug(msg2)
                 self.core.log.debug(ldata)
+               except Exception as e:
+                    self.core.log.error(e)
             case _:
                 self.core.log.critical('/'.join(rd.path))
     
