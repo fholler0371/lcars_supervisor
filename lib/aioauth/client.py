@@ -1,6 +1,7 @@
 from aiohttp import web
 import aiohttp
 import urllib.parse as up
+import json
 
 from corelib import Core
 from corelib.aio_property import aproperty
@@ -51,15 +52,11 @@ class Client:
                                  ('redirect_uri', self.callback),
                                  ('code', data.code))
                     try:
-                        async with aiohttp.ClientSession() as session:
-                            response = await session.post(url=f"{url}api/auth/token", data=post_data)
-                            if response.status == 502:
-                                self.core.log.error(f"Error code: 502")
-                                self.core.running.set()
-                                return (True, web.json_response(SendOk(ok=False).model_dump()))
-                            if response.status == 200:
-                                return (True, web.json_response(await response.json()))
-                            self.core.log.debug(response)
+                        resp = await self.core.web_l.post_raw_url(f"{url}api/auth/token", post_data)
+                        if resp is None:
+                            return (True, web.json_response(SendOk(ok=False).model_dump()))
+                        else:
+                            return (True, web.json_response(json.loads(resp)))
                     except Exception as e:
                         self.core.log.error(e)                 
                 except Exception as e:

@@ -198,9 +198,7 @@ class Api(BaseObj):
                     return (True, web.Response(status=403))
                 await self.validate_oauth_app(ldata, tc)
                 if ldata.valid:
-                    resp = await self.craete_token(msg2, ldata)
-                    self.core.log.debug(resp)
-                    return resp
+                    return await self.craete_token(msg2, ldata)
                 self.core.log.debug(msg2)
                 self.core.log.debug(ldata)
             case _:

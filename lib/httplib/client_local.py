@@ -31,6 +31,26 @@ class ClientLocal(BaseObj):
         self.session_timeout = aiohttp.ClientTimeout(total=None,sock_connect=1,sock_read=5)
         
     @aioretry.retry(retry_policy)        
+    async def _post_raw_url(self, url: str, post_data: dict) -> any:
+        try:
+            async with aiohttp.ClientSession() as session:
+                response = await session.post(url=url, data=post_data) 
+                if response.status != 200:
+                    a = b / 0
+                else:
+                    return await response.text()
+        except Exception as e:
+            self.core.log.error(e)
+            raise(e)
+
+    async def post_raw_url(self, url: str, data: dict) -> any:
+        try:
+            return await self._post_raw_url(url, data)
+        except Exception as e:
+            self.core.log.error(e)
+        return None
+
+    @aioretry.retry(retry_policy)        
     async def _get_raw(self, url: str) -> any:
         try:
             async with aiohttp.ClientSession(timeout=self.session_timeout) as session:
