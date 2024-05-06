@@ -36,7 +36,7 @@ class ClientLocal(BaseObj):
             async with aiohttp.ClientSession() as session:
                 response = await session.post(url=url, data=post_data) 
                 if response.status != 200:
-                    a = b / 0
+                    a = 1 / 0
                 else:
                     return await response.text()
         except Exception as e:
