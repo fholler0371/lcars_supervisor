@@ -29,6 +29,15 @@ add_css('/js_lib/jqwidgets/styles/jqx.base.css')
 add_css('/css/core.css')
 add_css('/css/jqx.material.css')
 
+//cache
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./cache.js', {scope: './'}).then(function() {
+        console.log('cache wurde aktviert')
+    }).catch(function(error) {
+        console.error(error)
+    })
+}
+
 desktop_layout = function() {
     $('body').html('<div class="header"><div class="header_l1"><div class="header_l2"><div class="header_l2i"></div></div></div></div>')
     $('.header').append('<div class="header_l3"><div class="header_l3i"></div></div>')
