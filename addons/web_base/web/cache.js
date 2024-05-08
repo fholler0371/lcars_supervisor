@@ -11,10 +11,15 @@
  limitations under the License.
 */
 
-var CACHE_VERSION = 1;
-var CURRENT_CACHES = {
+let CACHE_VERSION = 1;
+let CURRENT_CACHES = {
   font: 'cache-v' + CACHE_VERSION
-};
+}
+let BLOCK = [
+  '/main.js',
+  'libary_definitions.js',
+  '_dev.js'
+]
 
 self.addEventListener('activate', function(event) {
   var expectedCacheNamesSet = new Set(Object.values(CURRENT_CACHES));
@@ -34,53 +39,41 @@ self.addEventListener('activate', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
-  //console.log('Handling fetch event for', event.request.url);
+  console.log('Handling fetch event for', event.request.url);
 
   event.respondWith(
     caches.open(CURRENT_CACHES.font).then(function(cache) {
       return cache.match(event.request).then(function(response) {
         if (response) {
           //console.log(' Found response in cache:', response);
-
-          return response;
-        }
-
-        //console.log(' No response for %s found in cache. About to fetch ' +
-        //  'from network...', event.request.url);
-
-        return fetch(event.request.clone()).then(function(response) {
-          //console.log('  Response for %s from network is: %O',
-          //  event.request.url, response);
-
-          if (response.status < 400 &&
-              response.headers.has('content-type') &&
-              response.headers.get('content-type').match(/^font\//i)) {
-            //console.log('  Caching the response to', event.request.url);
-            cache.put(event.request, response.clone());
-          } else if  (response.status < 400 &&
-              response.headers.has('content-type') &&
-              response.headers.get('content-type').match(/^text\/css/i)) {
-            //console.log('  Caching the response to', event.request.url);
-            cache.put(event.request, response.clone());
-          } else if  (response.status < 400 &&
-              response.headers.has('content-type') &&
-              response.headers.get('content-type').match(/^image\//i)) {
-            //console.log('  Caching the response to', event.request.url);
-            cache.put(event.request, response.clone());
-          } else if  (response.status < 400 &&
-              response.headers.has('content-type') &&
-              response.headers.get('content-type').match(/^text\/javascript/i) &&
-              event.request.url.includes('/js_lib/')) {
-            //console.log('  Caching the response to', event.request.url);
-            cache.put(event.request, response.clone());
-          } else {
-            console.log('  Not caching the response to', event.request.url);
+          var allowed = true
+          BLOCK.forEach(function(item) {
+            if (event.request.url.includes(item)) {
+              allowed = false
+            }
+          })
+          if (allowed) {
+            return response;
           }
-
+        }
+        return fetch(event.request.clone()).then(function(response) {
+          if (event.request.method == "GET") {
+            if (!event.request.url.includes('?') && event.request.url.includes('https')) {
+              var allowed = true
+              BLOCK.forEach(function(item) {
+                if (event.request.url.includes(item)) {
+                  allowed = false
+                }
+              })
+              if (allowed) {
+                cache.put(event.request, response.clone())
+              }
+            }  
+          }
           return response;
         });
       }).catch(function(error) {
-        //console.error('  Error in fetch handler:', error);
+        console.error('  Error in fetch handler:', error);
 
         throw error;
       });

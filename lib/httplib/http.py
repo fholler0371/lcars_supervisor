@@ -106,12 +106,17 @@ class HTTP(BaseObj):
                     except Exception as e:
                         pass
                 if 'Authorization' in request.headers:
-                    token = request.headers.get('Authorization').split(' ')[-1]
-                    if self._jwt is None:
-                        url = f'{rd.scheme}://{rd.host}/auth/pem'
-                        self._jwt = cryptlib.Jwt(await self.core.web_l.get_raw(url))
-                    if self._jwt:
-                        rd.openid = self._jwt.validate(token)
+                    try:
+                        token = request.headers.get('Authorization').split(' ')[-1]
+                        if self._jwt is None:
+                            url = f'{rd.scheme}://{rd.host}/auth/pem'
+                            pem = await self.core.web_l.get_raw(url)
+                            self.core.log.info(pem)
+                            self._jwt = cryptlib.Jwt(pem)
+                        if self._jwt:
+                            rd.open_id = self._jwt.validate(token)
+                    except Exception as e:
+                        self.core.log.error(e)
                 if entry.func is not None:
                     try:
                         if resp := await entry.func(request, rd):
