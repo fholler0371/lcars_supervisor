@@ -39,32 +39,26 @@ self.addEventListener('activate', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
-  console.log('Handling fetch event for', event.request.url);
-
+  //console.log('Handling fetch event for', event.request.url);
   event.respondWith(
     caches.open(CURRENT_CACHES.font).then(function(cache) {
+      var allowed = true
+      BLOCK.forEach(function(item) {
+        if (event.request.url.includes(item)) {
+          allowed = false
+        }
+      })
       return cache.match(event.request).then(function(response) {
         if (response) {
           //console.log(' Found response in cache:', response);
-          var allowed = true
-          BLOCK.forEach(function(item) {
-            if (event.request.url.includes(item)) {
-              allowed = false
-            }
-          })
           if (allowed) {
             return response;
           }
         }
+        console.log('Handling fetch event for', event.request.url);
         return fetch(event.request.clone()).then(function(response) {
-          if (event.request.method == "GET") {
+          if (event.request.method == "GET" && response.status < 399) {
             if (!event.request.url.includes('?') && event.request.url.includes('https')) {
-              var allowed = true
-              BLOCK.forEach(function(item) {
-                if (event.request.url.includes(item)) {
-                  allowed = false
-                }
-              })
               if (allowed) {
                 cache.put(event.request, response.clone())
               }

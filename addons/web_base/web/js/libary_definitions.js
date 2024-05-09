@@ -30,6 +30,7 @@ add_css('/css/core.css')
 add_css('/css/jqx.material.css')
 
 //cache
+
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./cache.js', {scope: './'}).then(function() {
         console.log('cache wurde aktviert')
@@ -50,6 +51,9 @@ desktop_layout = function() {
     $('.left').append('<div class="left_l2"></div>')
     $('.left').append('<div class="left_l3"><div class="left_l3i"></div></div>')
     $('.left').append('<div class="main_content"></div>')
+
+    // CREATE BUTTON UP
+    $('.left_l1').append('<div class="main_button_area_up"></div>')
 }
 
 //setup core
@@ -223,6 +227,11 @@ login = {
                     console.error(resp.error)
                     return
                 }
+                if (!resp.ok) {
+                    window.modul['notification'].show('error', 'Keine Redirect URL')
+                    console.error(resp.error)
+                    return
+                }
                 let d = new Date()
                 localStorage.setItem('last_redirect_state', d.getTime())
                 window.location.replace(resp.redirect_url+d.getTime())
@@ -237,6 +246,16 @@ helper = {
     },
     set_label : function(label) {
         $('#header_appname').text(label)
+    },
+    activate : function(mod, label) {
+        let self = window.modul['helper']
+        self.set_label(label)
+        self.hide_all()
+        Object.entries(window.modul).forEach(element => {
+            if (element[0] != mod && element[1].modul) {
+                element[1].stop()
+            }
+        })
     }
 }
 
@@ -255,8 +274,11 @@ notification = {
 }
 
 modul_clock = {
-    icon: '/js/img/mdi/clock.svg',
+    modul: true,
+    icon: '/img/mdi/clock.svg',
     label: 'Uhr',
+    timer: undefined,
+    stopped: false,
     already_init : false,
     init: function () {
         window.modul.helper.hide_all()
@@ -280,15 +302,22 @@ modul_clock = {
         }
     },
     show: function () {
-        let clock = window.modul.clock
-        $('#header_appname').text(clock.label)
-        window.modul.helper.set_label(clock.label)
-        clock.set_content()
+        let self = window.modul['clock']
+        self.stopped = false
+        window.modul['helper'].activate('clock', self.label)
+        self.set_content()
         $('#content_modul_clock').show()
-        clock.refresh_time()
+        self.refresh_time()
+    },
+    stop: function() {
+        let self = window.modul['clock']
+        self.stopped = true
+        if (self.timer != undefined) {
+            clearTimeout(self.timer)
+        }
     },
     refresh_time: function() {
-        let clock = window.modul.clock
+        let self = window.modul['clock']
         if ($('#content_modul_clock').is(':visible')) {
             let date = new Date,
                 h = date.getHours(),
@@ -297,10 +326,12 @@ modul_clock = {
                 hp = 100 / 24 * h,
                 hm = 100 / 60 * m,
                 hs = 100 / 60 * s
-            clock.update_circle('modul_clock_seconds', hs, s)
-            clock.update_circle('modul_clock_minute', hm, m)
-            clock.update_circle('modul_clock_hour', hp, h)
-            setTimeout(clock.refresh_time, 1000)
+            self.update_circle('modul_clock_seconds', hs, s)
+            self.update_circle('modul_clock_minute', hm, m)
+            self.update_circle('modul_clock_hour', hp, h)
+            if (!self.stopped) {
+                self.timer = setTimeout(self.refresh_time, 1000)
+            }
             $('#modul_clock_data').text(date.toLocaleDateString('de-de', { weekday:"long", year:"numeric", month:"long", day:"numeric"}))
             date.setHours(0, 0, 0, 0)
             date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7)
@@ -349,13 +380,55 @@ modul_manager = {
             window.modul['manager'].moduls = ['clock']
             if (!(localStorage.getItem('access_token') === null)) {
                 window.api_call(url='get_allowed_moduls').then(resp => {
-                    console.log(resp)
+                    window.modul['manager'].moduls = [{mod: 'clock'}]
+                    if (resp['ok']) {
+                        resp['moduls'].forEach(element => {
+                            window.modul['manager'].moduls.push(element)
+                        });
+                    }
+                    let paths = {}
+                    let req_array = []
+                    window.modul['manager'].moduls.forEach(element => {
+                        if (window.modul[element.mod] == undefined) {
+                            paths[element.mod] = element.src
+                            req_array.push(element.mod)
+                        }
+                    })
+                    requirejs.config({paths: paths })
+                    if (req_array.length > 0) {
+                        requirejs(req_array, function() {
+                            setTimeout(window.modul['manager'].paint, 1)
+                        })
+                    } else {
+                        setTimeout(window.modul['manager'].paint, 1)
+                    }
                 })
+            } else {
+                window.modul['manager'].moduls = [{mod: 'clock'}]
+                setTimeout(window.modul['manager'].paint, 1)
             }
             console.log('modul_update')
         }
         setTimeout(window.modul['manager'].activate, 1000)
-    }
+    }, 
+    paint : function() {
+        let self = window.modul['manager']
+        $('.main_button_area_up').html('')
+        let i = 0
+        self.moduls.forEach(element => {
+            i = i + 1
+            $('.main_button_area_up').height(i*60+4)
+            var html = '<div class="button_left button_left_menu" data-id="'+element.mod+'" style="top: '
+            html += (i-1)*60+4 + 'px ;"><img src="'+window.modul[element.mod].icon+'" class="button_32"></div>'
+            $('.main_button_area_up').append(html)
+        })
+        $('.button_left_menu').off('click')
+        $('.button_left_menu').on('click', self.click)
+    },
+    click : function(event) {
+        let modul = $(this).data('id')
+        window.modul[modul].show()
+    }  
 }
 
 setup_core = function() {

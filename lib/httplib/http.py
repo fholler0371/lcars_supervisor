@@ -111,8 +111,8 @@ class HTTP(BaseObj):
                         if self._jwt is None:
                             url = f'{rd.scheme}://{rd.host}/auth/pem'
                             pem = await self.core.web_l.get_raw(url)
-                            self.core.log.info(pem)
-                            self._jwt = cryptlib.Jwt(pem)
+                            if pem is not None:
+                                self._jwt = cryptlib.Jwt(pem)
                         if self._jwt:
                             rd.open_id = self._jwt.validate(token)
                     except Exception as e:
@@ -130,7 +130,6 @@ class HTTP(BaseObj):
                     resp = await self.core.web_l.msg_send(data)
                     if isinstance(resp, RespRaw):
                         return web.Response(body=resp.content, headers=resp.headers, status=resp.status)
-                    self.core.log.debug(resp)
                     return resp[1]
         else:
             if self._static_handler is not None:

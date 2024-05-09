@@ -35,8 +35,9 @@ class Api(BaseObj):
                 if rd.open_id and (self.core.const.app in rd.open_id['app'] or rd.open_id['app'] == '*'):
                     try:
                         data = models.Moduls()
+                        data.append({'mod': 'app', 'src': '/js/mod/app_dev'})
                         self.core.log.debug("/".join(rd.path))
-                        self.core.log.debug(rd)
+                        #self.core.log.debug(rd)
                         return (True, web.json_response(data.model_dump()))
                     except Exception as e:
                         self.core.log.error(e)
