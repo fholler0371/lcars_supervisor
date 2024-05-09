@@ -33,7 +33,7 @@ class ClientLocal(BaseObj):
     @aioretry.retry(retry_policy)        
     async def _post_raw_url(self, url: str, post_data: dict) -> any:
         try:
-            async with aiohttp.ClientSession() as session:
+            async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
                 response = await session.post(url=url, data=post_data) 
                 if response.status != 200:
                     a = 1 / 0
@@ -53,7 +53,7 @@ class ClientLocal(BaseObj):
     @aioretry.retry(retry_policy)        
     async def _get_raw(self, url: str) -> any:
         try:
-            async with aiohttp.ClientSession(timeout=self.session_timeout) as session:
+            async with aiohttp.ClientSession(timeout=self.session_timeout, connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
                 async with session.get(url) as response:
                     if response.status != 200:
                         raise()
@@ -94,7 +94,7 @@ class ClientLocal(BaseObj):
             else:
                 host = f'{dest}:1235'
                 key = self.local_keys.local
-            async with aiohttp.ClientSession(headers={'X-Auth':key}, timeout=self.session_timeout) as session:
+            async with aiohttp.ClientSession(headers={'X-Auth':key}, timeout=self.session_timeout, connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
                 async with session.get(f'http://{host}/{url}') as response:
                     if response.status == 200:
                         return await response.json()

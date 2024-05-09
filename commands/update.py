@@ -117,13 +117,13 @@ async def update_repository(core: dict, name: str, source: str) -> dict:
     if respository_folder.exists():
         cmd = f"cd {respository_folder} ; git pull"
         p = await asyncio.subprocess.create_subprocess_shell(cmd, 
-                                                            stderr=asyncio.subprocess.PIPE, 
+                                                            #stderr=asyncio.subprocess.PIPE, 
                                                             stdout=asyncio.subprocess.PIPE)
         await p.wait()
     else:
         cmd = f"cd {git_folder} ; git clone {source}"
         p = await asyncio.subprocess.create_subprocess_shell(cmd, 
-                                                            stderr=asyncio.subprocess.PIPE, 
+                                                            #stderr=asyncio.subprocess.PIPE, 
                                                             stdout=asyncio.subprocess.PIPE)
         await p.wait()
 

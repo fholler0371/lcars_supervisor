@@ -5,6 +5,7 @@ import json
 import clilib.data as cd
 from corelib import BaseObj, Core
 from httplib.models import HttpHandler, HttpRequestData, SendOk
+from models.auth import App
 
 
 class Com(BaseObj):
@@ -18,6 +19,11 @@ class Com(BaseObj):
                 msg = rd.data
                 data = HttpHandler.model_validate(msg.data)
                 await self.core.web.add_handler(data)
+                return (True, web.json_response(SendOk().model_dump()))
+            case 'messages/register_app':
+                msg = rd.data
+                data = App.model_validate(msg.data)
+                self.core.api._apps[data.app]=data
                 return (True, web.json_response(SendOk().model_dump()))
             case _:
                 self.core.log.critical('/'.join(rd.path))

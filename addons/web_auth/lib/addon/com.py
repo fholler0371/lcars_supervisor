@@ -15,6 +15,7 @@ from corelib import BaseObj, Core
 from httplib.models import HttpHandler, HttpRequestData, SendOk, HttpMsgData
 from aioauth.models import GetClientId, ClientIdSecret
 from aioauth.models import UserData
+from models.auth import App
 
 import addon.db as db_settings
 
@@ -34,6 +35,8 @@ class Com(BaseObj):
     async def static(self, path: str) -> tuple:
         if path == '':
             path = 'index.html'
+        if path == 'user':
+            path = 'user.html'
         file_name = self.core.path.web / path
         if file_name.exists():
             mime = mimetypes.guess_type(file_name)[0]
@@ -46,6 +49,7 @@ class Com(BaseObj):
                 async with aiofiles.open(str(file_name)) as f:
                     return (True, web.Response(text=await f.read(), headers={'X-Raw': '1'})) 
         else:
+            #self.core.log.critical(file_name)
             return (True, web.Response(status=418))
         
     async def handler(self, request: web.Request, rd: HttpRequestData) -> bool:
@@ -157,6 +161,14 @@ class Com(BaseObj):
                            remote=f'{await self.core.web_l.hostname}.{self.core.const.app}')
         try:
             await self.core.web_l.msg_send(HttpMsgData(dest='web_base', type='register_web_app', data=data))
+        except Exception as e:
+            self.core.log.error(e)
+        data = App(app='user',
+                   url='/auth/user',
+                   icon='/img/mdi/account.svg',
+                   label='Nutzer')
+        try:
+            await self.core.web_l.msg_send(HttpMsgData(dest='web_base', type='register_app', data=data))
         except Exception as e:
             self.core.log.error(e)
  

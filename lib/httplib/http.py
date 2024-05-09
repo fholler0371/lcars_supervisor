@@ -59,6 +59,7 @@ class HTTP(BaseObj):
         for entry in self._handlers:
             if entry.domain == rd.path[1]:
                 rd.path = rd.path[2:]
+                rd.domain = entry.domain
                 rd.acl_check = self.acl_check(rd.ip, entry.acl)
                 if not rd.acl_check:
                     self.core.log.error(f'acl sagt nicht erlaubt')

@@ -66,6 +66,7 @@ requirejs = "https://git.holler.pro/fholler/requirejs.git"
 external_libaries = "https://git.holler.pro/fholler/external_libaries.git"
 jQWidgets = "https://git.holler.pro/fholler/jQWidgets.git"
 MaterialDesign-SVG = "https://git.holler.pro/fholler/MaterialDesign-SVG.git"
+packery = "https://git.holler.pro/fholler/packery.git"
 
 [networks.lcars-bridge]
 #type = "bridge"

@@ -12,3 +12,4 @@ class HttpRequestData(BaseModel):
     host : str = None
     scheme : str = None
     open_id : dict|None = None
+    domain: str = ''

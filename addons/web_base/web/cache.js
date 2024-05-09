@@ -55,8 +55,11 @@ self.addEventListener('fetch', function(event) {
             return response;
           }
         }
-        console.log('Handling fetch event for', event.request.url);
+        //console.log('Handling fetch event for', event.request.url);
         return fetch(event.request.clone()).then(function(response) {
+          if (event.request.method == "POST") {
+            console.log('Handling fetch event for', event.request.url)
+          }
           if (event.request.method == "GET" && response.status < 399) {
             if (!event.request.url.includes('?') && event.request.url.includes('https')) {
               if (allowed) {

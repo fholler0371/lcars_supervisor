@@ -2,6 +2,7 @@ requirejs.config({
     baseUrl: '/js_lib',
     paths: {
         svginject: 'svg-inject',
+        packery: 'packery',
         jqxcore: 'jqwidgets/jqxcore',
         jqxinput: 'jqwidgets/jqxinput',
         jqxpassword: 'jqwidgets/jqxpasswordinput',
@@ -32,7 +33,7 @@ add_css('/css/jqx.material.css')
 //cache
 
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./cache.js', {scope: './'}).then(function() {
+    navigator.serviceWorker.register('/cache.js', {scope: '/'}).then(function() {
         console.log('cache wurde aktviert')
     }).catch(function(error) {
         console.error(error)
@@ -442,8 +443,10 @@ setup_core = function() {
     }
     window.modul['fullscreen'] = fullscreen
     fullscreen.init()
-    window.modul['notification'] = notification
-    notification.init()
+    requirejs(['jqxnotification'], function() {
+        window.modul['notification'] = notification
+        notification.init()
+    })
     if (window.config.modul_login == undefined || window.config.modul_login) {
         window.modul['login'] = login
     } else {

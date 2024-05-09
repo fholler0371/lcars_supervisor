@@ -36,10 +36,10 @@ class Static(BaseObj):
                 async with aiofiles.open(file_name, 'br') as f:
                     return (True, web.Response(body=await f.read(), content_type=mime))
             
-            self.core.log.debug(mime)
-            self.core.log.debug(rd)
-            self.core.log.debug(self.core.path.web)
-            self.core.log.debug(file_name)
+            #self.core.log.debug(mime)
+            #self.core.log.debug(rd)
+            #self.core.log.debug(self.core.path.web)
+            #self.core.log.debug(file_name)
         return (True, web.Response(status=404, text='>>> oK <<<'))
         
     async def _ainit(self):
