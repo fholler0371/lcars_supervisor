@@ -16,6 +16,7 @@ from corelib import BaseObj, Core
 import aiotomllib
 import aiodatabase
 from httplib.models import HttpHandler, HttpRequestData, SendOk, HttpMsgData
+from models.auth import Moduls
 from models.network import IpData
 import cryptlib
 
@@ -222,6 +223,19 @@ class Api(BaseObj):
                 self.core.log.debug(ldata)
                except Exception as e:
                     self.core.log.error(e)
+            case 'get_allowed_moduls':
+                self.core.log.critical(rd)
+                if rd.open_id and (self.core.const.app in rd.open_id['app'] or rd.open_id['app'] == '*'):
+                    try:
+                        data = Moduls()
+                        #data.append({'mod': 'app', 'src': '/js/mod/app'})
+                        self.core.log.debug("/".join(rd.path))
+                        #self.core.log.debug(rd)
+                        return (True, web.json_response(data.model_dump()))
+                    except Exception as e:
+                        self.core.log.error(e)
+                else:
+                    return (True, web.json_response(SendOk(ok=False).model_dump()))
             case _:
                 self.core.log.critical('/'.join(rd.path))
     

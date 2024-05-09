@@ -41,7 +41,6 @@ define([], function() {
                         })                
                     })
                 }
-                console.log(resp)
             })
         },
         stop: function() {

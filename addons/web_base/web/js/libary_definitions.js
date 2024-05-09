@@ -77,6 +77,9 @@ window.api_call.async = function(url='', token=true, data={}) {
         headers = { 'Authorization': 'Bearer ' +  localStorage.getItem('access_token')}
       }
     }
+    if (window.config.app_context) {
+        data.context = window.config.app_context
+    }
     url = location.protocol + '//' + location.host + "/" + url
     url = url.replaceAll('//', '/').replace(':/', '://')
     return fetch(url, {
@@ -242,6 +245,14 @@ login = {
 }
 
 helper = {
+    show_home : function() {
+        let self = window.modul['helper']
+        //$('.header').append('<div id="go_home"><img src="/img/mdi/home.svg" class="button_32"></div>')
+        $('#go_home').show()
+        $('#go_home').on('click', function() {
+            window.location.href= '/'
+        })
+    },
     hide_all : function() {
         $('.content_modul').hide() 
     },
@@ -455,4 +466,7 @@ setup_core = function() {
     window.modul['manager'] = modul_manager
     window.modul['manager'].init()
     window.modul.login.init()
+    if (window.config.app_name && window.config.app_name != '') {
+        window.modul['helper'].show_home()
+    }
 }

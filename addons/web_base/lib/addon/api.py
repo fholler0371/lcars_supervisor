@@ -5,10 +5,11 @@ import json
 import clilib.data as cd
 from corelib import BaseObj, Core
 from httplib.models import HttpHandler, HttpRequestData, HttpMsgData, SendOk
+from models.auth import Moduls
 import aioauth
 
 #from addon.models import Moduls
-from  addon.models import Moduls, Apps
+from  addon.models import Apps
 
 class Api(BaseObj):
     def __init__(self, core: Core) -> None:
@@ -34,7 +35,7 @@ class Api(BaseObj):
         #call für dieses Modul
         match "/".join(rd.path):
             case 'get_allowed_moduls':
-                self.core.log.critical(rd)
+                #self.core.log.critical(rd)
                 if rd.open_id and (self.core.const.app in rd.open_id['app'] or rd.open_id['app'] == '*'):
                     try:
                         data = Moduls()
