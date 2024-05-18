@@ -1,79 +1,93 @@
-/*
- Copyright 2014 Google Inc. All Rights Reserved.
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
- http://www.apache.org/licenses/LICENSE-2.0
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
-*/
-
 let CACHE_VERSION = 1;
 let CURRENT_CACHES = {
-  font: 'cache-v' + CACHE_VERSION
+  static: 'staticCache-v' + CACHE_VERSION,
+  script: 'scriptCache-v' + CACHE_VERSION,
+  image: 'imageCache',
+  css: 'cssCache',
+  font: 'fontCache'
 }
-let BLOCK = [
-  '/main.js',
-  'libary_definitions.js',
-  '_dev.js'
-]
 
-self.addEventListener('activate', function(event) {
-  var expectedCacheNamesSet = new Set(Object.values(CURRENT_CACHES));
-  event.waitUntil(
+let ASSETS = {
+  static : [
+    '/',
+    '/auth/user'
+  ],
+  script : [
+    '/js_lib/require.js',
+    '/js_lib/jquery/jquery-3.7.0.js',
+    '/js_lib/svg-inject.js',
+    '/js_lib/jqwidgets/jqxcore.js',
+    '/js_lib/jqwidgets/jqxnotification.js',
+    '/js_lib/jqwidgets/jqxinput.js',
+    '/js_lib/jqwidgets/jqxpasswordinput.js',
+    '/js_lib/jqwidgets/jqxbuttons.js',
+    '/js_lib/packery.js',
+    '/js/mod/app.js'
+  ],
+  image : [
+    '/img/mdi/home.svg',
+    '/img/mdi/fullscreen.svg',
+    '/img/mdi/login.svg',
+    '/img/mdi/logout.svg',
+    '/img/mdi/account.svg',
+    '/img/mdi/menu.svg',
+    '/img/mdi/clock.svg'
+  ],
+  css : [
+    '/js_lib/jqwidgets/styles/jqx.base.css',
+    '/css/core.css',
+    '/css/jqx.material.css'
+  ],
+  font : [
+    '/css/lcars.ttf'
+  ]
+}
+let staticAssets = 
+
+self.addEventListener('install', function(ev) {
+  //console.log('SW installed')
+  for (const [key, value] of Object.entries(CURRENT_CACHES)) {
+    ev.waitUntil( 
+      caches.open(CURRENT_CACHES[key]).then(cache=>{
+        for (i in ASSETS[key]) {
+          caches.match(ASSETS[key][i]).then(cacheRes => {
+            if (cacheRes == undefined) {
+              cache.add(ASSETS[key][i])
+            } 
+          })
+        }
+      })
+    )
+  }
+  self.skipWaiting()
+})
+
+self.addEventListener('activate', function(ev) {
+  var expectedCacheNamesSet = new Set(Object.values(CURRENT_CACHES))
+  ev.waitUntil(
     caches.keys().then(function(cacheNames) {
       return Promise.all(
         cacheNames.map(function(cacheName) {
           if (!expectedCacheNamesSet.has(cacheName)) {
             // If this cache name isn't present in the set of "expected" cache names, then delete it.
             //console.log('Deleting out of date cache:', cacheName);
-            return caches.delete(cacheName);
+            return caches.delete(cacheName)
           }
         })
-      );
+      )
     })
-  );
-});
+  )
+})
 
-self.addEventListener('fetch', function(event) {
-  //console.log('Handling fetch event for', event.request.url);
-  event.respondWith(
-    caches.open(CURRENT_CACHES.font).then(function(cache) {
-      var allowed = true
-      BLOCK.forEach(function(item) {
-        if (event.request.url.includes(item)) {
-          allowed = false
-        }
-      })
-      return cache.match(event.request).then(function(response) {
-        if (response) {
-          //console.log(' Found response in cache:', response);
-          if (allowed) {
-            return response;
-          }
-        }
-        //console.log('Handling fetch event for', event.request.url);
-        return fetch(event.request.clone()).then(function(response) {
-          if (event.request.method == "POST") {
-            console.log('Handling fetch event for', event.request.url)
-          }
-          if (event.request.method == "GET" && response.status < 399) {
-            if (!event.request.url.includes('?') && event.request.url.includes('https')) {
-              if (allowed) {
-                cache.put(event.request, response.clone())
-              }
-            }  
-          }
-          return response;
-        });
-      }).catch(function(error) {
-        console.error('  Error in fetch handler:', error);
-
-        throw error;
-      });
+self.addEventListener('fetch', function(ev) {
+  //console.log('fetch request for', ev.request.url)
+  ev.respondWith(
+    caches.match(ev.request).then(cacheRes => {
+      if (cacheRes == undefined) {
+        console.log('Fehlt in Cache: '+ev.request.url)
+      }
+      return cacheRes || fetch(ev.request)
     })
-  );
-});
+  )
+})
+

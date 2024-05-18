@@ -49,7 +49,7 @@ class Com(BaseObj):
                 async with aiofiles.open(str(file_name)) as f:
                     return (True, web.Response(text=await f.read(), headers={'X-Raw': '1'})) 
         else:
-            #self.core.log.critical(file_name)
+            self.core.log.critical(file_name)
             return (True, web.Response(status=418))
         
     async def handler(self, request: web.Request, rd: HttpRequestData) -> bool:

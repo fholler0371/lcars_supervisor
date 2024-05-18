@@ -19,6 +19,7 @@ from httplib.models import HttpHandler, HttpRequestData, SendOk, HttpMsgData
 from models.auth import Moduls
 from models.network import IpData
 import cryptlib
+import aioauth
 
 from addon.models import UserLogin, LoginResponce, CodeData, TokenByCode, OpenId, TokenResponce
 import addon.db as db_settings
@@ -26,6 +27,7 @@ import addon.db as db_settings
 class Api(BaseObj):
     def __init__(self, core: Core) -> None:
         BaseObj.__init__(self, core)
+        self._auth = aioauth.Client(self.core)
         self._apps_db = aiodatabase.DB(f"sqlite:///{self.core.path.data}/apps.sqlite3")
         self._apps_db.add_table(db_settings.App())
         self._apps_db.add_table(db_settings.Oauth())
@@ -195,6 +197,11 @@ class Api(BaseObj):
             self.core.log.error(e)
         
     async def handler(self, request: web.Request, rd: HttpRequestData) -> bool:
+        #prüfen ob einträge für allgemeine auth handler ist
+        auth_resp = await self._auth.handler(request, rd)
+        if auth_resp[0]:
+            return auth_resp
+        #call für dieses Modul
         match '/'.join(rd.path):
             case 'do_login':
                 msg = HttpMsgData.model_validate(rd.data)
@@ -224,16 +231,15 @@ class Api(BaseObj):
                except Exception as e:
                     self.core.log.error(e)
             case 'get_allowed_moduls':
-                self.core.log.critical(rd)
-                if rd.open_id and (self.core.const.app in rd.open_id['app'] or rd.open_id['app'] == '*'):
-                    try:
-                        data = Moduls()
-                        #data.append({'mod': 'app', 'src': '/js/mod/app'})
-                        self.core.log.debug("/".join(rd.path))
-                        #self.core.log.debug(rd)
-                        return (True, web.json_response(data.model_dump()))
-                    except Exception as e:
-                        self.core.log.error(e)
+                try:
+                    rd = HttpMsgData.model_validate(rd.data)
+                    rd = HttpRequestData.model_validate(rd.data)
+                except:
+                    pass
+                if rd.open_id and ('user' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*'):
+                    data = Moduls()
+                    data.append({'mod': 'auth_user', 'src': '/auth/js/mod/auth_user'})
+                    return (True, web.json_response(data.model_dump()))
                 else:
                     return (True, web.json_response(SendOk(ok=False).model_dump()))
             case _:

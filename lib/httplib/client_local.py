@@ -12,7 +12,7 @@ from .local_keys import LocalKeys
 from .models import HttpMsgData, RespRaw
 
 
-MAX_RETRY = 7
+MAX_RETRY = 3
 def retry_policy(info: aioretry.RetryInfo) -> aioretry.RetryPolicyStrategy:
     return info.fails > MAX_RETRY, (2 ** info.fails) * 0.1
 

@@ -50,10 +50,13 @@ class Api(BaseObj):
             case 'app/load_list':
                 if rd.open_id:
                     data = Apps()
+                    #self.core.log.critical(self._apps)
                     for app, info in self._apps.items():
-                        if (app in rd.open_id['app'] or rd.open_id['app'] == '*') and info.time > time.time()-3600:
+                       if (app in rd.open_id['app'] or rd.open_id['app'] == '*') and info.time > time.time()-3600*24:
+                            
                             data.append(info)
                     data.sort()
+                    #self.core.log.critical(data)
                     return (True, web.json_response(data.model_dump()))
                 return (True, web.json_response(SendOk(ok=False).model_dump()))
             case _:

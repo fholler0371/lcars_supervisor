@@ -33,8 +33,16 @@ class Client:
         match "/".join(rd.path):
             case "get_login_link":
                 try:
-                    url = x if (x := request.headers.get('X-Forwarded-Scheme')) else request.scheme
-                    self.callback = url = f"{url}://{request.host}/"
+                    try: # ein level runter
+                        rd = HttpMsgData.model_validate(rd.data)
+                    except Exception as e:
+                        self.core.log.error(e) 
+                    try: # ein level runter
+                        rd = HttpRequestData.model_validate(rd.data)
+                    except Exception as e:
+                        self.core.log.error(e) 
+                    url = rd.scheme
+                    self.callback = url = f"{url}://{rd.host}/"
                     self.callback += 'callback.html' if self.core.const.app == 'web_base' else f'{self.core.const.app}/callback.html'
                     url += f'auth/login.html?response_type=code&redirect_uri={up.quote(self.callback)}'
                     client_id = await self.clientid

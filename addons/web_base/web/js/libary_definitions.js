@@ -33,11 +33,13 @@ add_css('/css/jqx.material.css')
 //cache
 
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/cache.js', {scope: '/'}).then(function() {
-        console.log('cache wurde aktviert')
-    }).catch(function(error) {
-        console.error(error)
-    })
+    if (navigator.serviceWorker.controller == undefined) {
+        navigator.serviceWorker.register('/cache.js', {scope: '/'}).then(function() {
+            console.log('cache wurde aktviert')
+        }).catch(function(error) {
+            console.error(error)
+        })
+    }
 }
 
 desktop_layout = function() {
@@ -246,8 +248,6 @@ login = {
 
 helper = {
     show_home : function() {
-        let self = window.modul['helper']
-        //$('.header').append('<div id="go_home"><img src="/img/mdi/home.svg" class="button_32"></div>')
         $('#go_home').show()
         $('#go_home').on('click', function() {
             window.location.href= '/'
@@ -392,7 +392,11 @@ modul_manager = {
             window.modul['manager'].moduls = ['clock']
             if (!(localStorage.getItem('access_token') === null)) {
                 window.api_call(url='get_allowed_moduls').then(resp => {
-                    window.modul['manager'].moduls = [{mod: 'clock'}]
+                    if (window.config.modul_clock == undefined || window.config.modul_clock) {
+                        window.modul['manager'].moduls = [{mod: 'clock'}]
+                    } else {
+                        window.modul['manager'].moduls = []
+                    }
                     if (resp['ok']) {
                         resp['moduls'].forEach(element => {
                             window.modul['manager'].moduls.push(element)
@@ -416,7 +420,11 @@ modul_manager = {
                     }
                 })
             } else {
-                window.modul['manager'].moduls = [{mod: 'clock'}]
+                if (window.config.modul_clock == undefined || window.config.modul_clock) {
+                    window.modul['manager'].moduls = [{mod: 'clock'}]
+                } else {
+                    window.modul['manager'].moduls = []
+                }
                 setTimeout(window.modul['manager'].paint, 1)
             }
             console.log('modul_update')
@@ -436,6 +444,9 @@ modul_manager = {
         })
         $('.button_left_menu').off('click')
         $('.button_left_menu').on('click', self.click)
+        if (window.modul['clock']) {
+            window.modul['clock'].show()
+        }
     },
     click : function(event) {
         let modul = $(this).data('id')
@@ -448,7 +459,7 @@ setup_core = function() {
         window.modul = {}
     }
     window.modul['helper'] = helper
-    if (window.config.modul_login == undefined || window.config.modul_login) {
+    if (window.config.modul_clock == undefined || window.config.modul_clock) {
         window.modul['clock'] = modul_clock
         window.modul.clock.init()
     }

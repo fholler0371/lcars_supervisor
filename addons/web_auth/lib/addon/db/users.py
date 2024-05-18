@@ -12,6 +12,7 @@ class Users(Table):
         self.add_field(Text('roles_sec'))
         self.add_field(Text('apps'))
         self.add_field(Text('apps_sec'))
+        self.add_field(Text('label'))
         #
         self.add_statement('get_user_by_name', QuerySingle("SELECT {fields} FROM {table} WHERE name=?", ['id', 'user_id'], ['name']))        
         self.add_statement('get_user_by_user_id', QuerySingle("SELECT {fields} FROM {table} WHERE user_id=?", ['id', 'user_id'], ['user_id']))        
