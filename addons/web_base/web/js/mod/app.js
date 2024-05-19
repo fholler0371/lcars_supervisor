@@ -5,15 +5,16 @@ define([], function() {
         label: 'Anwendungen',
         already_init : false,
         init: function () {
-            window.modul.helper.hide_all()
-            modul.clock.already_init = true
-            window.modul.clock.show()
+            //window.modul.helper.hide_all()
+            modul.app.already_init = true
+            window.modul.app.show()
         },
         set_content: function() {
             if (!($('#content_modul_app').length)) {
                 var html = '<div id="content_modul_app" class="content_modul jqx-widget-content-material modul_main_base"></div>'
                 $(".main_content").append(html)
             }
+            $('#content_modul_app').show()
         },
         show: function () {
             let self = window.modul['app']
@@ -23,7 +24,7 @@ define([], function() {
                 if (resp.ok) {
                     require(['packery', 'svginject'], function(Packery) {
                         self.set_content()
-                        $('#content_modul_main_base').text("")
+                        $('#content_modul_app').html('')
                         let data = resp.moduls
                         for (var i=0; i<data.length; i++) {
                             var html = '<div class="modul_main_base_item" style="width: 200px; height: 200px; border: 4px solid #36c; fill: #36c; text-align: center;'

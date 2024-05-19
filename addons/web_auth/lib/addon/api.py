@@ -21,7 +21,7 @@ from models.network import IpData
 import cryptlib
 import aioauth
 
-from addon.models import UserLogin, LoginResponce, CodeData, TokenByCode, OpenId, TokenResponce
+from addon.models import UserLogin, LoginResponce, CodeData, TokenByCode, OpenId, TokenResponce, UserLabel
 import addon.db as db_settings
 
 class Api(BaseObj):
@@ -177,7 +177,10 @@ class Api(BaseObj):
             if 'name' in ldata.scope:
                 user_data = await self._users_db.table('users').exec('get_name_by_id', {'id': ldata.user_id})
                 if user_data is not None:
-                    openid.name = user_data['name']
+                    if user_data['label']:
+                        openid.name = user_data['label']
+                    else:
+                        openid.name = user_data['name']
             if 'role' in ldata.scope.split(' '):
                 openid.role = ldata.roles
             if 'app' in ldata.scope.split(' '):
@@ -216,7 +219,6 @@ class Api(BaseObj):
                 ldata.ip = msg2.ip
                 return await self.doLogin(rd, ldata)
             case 'token':
-               try: 
                 msg = HttpMsgData.model_validate(rd.data)
                 msg2 = HttpRequestData.model_validate(msg.data)
                 tc = TokenByCode.model_validate(msg2.data)
@@ -228,8 +230,6 @@ class Api(BaseObj):
                     return await self.craete_token(msg2, ldata)
                 self.core.log.debug(msg2)
                 self.core.log.debug(ldata)
-               except Exception as e:
-                    self.core.log.error(e)
             case 'get_allowed_moduls':
                 try:
                     rd = HttpMsgData.model_validate(rd.data)
@@ -242,6 +242,25 @@ class Api(BaseObj):
                     return (True, web.json_response(data.model_dump()))
                 else:
                     return (True, web.json_response(SendOk(ok=False).model_dump()))
+            case 'user/get_label':
+                rd = HttpMsgData.model_validate(rd.data)
+                rd = HttpRequestData.model_validate(rd.data)
+                if rd.open_id and ('user' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*'):
+                    user = await self._users_db.table('users').exec('get_id_by_user_id', {'user_id': rd.open_id['sub']})
+                    name_data = await self._users_db.table('users').exec('get_name_by_id', {'id': user['id']})
+                    label = name_data['name']
+                    if name_data['label']:
+                        label = name_data['label']
+                    return (True, web.json_response({'ok': True, 'label': label}))
+            case 'user/set_label': 
+                rd = HttpMsgData.model_validate(rd.data)
+                rd = HttpRequestData.model_validate(rd.data)
+                if rd.open_id and ('user' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*'):
+                    label_data = UserLabel.model_validate_json(rd.data)
+                    await self._users_db.table('users').exec('update_label_by_user_id', {'user_id': rd.open_id['sub'], 'label':label_data.label})
+                    return (True, web.json_response(SendOk().model_dump()))
+                
+                
             case _:
                 self.core.log.critical('/'.join(rd.path))
     

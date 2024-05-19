@@ -61,6 +61,10 @@ desktop_layout = function() {
 
 //setup core
 window.api_call = function(url='', token=true, data={}, sync=false) {
+    if (typeof token==='object' ) {
+        data = token
+        token = true
+    }
     if (window.config.app_name != undefined) {
         url = '/api/' + window.config.app_name + '/' + url
     } else {
@@ -277,7 +281,7 @@ notification = {
     },
     show : function(template, text) {
         $("#notifictations").jqxNotification({
-            width: 250, position: "top-right", opacity: 0.9,
+            width: 250, position: "bottom-right", opacity: 0.8,
             autoOpen: false, animationOpenDelay: 800, autoClose: true, autoCloseDelay: 10_000, template: template
         })
         $("#notifictations_msg").text(text)

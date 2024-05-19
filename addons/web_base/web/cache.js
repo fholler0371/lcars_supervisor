@@ -1,4 +1,4 @@
-let CACHE_VERSION = 1;
+let CACHE_VERSION = 2;
 let CURRENT_CACHES = {
   static: 'staticCache-v' + CACHE_VERSION,
   script: 'scriptCache-v' + CACHE_VERSION,
@@ -31,7 +31,10 @@ let ASSETS = {
     '/img/mdi/logout.svg',
     '/img/mdi/account.svg',
     '/img/mdi/menu.svg',
-    '/img/mdi/clock.svg'
+    '/img/mdi/clock.svg',
+    '/js_lib/jqwidgets/styles/images/error.png',
+    '/js_lib/jqwidgets/styles/images/info.png',
+    '/js_lib/jqwidgets/styles/images/close_white.png'
   ],
   css : [
     '/js_lib/jqwidgets/styles/jqx.base.css',
@@ -50,9 +53,10 @@ self.addEventListener('install', function(ev) {
     ev.waitUntil( 
       caches.open(CURRENT_CACHES[key]).then(cache=>{
         for (i in ASSETS[key]) {
-          caches.match(ASSETS[key][i]).then(cacheRes => {
+          let entry = ASSETS[key][i]
+          caches.match(entry).then(cacheRes => {
             if (cacheRes == undefined) {
-              cache.add(ASSETS[key][i])
+              cache.add(entry)
             } 
           })
         }
@@ -84,7 +88,9 @@ self.addEventListener('fetch', function(ev) {
   ev.respondWith(
     caches.match(ev.request).then(cacheRes => {
       if (cacheRes == undefined) {
-        console.log('Fehlt in Cache: '+ev.request.url)
+        if (!(ev.request.method == 'POST')) {
+          console.log('Fehlt in Cache: '+ev.request.url, ev.request.method)
+        }
       }
       return cacheRes || fetch(ev.request)
     })

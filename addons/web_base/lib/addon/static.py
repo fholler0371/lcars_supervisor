@@ -11,7 +11,7 @@ from httplib.models import HttpHandler, HttpRequestData, SendOk
 
 TEXT_FILES = ['text/html', 'text/javascript', 'text/css']
 SVG_FILES = ['image/svg+xml']
-BIN_FILES = ['font/ttf']
+BIN_FILES = ['font/ttf', 'image/png']
 class Static(BaseObj):
     def __init__(self, core: Core) -> None:
         BaseObj.__init__(self, core)

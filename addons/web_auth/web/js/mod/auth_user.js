@@ -5,46 +5,49 @@ define([], function() {
         label: 'Nutzereinstellungen',
         already_init : false,
         init: function () {
-            window.modul.helper.hide_all()
-            modul.clock.already_init = true
-            window.modul.clock.show()
         },
         set_content: function() {
+            let self = window.modul['auth_user']
             if (!($('#content_modul_auth_user').length)) {
                 var html = '<div id="content_modul_auth_user" class="content_modul jqx-widget-content-material modul_main_base"></div>'
-                $(".main_content").auth_userend(html)
-            }
+                $(".main_content").append(html)
+                require(['jqxinput', 'jqxbutton'], function() {
+                    html = '<table style="margin: 30px;"><tr><td><input id="content_modul_auth_user_label" type="text" autocomplete="label" required/>'
+                    html += '</td><td width="20px"></td><td><input type="button" value="Namen senden" id="send_label" /></td></tr>'
+                    html += '<tr height="30px"></tr></table>'
+                    $('#content_modul_auth_user').append(html)
+                    $("#content_modul_auth_user_label").jqxInput({placeHolder: "Anzeigename", height: 30, width: 380, minLength: 5, theme: 'material' })
+                    $("#send_label").jqxButton({ width: 120, height: 40, theme: 'material' })
+                                    .on('click', self.click_send_label)
+                })
+            } 
+            $('#content_modul_auth_user').show()
         },
         show: function () {
             let self = window.modul['auth_user']
             window.modul['helper'].activate('auth_user', self.label)
             self.set_content()
-            window.api_call(url='auth_user/load_list').then(resp => {
-                if (resp.ok) {
-                    require(['packery', 'svginject'], function(Packery) {
-                        self.set_content()
-                        $('#content_modul_main_base').text("")
-                        let data = resp.moduls
-                        for (var i=0; i<data.length; i++) {
-                            var html = '<div class="modul_main_base_item" style="width: 200px; height: 200px; border: 4px solid #36c; fill: #36c; text-align: center;'
-                            html += 'border-radius: 12px; color: #36c; cursor: pointer" data-domain="'+data[i].url
-                            html += '"><img src="'+data[i].icon+'" height="100px" width="100px"'
-                            html += ' onload="SVGInject(this)" style="position: relative; top: 20px"><div style="position: relative; top: 20px;">'+data[i].label
-                            html += '</div></div>'
-                            $('#content_modul_auth_user').auth_userend(html)
-                        }        
-                        new Packery( '.modul_main_base', {itemSelector: '.modul_main_base_item', gutter: 20})
-                        $('.modul_main_base_item').off('click')
-                        $('.modul_main_base_item').on('click', function(event) {
-                            let domain = $(event.currentTarget).data('domain')
-                            window.location.href = domain
-                        })                
-                    })
-                }
+            require(['jqxinput'], function() {
+                window.api_call(url='user/get_label').then(resp => {
+                    if (resp.ok) {
+                        $("#content_modul_auth_user_label").jqxInput('val', resp.label)
+                    } else {
+                        notification.show('error', 'Konnte den Anmzeigename nicht laden')
+                    }
+                })
             })
         },
         stop: function() {
         
+        },
+        click_send_label() {
+            window.api_call(url='user/set_label', data={label: $("#content_modul_auth_user_label").jqxInput('val')}).then(resp => {
+                if (resp.ok) {
+                    notification.show('info', 'Anzeigenamen gespeichert')
+                } else {
+                    notification.show('error', 'Anzeigenamen nicht gespeichert')
+                }
+        })
         }
     }
     window.modul['auth_user'].init()
