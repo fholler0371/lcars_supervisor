@@ -1,0 +1,11 @@
+name = "web_avm"
+label = "LCARS WebAvm"
+
+[docker]
+name = "lcars/python:%Y.%m"
+folder = 'python'
+
+[lib]
+web = "httplib.HTTP"
+web_l = "httplib.ClientLocal"
+com = "addon_com.Com"
