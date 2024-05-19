@@ -31,4 +31,5 @@ dest = "/lcars/config/manifest.toml"
 "%base_folder%/addons/web_avm/src/run.py" = "/lcars/starter/run.py"
 "%base_folder%/addons/web_avm/lib" = "/lcars/lib2"
 
-#[volumes.web]
+[volumes.web]
+"%base_folder%/addons/web_avm/web" = "/lcars/web"
