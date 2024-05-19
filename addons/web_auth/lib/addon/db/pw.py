@@ -11,5 +11,5 @@ class Pw(Table):
         self.add_statement('get_password_by_id', QuerySingle("SELECT {fields} FROM {table} WHERE id=?", ['password'], ['id']))    
         self.add_statement('insert', QueryInsert("INSERT INTO {table} (id, password) VALUES (?, ?)", 
                                                  ['id', 'password']))
-        self.add_statement('update', QueryUpdate("UPDATE {table} SET password=? WHERE id=?)", 
+        self.add_statement('update', QueryUpdate("UPDATE {table} SET password=? WHERE id=?", 
                                                  ['password', 'id']))

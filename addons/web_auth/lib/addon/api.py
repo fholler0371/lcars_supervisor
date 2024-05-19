@@ -21,7 +21,7 @@ from models.network import IpData
 import cryptlib
 import aioauth
 
-from addon.models import UserLogin, LoginResponce, CodeData, TokenByCode, OpenId, TokenResponce, UserLabel
+from addon.models import UserLogin, LoginResponce, CodeData, TokenByCode, OpenId, TokenResponce, UserLabel, UserPassword
 import addon.db as db_settings
 
 class Api(BaseObj):
@@ -105,7 +105,6 @@ class Api(BaseObj):
                             (await self._users_db.table('users').exec('get_app_by_id', {'id': ldata.user_id}))['apps'])
             except Exception as e:
                 self.core.log.error(e)
- 
 
     async def get_login_token(self, ldata: UserLogin) -> None:
         data = json.dumps({'t': int(time.time()) + (604_800 if ldata.secure else 28_000), 'u':ldata.user_id_s})
@@ -259,8 +258,18 @@ class Api(BaseObj):
                     label_data = UserLabel.model_validate_json(rd.data)
                     await self._users_db.table('users').exec('update_label_by_user_id', {'user_id': rd.open_id['sub'], 'label':label_data.label})
                     return (True, web.json_response(SendOk().model_dump()))
-                
-                
+            case 'user/set_password': 
+                rd = HttpMsgData.model_validate(rd.data)
+                rd = HttpRequestData.model_validate(rd.data)
+                if rd.open_id and ('user' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*'):
+                    password_data = UserPassword.model_validate_json(rd.data)
+                    if password_data.valid:
+                        user = await self._users_db.table('users').exec('get_id_by_user_id', {'user_id': rd.open_id['sub']})
+                        pw = await self._pw_db.table('pw').exec('get_password_by_id', {'id': user['id']})
+                        if bcrypt.checkpw((self.core.com._salt+password_data.password).encode(), pw['password'].encode()):
+                            pw_hash = bcrypt.hashpw((self.core.com._salt+password_data.password_new).encode(), bcrypt.gensalt()).decode()
+                            await self._pw_db.table('pw').exec('update', {'id': user['id'], 'password': pw_hash})
+                            return (True, web.json_response(SendOk().model_dump()))                
             case _:
                 self.core.log.critical('/'.join(rd.path))
     
