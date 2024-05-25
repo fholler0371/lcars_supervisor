@@ -6,3 +6,4 @@ from .token_by_code import TokenByCode
 from .openid import OpenId
 from .user_label import UserLabel
 from .user_password import UserPassword
+from .user_mail import UserMail

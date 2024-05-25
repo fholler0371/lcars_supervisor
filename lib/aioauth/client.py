@@ -8,7 +8,7 @@ from corelib.aio_property import aproperty
 from httplib.models import HttpRequestData, SendOk
 
 from aioauth.models import GetClientId, ClientIdSecret, Code, Token
-from httplib.models import HttpMsgData, RedirectUrl
+from httplib.models import HttpMsgData, RedirectUrl, HttpRequestData
 
 class Client:
     def __init__(self, core: Core):
@@ -43,7 +43,7 @@ class Client:
                         self.core.log.error(e) 
                     url = rd.scheme
                     self.callback = url = f"{url}://{rd.host}/"
-                    self.callback += 'callback.html' if self.core.const.app == 'web_base' else f'{self.core.const.app}/callback.html'
+                    self.callback += 'callback.html' if self.core.const.app == 'web_base' else f'{self.core.const.app.split('_')[-1]}/callback.html'
                     url += f'auth/login.html?response_type=code&redirect_uri={up.quote(self.callback)}'
                     client_id = await self.clientid
                     if client_id is None:
@@ -56,7 +56,12 @@ class Client:
                 try:
                     url = rd.scheme
                     self.callback = url = f"{url}://{rd.host}/"
-                    self.callback += 'callback.html' if self.core.const.app == 'web_base' else f'{self.core.const.app}/callback.html'
+                    self.callback += 'callback.html' if self.core.const.app == 'web_base' else f'{self.core.const.app.split('_')[-1]}/callback.html'
+                    try:
+                        rd = HttpMsgData.model_validate(rd.data)
+                        rd = HttpRequestData.model_validate(rd.data)
+                    except:
+                        pass
                     data = Code.model_validate_json(rd.data)
                     post_data = (('grant_type', 'code'),
                                  ('client_id', await self.clientid),
@@ -65,9 +70,11 @@ class Client:
                                  ('code', data.code))
                     try:
                         resp = await self.core.web_l.post_raw_url(f"{url}api/auth/token", post_data)
+                        self.core.log.critical(resp) 
                         if resp is None:
                             return (True, web.json_response(SendOk(ok=False).model_dump()))
                         else:
+                            self.core.log.critical(resp) 
                             return (True, web.json_response(json.loads(resp)))
                     except Exception as e:
                         self.core.log.error(e)                 
@@ -77,13 +84,20 @@ class Client:
                 try:
                     url = rd.scheme
                     url = f"{url}://{rd.host}/"                    
+                    try:
+                        rd = HttpMsgData.model_validate(rd.data)
+                        rd = HttpRequestData.model_validate(rd.data)
+                    except:
+                        pass
                     data = Token.model_validate_json(rd.data)
                     post_data = (('grant_type', 'refresh_token'),
                                  ('client_id', await self.clientid),
                                  ('client_secret', self._secret),
                                  ('code', data.token))
+                    self.core.log.critical(post_data)
                     try:
                         resp = await self.core.web_l.post_raw_url(f"{url}api/auth/token", post_data)
+                        self.core.log.critical(resp) 
                         if resp is None:
                             return (True, web.json_response(SendOk(ok=False).model_dump()))
                         else:

@@ -21,7 +21,7 @@ from models.network import IpData
 import cryptlib
 import aioauth
 
-from addon.models import UserLogin, LoginResponce, CodeData, TokenByCode, OpenId, TokenResponce, UserLabel, UserPassword
+from addon.models import UserLogin, LoginResponce, CodeData, TokenByCode, OpenId, TokenResponce, UserLabel, UserPassword, UserMail
 import addon.db as db_settings
 
 class Api(BaseObj):
@@ -218,9 +218,12 @@ class Api(BaseObj):
                 ldata.ip = msg2.ip
                 return await self.doLogin(rd, ldata)
             case 'token':
+                self.core.log.debug(rd.data)
                 msg = HttpMsgData.model_validate(rd.data)
                 msg2 = HttpRequestData.model_validate(msg.data)
+                self.core.log.debug(msg2.data)
                 tc = TokenByCode.model_validate(msg2.data)
+                self.core.log.debug(tc)
                 ldata = await self.get_ldata_by_token(tc)
                 if ldata is None:
                     return (True, web.Response(status=403))
@@ -238,6 +241,8 @@ class Api(BaseObj):
                 if rd.open_id and ('user' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*'):
                     data = Moduls()
                     data.append({'mod': 'auth_user', 'src': '/auth/js/mod/auth_user'})
+                    if 'user_sec' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*':
+                        data.append({'mod': 'auth_user_sec', 'src': '/auth/js/mod/auth_user_sec'})
                     return (True, web.json_response(data.model_dump()))
                 else:
                     return (True, web.json_response(SendOk(ok=False).model_dump()))
@@ -270,6 +275,22 @@ class Api(BaseObj):
                             pw_hash = bcrypt.hashpw((self.core.com._salt+password_data.password_new).encode(), bcrypt.gensalt()).decode()
                             await self._pw_db.table('pw').exec('update', {'id': user['id'], 'password': pw_hash})
                             return (True, web.json_response(SendOk().model_dump()))                
+            case 'user/get_mail':
+                rd = HttpMsgData.model_validate(rd.data)
+                rd = HttpRequestData.model_validate(rd.data)
+                if rd.open_id and ('user_sec' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*'):
+                    mail_data = await self._users_db.table('users').exec('get_mail_by_user_id', {'user_id': rd.open_id['sub']})
+                    mail = ''
+                    if mail_data['mail']:
+                        mail = mail_data['mail']
+                    return (True, web.json_response({'ok': True, 'mail': mail}))
+            case 'user/set_mail': 
+                rd = HttpMsgData.model_validate(rd.data)
+                rd = HttpRequestData.model_validate(rd.data)
+                if rd.open_id and ('user_sec' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*'):
+                    mail_data = UserMail.model_validate_json(rd.data)
+                    await self._users_db.table('users').exec('update_mail_by_user_id', {'user_id': rd.open_id['sub'], 'mail':mail_data.mail})
+                    return (True, web.json_response(SendOk().model_dump()))
             case _:
                 self.core.log.critical('/'.join(rd.path))
     

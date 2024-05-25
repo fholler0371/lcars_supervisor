@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg" href="/img/mdi/home.svg">
+    <title>LCARS</title>
+    <!link rel="stylesheet" href="style.css">
+    <script>
+      window.config = {
+      }
+      const queryString = window.location.search
+      const urlParams = new URLSearchParams(queryString)
+      const state = urlParams.get('state')
+      const last_state = localStorage.getItem('last_redirect_state')
+      //localStorage.removeItem('last_redirect_state')
+      let path = window.location.pathname.split('/')
+      path.pop()
+      let url = window.location.protocol + '//' + window.location.hostname + path.join('/') + '/user'
+      if (state != last_state) {
+        window.location.href = url
+      } else {
+        const data = {code : urlParams.get('code')}
+        let api_url = window.location.protocol + '//' + window.location.hostname + '/api/auth/'
+        if (window.config.app_name != undefined) {
+          api_url += 'window.config.app_name' + '/' 
+        }
+        api_url += 'validate_code'
+        console.log(api_url)
+        fetch(api_url, {
+          timeout: 5000,
+          method: 'POST',
+          mode: 'cors',
+          cache: 'no-cache',
+          redirect: 'follow',
+          referrerPolicy: 'no-referrer',
+          body: JSON.stringify(data)
+        }).then((response) => {
+          console.log(response)
+            if (response.status >= 200 && response.status <= 299) {
+              response.json().then((data) => {
+                localStorage.setItem('access_token', data.access_token)
+                localStorage.setItem('refresh_token', data.refresh_token)
+                localStorage.setItem('access_token_timeout',  Math.round(new Date() / 1000 + data.expires_in))
+                window.location.href = url
+              })
+            } else {
+              console.error('code prüfen: '+response.status)
+              window.location.href = url
+            }
+        }).catch(err => {
+          console.log('error')
+          window.location.href = url
+        })
+      }
+    </script>
+  </head>
+  <body style="min-height: 100vh; overflow: hidden; background-color: black;">
+    <div style="color: #f90; position: absolute; top: 50%; left: 50%; font-family: 'LCARS'; font-size: 32px; transform: translate(-50%, -50%)">Cheking Login</div>
+  </body>
+</html>

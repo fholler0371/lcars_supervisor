@@ -208,6 +208,7 @@ login = {
         let login = window.modul.login
         clearTimeout(login.token_timer)
         login.update_state()
+        window.location.replace('/')
     },
     left_access_token: function() {
         let left = -1

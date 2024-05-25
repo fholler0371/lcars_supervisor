@@ -30,6 +30,7 @@ let ASSETS = {
     '/img/mdi/login.svg',
     '/img/mdi/logout.svg',
     '/img/mdi/account.svg',
+    'img/mdi/account-lock.svg', 
     '/img/mdi/menu.svg',
     '/img/mdi/clock.svg',
     '/js_lib/jqwidgets/styles/images/error.png',

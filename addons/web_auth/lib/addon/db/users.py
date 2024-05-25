@@ -13,6 +13,7 @@ class Users(Table):
         self.add_field(Text('apps'))
         self.add_field(Text('apps_sec'))
         self.add_field(Text('label'))
+        self.add_field(Text('mail'))
         #
         self.add_statement('get_user_by_name', QuerySingle("SELECT {fields} FROM {table} WHERE name=?", ['id', 'user_id'], ['name']))        
         self.add_statement('get_user_by_user_id', QuerySingle("SELECT {fields} FROM {table} WHERE user_id=?", ['id', 'user_id'], ['user_id']))        
@@ -27,3 +28,5 @@ class Users(Table):
         self.add_statement('get_app_by_id', QuerySingle("SELECT {fields} FROM {table} WHERE id=?", ['apps'], ['id']))        
         self.add_statement('get_app_sec_by_id', QuerySingle("SELECT {fields} FROM {table} WHERE id=?", ['apps_sec'], ['id']))        
         self.add_statement('update_label_by_user_id', QueryUpdate("UPDATE {table} SET label=? WHERE user_id=?", ['label', 'user_id']))        
+        self.add_statement('get_mail_by_user_id', QuerySingle("SELECT {fields} FROM {table} WHERE user_id=?", ['mail'], ['user_id']))        
+        self.add_statement('update_mail_by_user_id', QueryUpdate("UPDATE {table} SET mail=? WHERE user_id=?", ['mail', 'user_id']))        
