@@ -65,10 +65,12 @@ window.api_call = function(url='', token=true, data={}, sync=false) {
         data = token
         token = true
     }
-    if (window.config.app_name != undefined) {
-        url = '/api/' + window.config.app_name + '/' + url
-    } else {
-        url = '/api/' + url
+    if (url.charAt(0) != '/') {
+        if (window.config.app_name != undefined) {
+            url = '/api/' + window.config.app_name + '/' + url
+        } else {
+            url = '/api/' + url
+        }
     }
     if (sync) {
     } else {
@@ -159,7 +161,7 @@ login = {
     get_access_token: function() {
         let refresh_token = localStorage.getItem('refresh_token')
         if (refresh_token != null) {
-            window.api_call(url='refresh_token', token=false, data={token: refresh_token}).then(data => {
+            window.api_call(url='/api/refresh_token', token=false, data={token: refresh_token}).then(data => {
                 if (data.refresh_token == undefined) {
                     window.modul.login.do_logout()
                 } else {

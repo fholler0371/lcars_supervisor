@@ -1,4 +1,4 @@
-app = 'web_avm'
+app = 'web_router'
 
 [logger]
 version = 1

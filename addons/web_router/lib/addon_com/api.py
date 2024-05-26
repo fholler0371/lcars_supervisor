@@ -23,9 +23,9 @@ class Api(BaseObj):
                     rd = HttpRequestData.model_validate(rd.data)
                 except:
                     pass
-                if rd.open_id and ('avm' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*'):
+                if rd.open_id and ('router' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*'):
                     data = Moduls()
-                    #data.append({'mod': 'auth_user', 'src': '/auth/js/mod/auth_user'})
+                    data.append({'mod': 'router_net', 'src': '/router/js/mod/router_net'})
                     return (True, web.json_response(data.model_dump()))
                 else:
                     return (True, web.json_response(SendOk(ok=False).model_dump()))

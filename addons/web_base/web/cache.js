@@ -22,7 +22,9 @@ let ASSETS = {
     '/js_lib/jqwidgets/jqxpasswordinput.js',
     '/js_lib/jqwidgets/jqxbuttons.js',
     '/js_lib/packery.js',
-    '/js/mod/app.js'
+    '/js/mod/app.js',
+    // auth
+    '/auth/js/mod/auth_user.js'
   ],
   image : [
     '/img/mdi/home.svg',
@@ -31,6 +33,7 @@ let ASSETS = {
     '/img/mdi/logout.svg',
     '/img/mdi/account.svg',
     'img/mdi/account-lock.svg', 
+    '/img/mdi/router-wireless.svg',
     '/img/mdi/menu.svg',
     '/img/mdi/clock.svg',
     '/js_lib/jqwidgets/styles/images/error.png',

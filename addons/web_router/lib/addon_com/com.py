@@ -32,6 +32,7 @@ class Com(BaseObj):
         else:
             self.core.log.critical(file_name)
             return (True, web.Response(status=418))
+        
     async def handler(self, request: web.Request, rd: HttpRequestData) -> bool:
         match '/'.join(rd.path):
             case 'messages/relay':
@@ -46,14 +47,14 @@ class Com(BaseObj):
     async def register_web_app(self)->None:
         self.core.log.debug('do register')
         await self.core.call_random(300, self.register_web_app)
-        data = HttpHandler(domain='avm', acl=None, 
+        data = HttpHandler(domain='router', acl=None, 
                            remote=f'{await self.core.web_l.hostname}.{self.core.const.app}')
         try:
             await self.core.web_l.msg_send(HttpMsgData(dest='web_base', type='register_web_app', data=data))
         except Exception as e:
             self.core.log.error(e)
-        data = App(app='avm',
-                   url='/avm',
+        data = App(app='router',
+                   url='/router',
                    icon='/img/mdi/router-wireless.svg',
                    label='FritzBox')
         try:
