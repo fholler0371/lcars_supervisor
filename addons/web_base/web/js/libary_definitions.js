@@ -461,6 +461,37 @@ modul_manager = {
     }  
 }
 
+timeout = {
+    timeout_clock : 180, 
+    tick_clock : 180,
+    do_notify : false,
+    init : function () {
+        let self = window.modul['timeout']
+        setInterval(self.do_tick, 1000)
+        let activityEvents = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart']
+        activityEvents.forEach(function(eventName) {
+            document.addEventListener(eventName, self.user_action, true);
+        })
+    },
+    do_tick : function() {
+        let self = window.modul['timeout']
+        if (self.tick_clock >= 0) {
+            self.tick_clock -= 1
+        }
+        if (((self.tick_clock % 60) == 0) && self.do_notify) {
+            window.modul['notification'].show('info', 'Uhr wird in '+Math.floor(self.tick_clock / 60)+' Minuten') 
+            console.log('Uhr wird in '+Math.floor(self.tick_clock / 60)+' Minuten')
+        }
+        if (self.tick_clock == 0) {
+            window.modul.clock.show()
+        }
+    },
+    user_action : function() {
+        let self = window.modul['timeout']
+        self.tick_clock = self.timeout_clock
+    }
+}
+
 setup_core = function() {
     if (window.modul == undefined) {
         window.modul = {}
@@ -476,8 +507,10 @@ setup_core = function() {
         window.modul['notification'] = notification
         notification.init()
     })
+    window.modul['timeout'] = timeout
     if (window.config.modul_login == undefined || window.config.modul_login) {
         window.modul['login'] = login
+        window.modul.timeout.init()
     } else {
         $('#header_username, #login_icon').remove()
     }
