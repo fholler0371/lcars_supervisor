@@ -92,7 +92,7 @@
   .header_right tr {
     height: 28px;
   }
-  #header_fullscreen, #login_icon {
+  #header_settings, #header_fullscreen, #login_icon {
     width: 48px;
     position: relative;
     cursor: pointer;

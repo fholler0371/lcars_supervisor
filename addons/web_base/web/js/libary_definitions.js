@@ -7,13 +7,20 @@ requirejs.config({
         jqxinput: 'jqwidgets/jqxinput',
         jqxpassword: 'jqwidgets/jqxpasswordinput',
         jqxbutton: 'jqwidgets/jqxbuttons',
-        jqxnotification: 'jqwidgets/jqxnotification'
+        jqxnotification: 'jqwidgets/jqxnotification',
+        jqxwindow: 'jqwidgets/jqxwindow',
+        jqxdropdownlist: 'jqwidgets/jqxdropdownlist',
+        jqxlistbox: 'jqwidgets/jqxlistbox',
+        jqxscrollbar: 'jqwidgets/jqxscrollbar'
     },
     shim: {
         jqxinput: {deps: ["jqxcore"]},
         jqxpassword: {deps: ["jqxcore"]},
         jqxbutton: {deps: ["jqxcore"]},
-        jqxnotification: {deps: ["jqxcore"]}
+        jqxnotification: {deps: ["jqxcore"]},
+        jqxwindow: {deps: ["jqxcore"]},
+        jqxdropdownlist: {deps: ["jqxcore", "jqxlistbox"]},
+        jqxlistbox: {deps: ["jqxcore", "jqxbutton", "jqxscrollbar"]}
     }
 })
 
@@ -47,7 +54,8 @@ desktop_layout = function() {
     $('.header').append('<div class="header_l3"><div class="header_l3i"></div></div>')
     $('.header').append('<div class="header_l4"></div>')
     let html = '<div class="header_content" style="color: var(--main-color_be);"><div id="header_appname"></div></div>'
-    html += '<table class="header_right"><tr><td id="header_fullscreen"></td><td id="header_username"></td><td id="login_icon"></td></tr></table></div>'
+    html += '<table class="header_right"><tr><td id="header_settings"></td><td id="header_fullscreen"></td><td id="header_username"></td>'
+    html += '<td id="login_icon"></td></tr></table></div>'
     $('.header').append(html)
     $('.header').append('<div id="go_home" style="display: none"><img class="button_32" src="/img/mdi/home.svg"></div>')
     $('body').append('<div class="left"><div class="left_l1"><div class="left_l2"></div></div></div>')
@@ -143,6 +151,67 @@ fullscreen = {
                 } catch {}
             } 
         }
+    }
+}
+
+settings = {
+    'activ': false,
+    'init': function(){
+        $('#header_settings').append('<img class="button_32" src="/img/mdi/cog-outline.svg" onload="SVGInject(this)" style="top: 0">')
+        $('#header_settings').on('click', window.modul.settings.onClick)
+    },
+    'onClick': function() {
+        require(['jqxwindow', 'jqxdropdownlist'], function () {
+            if (!($('#window_user_settings').length)) {
+                var html =  '<div id="window_user_settings"><div><span>Einstellungen</span></div><div id="window_user_settings_content">'
+                html += '<table>'/*<tr width="100%"><td style="width: 100%;">automatisch Abmelden nach:</td><td style="width: 100%; text-align: left; ">'
+                html += '<div id="window_user_settings_logout"></div></td></tr>'*/
+                html += '<tr width="100%"><td style="width: 100%;">Zeige Uhr nach:</td><td style="width: 100%; text-align: left; ">'
+                html += '<div id="window_user_settings_clock"></div></td></tr></table>'
+                html += '</div></div>'
+                $('body').append(html)
+                $('#window_user_settings').jqxWindow({
+                    maxHeight: 400, maxWidth: 700, minHeight: 110, minWidth: 200, height: 110, width: 500, theme: 'material',
+                    isModal: true, modalOpacity: 0.75,
+                    initContent: function () {
+                        var source= ['3min', '15min', '1h', 'nie']
+                        $(/*"#window_user_settings_logout, */"#window_user_settings_clock").jqxDropDownList({theme: 'material', source: source, height:40})
+                        /*$("#window_user_settings_logout").on('change', function (event) {
+                            var args = event.args
+                            if (args) {
+                                var value=[180, 900, 3600, -1]
+                                modul.settings.logout = value[args.index]
+                                localStorage.setItem('state_clock', modul.settings.logout)
+                            }
+                        })*/
+                        $("#window_user_settings_clock").on('change', function (event) {
+                            var args = event.args
+                            if (args) {
+                                var value=[180, 900, 3600, -1]
+                                window.modul.timeout.timeout_clock= value[args.index]
+                                localStorage.setItem('state_clock', window.modul.timeout.timeout_clock)
+                            }
+                        })
+                    }
+                })
+            }
+            $('#window_user_settings').jqxWindow('show')
+            var value=[180, 900, 3600, -1]
+            /*var index = 0
+            for (var i=0; i<4; i++) {
+                if (modul.settings.logout == value[i]) {
+                    index = i
+                }
+            }
+            $("#window_user_settings_logout").jqxDropDownList('selectIndex', index)*/
+            var index = 0
+            for (var i=0; i<4; i++) {
+                if (modul.settings.clock == value[i]) {
+                    index = i
+                }
+            }
+            $("#window_user_settings_clock").jqxDropDownList('selectIndex', index)
+          })
     }
 }
 
@@ -472,6 +541,10 @@ timeout = {
         activityEvents.forEach(function(eventName) {
             document.addEventListener(eventName, self.user_action, true);
         })
+        let timeout = localStorage.getItem('state_clock')
+        if (timeout != null) {
+            self.timeout_clock = timeout
+        }
     },
     do_tick : function() {
         let self = window.modul['timeout']
@@ -516,6 +589,8 @@ setup_core = function() {
     }
     window.modul['manager'] = modul_manager
     window.modul['manager'].init()
+    window.modul['settings'] = settings
+    window.modul['settings'].init()
     window.modul.login.init()
     if (window.config.app_name && window.config.app_name != '') {
         window.modul['helper'].show_home()

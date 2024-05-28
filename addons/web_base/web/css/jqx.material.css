@@ -1006,41 +1006,41 @@
 }
 
 .jqx-grid-column-sortascbutton-material, .jqx-expander-arrow-bottom-material, .jqx-window-collapse-button-material, .jqx-menu-item-arrow-up-material, .jqx-menu-item-arrow-up-selected-material, .jqx-menu-item-arrow-top-up-material, .jqx-icon-arrow-up-material, .jqx-icon-arrow-up-hover-material, .jqx-icon-arrow-up-selected-material {
-    background-image: url('images/material-icon-up-white.png');
+    background-image: url('/js_lib/jqwidgets/styles/images/material-icon-up-white.png');
     background-repeat: no-repeat;
     background-position: center;
 }
 
 .jqx-widget-material .jqx-grid-group-expand-material, .jqx-grid-group-expand-material, .jqx-grid-column-menubutton-material, .jqx-grid-column-sortdescbutton-material, .jqx-expander-arrow-top-material, .jqx-window-collapse-button-collapsed-material, .jqx-menu-item-arrow-down-material, .jqx-menu-item-arrow-down-selected-material, .jqx-menu-item-arrow-down-material, .jqx-icon-arrow-down-material, .jqx-icon-arrow-down-hover-material, .jqx-icon-arrow-down-selected-material {
-    background-image: url('images/material-icon-down-white.png');
+    background-image: url('/js_lib/jqwidgets/styles/images/material-icon-down-white.png');
     background-repeat: no-repeat;
     background-position: center;
 }
 
 .jqx-tabs-arrow-left-material, .jqx-menu-item-arrow-left-selected-material, .jqx-menu-item-arrow-top-left, .jqx-icon-arrow-left-material, .jqx-icon-arrow-down-left-material, .jqx-icon-arrow-left-selected-material {
-    background-image: url('images/material-icon-left.png');
+    background-image: url('/js_lib/jqwidgets/styles/images/material-icon-left.png');
     background-repeat: no-repeat;
     background-position: center;
 }
 
 .jqx-widget-material .jqx-grid-group-collapse-material, .jqx-grid-group-collapse-material, .jqx-tabs-arrow-right-material, .jqx-menu-item-arrow-right-selected-material, .jqx-menu-item-arrow-top-right-material, .jqx-icon-arrow-right-material, .jqx-icon-arrow-right-hover-material, .jqx-icon-arrow-right-selected-material {
-    background-image: url('images/material-icon-right.png');
+    background-image: url('/js_lib/jqwidgets/styles/images/material-icon-right.png');
     background-repeat: no-repeat;
     background-position: center;
 }
 
 .jqx-tree-item-arrow-collapse-rtl-material, .jqx-tree-item-arrow-collapse-hover-rtl-material {
-    background-image: url(./images/material-icon-left.png);
+    background-image: url(/js_lib/jqwidgets/styles//images/material-icon-left.png);
 }
 
 .jqx-menu-item-arrow-left-selected-material {
-    background-image: url('images/material-icon-left.png');
+    background-image: url('/js_lib/jqwidgets/styles/images/material-icon-left.png');
     background-repeat: no-repeat;
     background-position: center;
 }
 
 .jqx-menu-item-arrow-right-selected-material {
-    background-image: url('images/material-icon-right.png');
+    background-image: url('/js_lib/jqwidgets/styles/images/material-icon-right.png');
     background-repeat: no-repeat;
     background-position: center;
 }

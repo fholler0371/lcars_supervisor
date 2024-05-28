@@ -21,6 +21,10 @@ let ASSETS = {
     '/js_lib/jqwidgets/jqxinput.js',
     '/js_lib/jqwidgets/jqxpasswordinput.js',
     '/js_lib/jqwidgets/jqxbuttons.js',
+    '/js_lib/jqwidgets/jqxwindow.js',
+    '/js_lib/jqwidgets/jqxscrollbar.js',
+    '/js_lib/jqwidgets/jqxlistbox.js',
+    '/js_lib/jqwidgets/jqxdropdownlist.js',
     '/js_lib/packery.js',
     '/js/mod/app.js',
     // auth
@@ -36,9 +40,15 @@ let ASSETS = {
     '/img/mdi/router-wireless.svg',
     '/img/mdi/menu.svg',
     '/img/mdi/clock.svg',
+    '/img/mdi/cog-outline.svg',
     '/js_lib/jqwidgets/styles/images/error.png',
     '/js_lib/jqwidgets/styles/images/info.png',
-    '/js_lib/jqwidgets/styles/images/close_white.png'
+    '/js_lib/jqwidgets/styles/images/close_white.png',
+    '/js_lib/jqwidgets/styles/images/close.png',
+    '/js_lib/jqwidgets/styles/images/material-icon-down-white.png',
+    '/js_lib/jqwidgets/styles/images/material-icon-up-white.png',
+    '/js_lib/jqwidgets/styles/images/material-icon-left.png',
+    '/js_lib/jqwidgets/styles/images/material-icon-right.png'
   ],
   css : [
     '/js_lib/jqwidgets/styles/jqx.base.css',
