@@ -3,7 +3,9 @@ from aiohttp import web
 from corelib import BaseObj, Core
 from httplib.models import HttpHandler, HttpRequestData, SendOk, HttpMsgData
 from models.auth import Moduls
+from models.network import IpData
 import aioauth
+
 
 class Api(BaseObj):
     def __init__(self, core: Core) -> None:
@@ -29,6 +31,12 @@ class Api(BaseObj):
                     return (True, web.json_response(data.model_dump()))
                 else:
                     return (True, web.json_response(SendOk(ok=False).model_dump()))
+            case 'user/get_record':
+                self.core.log.critical('Ask for route')
+                resp = await self.core.web_l.msg_send(HttpMsgData(dest='avm', type='get_all_ip'))
+                data = IpData.model_validate(resp)
+                self.core.log.debug(data)
+                return (True, web.json_response(SendOk(data=data.model_dump()).model_dump()))
             case _:
                 self.core.log.critical('/'.join(rd.path))
     

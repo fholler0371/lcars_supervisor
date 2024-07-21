@@ -38,12 +38,16 @@ class Com(BaseObj):
                     if relay_rd.path[0] == 'dyndns':
                         dyndns_data = AvmDynDns.model_validate(relay_rd.data)
                         for key, value in dyndns_data.model_dump().items():
-                            if hasattr(self._state, key):
-                                self._state.update(**{key: value})
+                            if value != '':
+                                if hasattr(self._state, key):
+                                    self._state.update(**{key: value})
                         self.core.log.debug(dyndns_data)
                         await self.core.call(self.on_update)
                         return (True, web.json_response(SendOk().model_dump()))
                 case 'get_ip':
+                    data = IpData(ip4=self._state.ip4)
+                    return (True, web.json_response(data.model_dump()))
+                case 'get_all_ip':
                     data = IpData(ip4=self._state.ip4)
                     return (True, web.json_response(data.model_dump()))
                 

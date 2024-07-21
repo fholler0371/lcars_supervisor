@@ -13,7 +13,7 @@ define([], function() {
                 $(".main_content").append(html)
                 require(['jqxinput', 'jqxbutton', 'jqxpassword'], function() {
                     html = '<table style="margin: 30px;"><tr><td>IP-V4'
-                    html += '</td><td width="20px"></td><td id="content_modul_router_ipv4></td></tr></table>'
+                    html += '</td><td width="20px"></td><td id="content_modul_router_ipv4"></td></tr></table>'
                     $('#content_modul_router_net').append(html)
                 })
             } 
@@ -25,8 +25,13 @@ define([], function() {
             self.set_content()
             require(['jqxinput'], function() {
                 window.api_call(url='user/get_record').then(resp => {
+                    console.log(resp)
                     if (resp.ok) {
-                        //$("#content_modul_router_net_label").jqxInput('val', resp.label)
+                        if (resp.data.ip4 == undefined || resp.data.ip4 == '') {
+                            notification.show('info', 'Keine IP-V4 Adresse')
+                        } else {
+                            $('#content_modul_router_ipv4').text(resp.data.ip4)
+                        }
                     } else {
                         notification.show('error', 'Router-Daten konnten nicht geladen werden')
                     }

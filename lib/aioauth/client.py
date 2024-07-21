@@ -43,7 +43,7 @@ class Client:
                         self.core.log.error(e) 
                     url = rd.scheme
                     self.callback = url = f"{url}://{rd.host}/"
-                    self.callback += 'callback.html' if self.core.const.app == 'web_base' else f'{self.core.const.app.split('_')[-1]}/callback.html'
+                    self.callback += 'callback.html' if self.core.const.app == 'web_base' else f'{self.core.const.app.split("_")[-1]}/callback.html'
                     url += f'auth/login.html?response_type=code&redirect_uri={up.quote(self.callback)}'
                     client_id = await self.clientid
                     if client_id is None:
@@ -56,7 +56,7 @@ class Client:
                 try:
                     url = rd.scheme
                     self.callback = url = f"{url}://{rd.host}/"
-                    self.callback += 'callback.html' if self.core.const.app == 'web_base' else f'{self.core.const.app.split('_')[-1]}/callback.html'
+                    self.callback += 'callback.html' if self.core.const.app == 'web_base' else f'{self.core.const.app.split("_")[-1]}/callback.html'
                     try:
                         rd = HttpMsgData.model_validate(rd.data)
                         rd = HttpRequestData.model_validate(rd.data)
@@ -71,7 +71,7 @@ class Client:
                     try:
                         resp = await self.core.web_l.post_raw_url(f"{url}api/auth/token", post_data)
                         self.core.log.critical(resp) 
-                        if resp is None:
+                        if resp is None or resp == "{}":
                             return (True, web.json_response(SendOk(ok=False).model_dump()))
                         else:
                             self.core.log.critical(resp) 
@@ -98,7 +98,7 @@ class Client:
                     try:
                         resp = await self.core.web_l.post_raw_url(f"{url}api/auth/token", post_data)
                         self.core.log.critical(resp) 
-                        if resp is None:
+                        if resp is None or resp == '{}':
                             return (True, web.json_response(SendOk(ok=False).model_dump()))
                         else:
                             return (True, web.json_response(json.loads(resp)))
