@@ -5,7 +5,8 @@ LIBS = {
    "cryptography" : "cryptography",
    "aiosqlite" : "aiosqlite",
    "bcrypt" : "bcrypt",
-   "pyjwt" : "jwt"
+   "pyjwt" : "jwt",
+   "pyotp" : "pyotp"
 }
 
 async def main() -> None:

@@ -11,6 +11,7 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 import aiofiles
 import jwt
+import pyotp
 
 from corelib import BaseObj, Core
 import aiotomllib
@@ -35,6 +36,7 @@ class Api(BaseObj):
         self._users_db.add_table(db_settings.Users())
         self._pw_db = aiodatabase.DB(f"sqlite:///{self.core.path.data}/pw.sqlite3")
         self._pw_db.add_table(db_settings.Pw())
+        self._pw_db.add_table(db_settings.Otp())
         self._code_db = aiodatabase.DB(f"sqlite:///{self.core.path.data}/code.sqlite3")
         self._code_db.add_table(db_settings.Code())
         self._token_db = aiodatabase.DB(f"sqlite:///{self.core.path.data}/token.sqlite3")
@@ -291,6 +293,23 @@ class Api(BaseObj):
                     mail_data = UserMail.model_validate_json(rd.data)
                     await self._users_db.table('users').exec('update_mail_by_user_id', {'user_id': rd.open_id['sub'], 'mail':mail_data.mail})
                     return (True, web.json_response(SendOk().model_dump()))
+            case 'user/get_totp':
+                rd = HttpMsgData.model_validate(rd.data)
+                rd = HttpRequestData.model_validate(rd.data)
+                user = await self._users_db.table('users').exec('get_id_by_user_id', {'user_id': rd.open_id['sub']})
+                if user:
+                    token = pyotp.random_hex()
+                    self.core.log.critical('TTOOTTPP') 
+                    self.core.log.critical(pyotp.random_hex()) 
+                    self.core.log.critical(rd.open_id) 
+                    self.core.log.critical(user['id'])
+                    otp = await self._pw_db.table('otp').exec('get', {'id': user['id']})
+                    if otp:
+                        await self._pw_db.table('otp').exec('update', {'id': user['id'], 'otp': token})
+                    else:
+                        await self._pw_db.table('otp').exec('insert', {'id': user['id'], 'otp': token})
+                    return (True, web.json_response({'ok': True, 'otp': token}))
+                    self.core.log.critical(otp)
             case _:
                 self.core.log.critical('/'.join(rd.path))
     
@@ -299,6 +318,7 @@ class Api(BaseObj):
         await self.core.web.add_handler(HttpHandler(domain = 'api', func = self.handler, auth='remote', acl=None))
         await self._code_db.setup()
         await self._token_db.setup()
+        await self._pw_db.setup()
         
     async def _astart(self):
         self.core.log.debug('starte api')
