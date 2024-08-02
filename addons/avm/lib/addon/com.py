@@ -48,7 +48,9 @@ class Com(BaseObj):
                     data = IpData(ip4=self._state.ip4)
                     return (True, web.json_response(data.model_dump()))
                 case 'get_all_ip':
-                    data = IpData(ip4=self._state.ip4)
+                    self.core.log.critical(self._state)
+                    data = IpData(ip4=self._state.ip4, prefix=self._state.prefix)
+                    self.core.log.critical(data)
                     return (True, web.json_response(data.model_dump()))
                 
         

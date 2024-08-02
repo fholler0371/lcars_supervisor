@@ -13,7 +13,8 @@ define([], function() {
                 $(".main_content").append(html)
                 require(['jqxinput', 'jqxbutton', 'jqxpassword'], function() {
                     html = '<table style="margin: 30px;"><tr><td>IP-V4'
-                    html += '</td><td width="20px"></td><td id="content_modul_router_ipv4"></td></tr></table>'
+                    html += '</td><td width="20px"></td><td id="content_modul_router_ipv4"></td></tr><tr height="15px"></tr><tr><td>Prefix</td><td></td>'
+                    html += '<td id="content_modul_router_prefix"></td></tr></table>'
                     $('#content_modul_router_net').append(html)
                 })
             } 
@@ -31,6 +32,11 @@ define([], function() {
                             notification.show('info', 'Keine IP-V4 Adresse')
                         } else {
                             $('#content_modul_router_ipv4').text(resp.data.ip4)
+                        }
+                        if (resp.data.prefix == undefined || resp.data.prefix == '') {
+                            notification.show('info', 'Keine IP-V6 Prefix')
+                        } else {
+                            $('#content_modul_router_prefix').text(resp.data.prefix)
                         }
                     } else {
                         notification.show('error', 'Router-Daten konnten nicht geladen werden')
