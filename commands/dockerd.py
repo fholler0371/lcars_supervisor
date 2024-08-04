@@ -127,7 +127,8 @@ async def container_add(core: corelib.Core, container: str) -> None:
             comp['services'][toml['name']]['networks'].append(f'net{idx}')
             idx += 1
     if 'volumes' in toml:
-        data_folder = pathlib.Path('/'.join(str(core.path.data).split('/')[:-1])) / toml['name'] 
+        data_base_folder = pathlib.Path('/'.join(str(core.path.data).split('/')[:-1]))  
+        data_folder = data_base_folder / toml['name'] 
         log_folder = pathlib.Path('/'.join(str(core.path.log).split('/')[:-1])) / toml['name'] 
         temp_folder = pathlib.Path('/'.join(str(core.path.temp).split('/')[:-1])) / toml['name']
         base_config_folder = core.path.lcars / 'config'
@@ -140,6 +141,7 @@ async def container_add(core: corelib.Core, container: str) -> None:
         if 'config' in toml['volumes']:
             for entry in toml['volumes']['config']:
                 source = entry['source']
+                source = source.replace('%data_base_folder%', str(data_base_folder))
                 source = source.replace('%data_folder%', str(data_folder))
                 source = source.replace('%log_folder%', str(log_folder))
                 source = source.replace('%temp_folder%', str(temp_folder))
@@ -153,6 +155,7 @@ async def container_add(core: corelib.Core, container: str) -> None:
                         stdout=asyncio.subprocess.PIPE)
                     await p.wait()
                     base = entry['base']
+                    base = base.replace('%data_base_folder%', str(data_base_folder))
                     base = base.replace('%data_folder%', str(data_folder))
                     base = base.replace('%log_folder%', str(log_folder))
                     base = base.replace('%temp_folder%', str(temp_folder))
@@ -167,6 +170,7 @@ async def container_add(core: corelib.Core, container: str) -> None:
                 comp['services'][toml['name']]['volumes'].append(f"{source}:{entry['dest']}:ro")
         if 'base' in toml['volumes']:
             for source, dest in toml['volumes']['base'].items():
+                source = source.replace('%data_base_folder%', str(data_base_folder))
                 source = source.replace('%data_folder%', str(data_folder))
                 source = source.replace('%log_folder%', str(log_folder))
                 source = source.replace('%temp_folder%', str(temp_folder))
