@@ -14,6 +14,10 @@ source = "%config_folder%/config.toml"
 dest = "/lcars/config/config.toml"
 
 [[volumes.config]]
+source = "%config_folder%/secret.toml"
+dest = "/lcars/config/secret.toml"
+
+[[volumes.config]]
 source = "%base_config_folder%/acl.toml"
 dest = "/lcars/config/acl.toml"
 
@@ -30,6 +34,6 @@ dest = "/lcars/config/manifest.toml"
 
 [volumes.run]
 "%base_folder%/addons/backup/src/run.py" = "/lcars/starter/run.py"
+"%base_folder%/addons/backup/src/update.py" = "/lcars/starter/update.py"
 "%base_folder%/addons/backup/lib" = "/lcars/lib2"
 
-#[volumes.web]
