@@ -8,7 +8,7 @@ folder = 'python'
 [lib]
 web = "httplib.HTTP"
 web_l = "httplib.ClientLocal"
-com = "addon_com.Com"
-api = "addon_com.Api"
-firmware = "addon_com.Firmwarcheck"
-
+com = "addon.Com"
+api = "addon.Api"
+firmware = "addon.Firmwarcheck"
+powerhist = "addon.PowerHistory"

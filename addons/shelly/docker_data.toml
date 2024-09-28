@@ -29,6 +29,7 @@ dest = "/lcars/config/manifest.toml"
 
 [volumes.run]
 "%base_folder%/addons/shelly/src/run.py" = "/lcars/starter/run.py"
+"%base_folder%/addons/web_auth/src/update.py" = "/lcars/starter/update.py"
 "%base_folder%/addons/shelly/lib" = "/lcars/lib2"
 
 #[volumes.web]

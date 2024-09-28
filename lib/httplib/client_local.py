@@ -23,6 +23,7 @@ class ClientLocal(BaseObj):
         self._hostname = None
         self._parent_ip = None
         self._app_list_valid = 0
+        self._reatart_because_auth = 0
         self._app_list = []
         
     async def _ainit(self):
@@ -37,6 +38,10 @@ class ClientLocal(BaseObj):
                 response = await session.post(url=url, data=post_data) 
                 if response.status != 200:
                     self.core.log.error(f"{response.status} {url}")
+                    self._reatart_because_auth += 1
+                    if self._reatart_because_auth == 16:
+                        self.core.running.set()
+                
                     return "{}"
                 else:
                     return await response.text()

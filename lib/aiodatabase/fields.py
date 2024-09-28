@@ -22,3 +22,8 @@ class Text(Field):
     def __init__(self, name, **kwargs) -> None:
         super().__init__(name, **kwargs)
         self._type = "TEXT"
+
+class Float(Field):
+    def __init__(self, name, **kwargs) -> None:
+        super().__init__(name, **kwargs)
+        self._type = "REAL"

@@ -23,6 +23,7 @@ class Com(BaseObj):
             case 'messages/register_app':
                 msg = rd.data
                 data = App.model_validate(msg.data)
+                self.core.log.debug(data)
                 self.core.api._apps[data.app]=data
                 return (True, web.json_response(SendOk().model_dump()))
             case _:
