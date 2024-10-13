@@ -49,11 +49,10 @@ class Com(BaseObj):
                     return (True, web.json_response(data.model_dump()))
                 case 'get_all_ip':
                     self.core.log.critical(self._state)
-                    data = IpData(ip4=self._state.ip4, prefix=self._state.prefix)
+                    data = IpData(ip4=self._state.ip4, prefix=self._state.prefix, ip6=self._state.ip6)
                     self.core.log.critical(data)
                     return (True, web.json_response(data.model_dump()))
-                
-        
+                        
     async def _ainit(self):
         self.core.log.debug('Initaliesiere com')
         await self.core.web.add_handler(HttpHandler(domain = 'com', func = self.handler, auth='local', acl='lcars_docker'))
