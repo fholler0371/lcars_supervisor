@@ -1,0 +1,39 @@
+name = "aws_r53"
+
+image = "lcars/python:%Y.%m"
+restart = "unless-stopped"
+networks = ["lcars-bridge"]
+#ports = ['1236:1235']
+
+[setup]
+lcars = true
+
+[[volumes.config]]
+base = "%base_folder%/addons/aws_r53/config/config.toml"
+source = "%config_folder%/config.toml"
+dest = "/lcars/config/config.toml"
+
+[[volumes.config]]
+source = "%base_config_folder%/secret.toml"
+dest = "/lcars/config/secret.toml"
+
+[[volumes.config]]
+source = "%base_config_folder%/acl.toml"
+dest = "/lcars/config/acl.toml"
+
+[[volumes.config]]
+source = "%base_folder%/addons/aws_r53/manifest.toml"
+dest = "/lcars/config/manifest.toml"
+
+[volumes.base]
+"%data_folder%" = "/lcars/data"
+"%log_folder%" = "/lcars/log"
+"%temp_folder%" = "/lcars/temp"
+"%base_folder%/lib" = "/lcars/lib"
+
+[volumes.run]
+"%base_folder%/addons/aws_r53/src/run.py" = "/lcars/starter/run.py"
+"%base_folder%/addons/aws_r53/src/update.py" = "/lcars/starter/update.py"
+"%base_folder%/addons/aws_r53/lib" = "/lcars/lib2"
+
+#[volumes.web]
