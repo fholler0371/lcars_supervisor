@@ -14,7 +14,7 @@ class Com(BaseObj):
         BaseObj.__init__(self, core)
         
     async def do_check_records(self):
-        await self.core.call_random(60, self.do_check_records)
+        await self.core.call_random(300, self.do_check_records)
         zones = {}
         with open("/lcars/config/secret.toml", "rb") as f:
             secret = tomllib.load(f)
