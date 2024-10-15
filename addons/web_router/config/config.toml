@@ -45,3 +45,6 @@ level = "DEBUG"
 filename = "%log_folder%/my_log.json"
 maxBytes = 10000000
 backupCount = 9
+
+[avm]
+fritzlink = ""

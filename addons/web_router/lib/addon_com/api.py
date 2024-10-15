@@ -1,4 +1,5 @@
 from aiohttp import web
+import tomllib
 
 from corelib import BaseObj, Core
 from httplib.models import HttpHandler, HttpRequestData, SendOk, HttpMsgData
@@ -10,7 +11,13 @@ import aioauth
 class Api(BaseObj):
     def __init__(self, core: Core) -> None:
         BaseObj.__init__(self, core)
+        self._fritzlink = ''
         self._auth = aioauth.Client(self.core)
+        with open("/lcars/config/config.toml", "rb") as f:
+            config = tomllib.load(f)
+            self.core.log.debug(config.get('avm', {}).get('fritzlimk', ''))
+            self._fritzlink = config.get('avm', {}).get('fritzlimk', '')
+            self.core.log.debug(self._fritzlink)
                 
     async def handler(self, request: web.Request, rd: HttpRequestData) -> bool:
         #prüfen ob einträge für allgemeine auth handler ist
@@ -37,12 +44,18 @@ class Api(BaseObj):
                 data = IpData.model_validate(resp)
                 self.core.log.debug(data)
                 return (True, web.json_response(SendOk(data=data.model_dump()).model_dump()))
+            case 'user/fritzlink':
+                self.core.log.critical('get fritzlinky')
+                return (True, web.json_response({"ok" :True, "link": self._fritzlink}))
             case _:
                 self.core.log.critical('/'.join(rd.path))
     
     async def _ainit(self):
         self.core.log.debug('Initaliesiere api')
         await self.core.web.add_handler(HttpHandler(domain = 'api', func = self.handler, auth='remote', acl=None))
+        with open("/lcars/config/config.toml", "rb") as f:
+            config = tomllib.load(f)
+            self._fritzlink = config.get('avm', {}).get('fritzlink', '')
         
     async def _astart(self):
         self.core.log.debug('starte api')
