@@ -46,10 +46,12 @@ class Com(BaseObj):
                             for entry in  zones[zone_id]['data']:
                                 if entry['Name'] == f'{record['domain']}.' and entry['Type'] == record['type']:
                                     value = ip_data.get(record['entry'])
-                                    if value != entry['ResourceRecords'][0]['Value']:
-                                        batch = [{'Action': 'UPSERT', 'ResourceRecordSet': {'Name': entry['Name'], 'Type': 'AAAA', 'TTL': 300,
-                                                  'ResourceRecords': [{'Value': value}]}}]
-                                        resp = r53.change_resource_record_sets(HostedZoneId=zone_id, ChangeBatch={'Comment': 'changed by lcars', 'Changes': batch})
+                                    for type_rec in entry['ResourceRecords']:
+                                        if value != type_rec['Value']:
+                                            batch = [{'Action': 'UPSERT', 'ResourceRecordSet': {'Name': entry['Name'], 'Type': record['type'], 'TTL': 300,
+                                                      'ResourceRecords': [{'Value': value}]}}]
+                                            #self.core.log.debug(batch)
+                                            resp = r53.change_resource_record_sets(HostedZoneId=zone_id, ChangeBatch={'Comment': 'changed by lcars', 'Changes': batch})
         except Exception as e:
             self.core.log.error(repr(e))
                 
