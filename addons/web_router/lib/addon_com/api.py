@@ -1,5 +1,6 @@
 from aiohttp import web
 import tomllib
+import json
 
 from corelib import BaseObj, Core
 from httplib.models import HttpHandler, HttpRequestData, SendOk, HttpMsgData
@@ -39,14 +40,22 @@ class Api(BaseObj):
                 else:
                     return (True, web.json_response(SendOk(ok=False).model_dump()))
             case 'user/get_record':
-                self.core.log.critical('Ask for route')
-                resp = await self.core.web_l.msg_send(HttpMsgData(dest='avm', type='get_all_ip'))
-                data = IpData.model_validate(resp)
-                self.core.log.debug(data)
-                return (True, web.json_response(SendOk(data=data.model_dump()).model_dump()))
+                self.core.log.debug('Ask for route')
+                bc = rd.data.data
+                if bc['open_id'] and ('router' in bc['open_id']['app'].split(' ') or bc['open_id']['app'] == '*'):
+                    resp = await self.core.web_l.msg_send(HttpMsgData(dest='avm', type='get_all_ip'))
+                    data = IpData.model_validate(resp)
+                    self.core.log.debug(data)
+                    return (True, web.json_response(SendOk(data=data.model_dump()).model_dump()))
+                else:
+                    return (True, web.json_response(SendOk(ok=False).model_dump()))
             case 'user/fritzlink':
-                self.core.log.critical('get fritzlinky')
-                return (True, web.json_response({"ok" :True, "link": self._fritzlink}))
+                self.core.log.debug('get fritzlinky')
+                bc = rd.data.data
+                if bc['open_id'] and ('router' in bc['open_id']['app'].split(' ') or bc['open_id']['app'] == '*'):
+                    return (True, web.json_response({"ok" :True, "link": self._fritzlink}))
+                else:
+                    return (True, web.json_response(SendOk(ok=False).model_dump()))
             case _:
                 self.core.log.critical('/'.join(rd.path))
     

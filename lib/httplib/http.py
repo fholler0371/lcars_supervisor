@@ -54,6 +54,7 @@ class HTTP(BaseObj):
                                  host=x if (x := request.headers.get('X-Host')) else request.host,
                                  scheme=x if (x := request.headers.get('X-Forwarded-Scheme')) else request.scheme)
             self.core.log.debug(f'{rd.ip} {request.method} {request.path}')
+            self.core.log.debug(request.headers)
         except Exception as e:
             self.core.log.error(e)
         for entry in self._handlers:
