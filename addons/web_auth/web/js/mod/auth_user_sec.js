@@ -32,6 +32,8 @@ define([], function() {
             let self = window.modul['auth_user_sec']
             window.modul['helper'].activate('auth_user_sec', self.label)
             self.set_content()
+            $("#content_modul_auth_user_sec_mail").val('')
+            $("#content_modul_auth_user_sec_totp").text('')
             require(['jqxinput'], function() {
                 window.api_call(url='user/get_mail').then(resp => {
                     if (resp.ok) {

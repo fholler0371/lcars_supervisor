@@ -296,20 +296,24 @@ class Api(BaseObj):
             case 'user/get_totp':
                 rd = HttpMsgData.model_validate(rd.data)
                 rd = HttpRequestData.model_validate(rd.data)
-                user = await self._users_db.table('users').exec('get_id_by_user_id', {'user_id': rd.open_id['sub']})
-                if user:
-                    token = pyotp.random_hex()
-                    self.core.log.critical('TTOOTTPP') 
-                    self.core.log.critical(pyotp.random_hex()) 
-                    self.core.log.critical(rd.open_id) 
-                    self.core.log.critical(user['id'])
-                    otp = await self._pw_db.table('otp').exec('get', {'id': user['id']})
-                    if otp:
-                        await self._pw_db.table('otp').exec('update', {'id': user['id'], 'otp': token})
-                    else:
-                        await self._pw_db.table('otp').exec('insert', {'id': user['id'], 'otp': token})
-                    return (True, web.json_response({'ok': True, 'otp': token}))
-                    self.core.log.critical(otp)
+                if rd.open_id and ('user_sec' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*'):
+                    user = await self._users_db.table('users').exec('get_id_by_user_id', {'user_id': rd.open_id['sub']})
+                    if user:
+                        token = pyotp.random_base32()
+                        _project =  (await aiotomllib.loader(self.core.path.config / 'secret.toml')).get('project', '')
+                        self.core.log.critical('TTOOTTPP') 
+                        self.core.log.critical(pyotp.random_hex()) 
+                        self.core.log.critical(rd.open_id) 
+                        self.core.log.critical(user['id'])
+                        otp = await self._pw_db.table('otp').exec('get', {'id': user['id']})
+                        if otp:
+                            await self._pw_db.table('otp').exec('update', {'id': user['id'], 'otp': token})
+                        else:
+                            await self._pw_db.table('otp').exec('insert', {'id': user['id'], 'otp': token})
+                        uri = pyotp.totp.TOTP(token).provisioning_uri(name=rd.open_id['name'], issuer_name=_project)
+
+                        return (True, web.json_response({'ok': True, 'otp': token, 'uri': uri}))
+                        self.core.log.critical(otp)
             case _:
                 self.core.log.critical('/'.join(rd.path))
     
