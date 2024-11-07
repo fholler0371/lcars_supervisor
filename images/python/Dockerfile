@@ -1,4 +1,4 @@
-FROM python:3.12-%codename%
+FROM python:3.13-%codename%
 
 WORKDIR /lcars
 
@@ -13,7 +13,7 @@ RUN rm /etc/localtime && ln -s /usr/share/zoneinfo/Europe/Berlin /etc/localtime 
     apt update && apt install -y locales locales-all iproute2 && \
     dpkg-reconfigure locales
 
-RUN pip install aiofiles aiohttp docker pyyaml pydantic netaddr aioretry
+RUN pip install aiofiles aiohttp docker pyyaml pydantic netaddr aioretry psutil
 
 COPY main.py /lcars/starter/main.py
 COPY health_check.py /lcars/starter/health_check.py

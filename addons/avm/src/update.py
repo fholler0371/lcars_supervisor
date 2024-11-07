@@ -2,7 +2,8 @@ import asyncio
 import importlib
 
 LIBS = {
-   "fritzconnection" : "fritzconnection"
+   "fritzconnection" : "fritzconnection",
+   "netaddr" : "netaddr"
 }
 
 async def main() -> None:

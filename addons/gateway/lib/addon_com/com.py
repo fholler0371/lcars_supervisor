@@ -38,6 +38,10 @@ class Com(BaseObj):
                         hostname = await self.core.web_l.hostname
                     _out.data.extend([f'{hostname}.{name}' for name in app_data['apps']])
                 return (True, web.json_response(_out.model_dump()))
+            case 'messages/get_ip6':
+                resp = await self.core.web_l.get('network/ip6', dest='parent')
+                out = StringList(data=resp.get('ip6_addr'))
+                return (True, web.json_response(out.model_dump()))    
             case _:
                 self.core.log.debug(rd)
         return False

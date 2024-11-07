@@ -1,17 +1,20 @@
 from aiohttp import web
 import pathlib
 import aioyamllib
+import netaddr
 
 from corelib import BaseObj, Core
 from httplib.models import HttpMsgData, HttpHandler, HttpRequestData, SendOk
 
 from .models import AvmDynDns, IpState
 from models.network import IpData
+from models.basic import StringEntry, StringList
 
 class Com(BaseObj):
     def __init__(self, core: Core) -> None:
         BaseObj.__init__(self, core)
         self._state = IpState()
+        self._home = StringEntry(data='_home')
         self._state_name = pathlib.Path('/lcars/data/ip_state.yml')
         
     async def save(self, repeat: bool = True) -> None:
@@ -26,8 +29,21 @@ class Com(BaseObj):
             self.core.log.error(Exception)
 
     async def on_update(self) -> None:
-        self.core.log.info('Aktion bei neuen Daten')
-        self.core.log.debug(self._state)
+        if self._state.change or self._state.home_ip6:
+            resp = await self.core.web_l.msg_send(HttpMsgData(dest='gateway', type='get_ip6'))
+            try:
+                data = StringList(data=resp.get('data', []))
+                net = netaddr.IPNetwork(self._state.prefix)
+                for entry in data.data:
+                    try:
+                        ip = netaddr.IPAddress(entry)
+                        if ip in net:
+                            self._state.home_ip6 = entry
+                            self._state.change = False
+                    except Exception as e:
+                        self.core.log.error(repr(e))
+            except Exception as e:
+                self.core.log.error(repr(e))
         
     async def handler(self, request: web.Request, rd: HttpRequestData) -> bool:
         if rd.path[0] == 'messages':
@@ -48,9 +64,9 @@ class Com(BaseObj):
                     data = IpData(ip4=self._state.ip4)
                     return (True, web.json_response(data.model_dump()))
                 case 'get_all_ip':
-                    self.core.log.critical(self._state)
-                    data = IpData(ip4=self._state.ip4, prefix=self._state.prefix, ip6=self._state.ip6)
-                    self.core.log.critical(data)
+                    #self.core.log.critical(self._state)
+                    data = IpData(ip4=self._state.ip4, prefix=self._state.prefix, ip6=self._state.ip6, home_ip6=self._state.home_ip6)
+                    #self.core.log.critical(data)
                     return (True, web.json_response(data.model_dump()))
                         
     async def _ainit(self):

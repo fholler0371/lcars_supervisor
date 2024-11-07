@@ -11,6 +11,9 @@ from models.network import Hostname
 from .local_keys import LocalKeys
 from .models import HttpMsgData, RespRaw
 
+class RetryException(BaseException):
+    pass 
+
 
 MAX_RETRY = 7
 def retry_policy(info: aioretry.RetryInfo) -> aioretry.RetryPolicyStrategy:
@@ -62,7 +65,7 @@ class ClientLocal(BaseObj):
             async with aiohttp.ClientSession(timeout=self.session_timeout, connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
                 async with session.get(url) as response:
                     if response.status != 200:
-                        raise()
+                        raise(RetryException)
                     else:
                         return await response.text()
         except Exception as e:

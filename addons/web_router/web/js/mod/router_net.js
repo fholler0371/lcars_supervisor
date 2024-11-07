@@ -15,9 +15,9 @@ define([], function() {
                     html = '<table style="margin: 30px;"><tr><td>IP-V4'
                     html += '</td><td width="20px"></td><td id="content_modul_router_ipv4"></td></tr><tr height="15px"></tr><tr><td>Prefix</td><td></td>'
                     html += '<td id="content_modul_router_prefix"></td></tr><tr height="15px"></tr><tr><td>'
-                    html += ''
                     html += '<span id="content_modul_router_link_fritz">Fritzbox</span></td><td></td>'
-                    html += '<td id="content_modul_router_fritz"></td></tr></table>'
+                    html += '<td id="content_modul_router_fritz"></td></tr><tr height="15px"></tr><tr><td>Home</td><td></td>'
+                    html += '<td id="content_modul_router_home"></td></tr><tr height="15px"></tr></table>'
                     $('#content_modul_router_net').append(html)
                 })
             } 
@@ -45,6 +45,11 @@ define([], function() {
                             notification.show('info', 'Keine Fritzbox Adresse')
                         } else {
                             $('#content_modul_router_fritz').text(resp.data.ip6)
+                        }
+                        if (resp.data.home_ip6 == undefined || resp.data.home_ip6 == '') {
+                            notification.show('info', 'Keine Home Adresse')
+                        } else {
+                            $('#content_modul_router_home').text(resp.data.home_ip6)
                         }
                     } else {
                         notification.show('error', 'Router-Daten konnten nicht geladen werden')

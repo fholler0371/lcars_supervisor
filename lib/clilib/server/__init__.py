@@ -4,6 +4,8 @@ from datetime import datetime as dt
 from datetime import UTC
 import socket
 import json
+import tomllib
+import psutil as ps
 
 from ..data import CliStatus, CliContainer
 from httplib.models import HttpHandler, HttpRequestData
@@ -36,6 +38,12 @@ class Server(BaseObj):
                 return await self.cli_docker_status()
             case 'network/hostname':
                 return (True, web.json_response({'hostname': socket.getfqdn()}))
+            case 'network/ip6':
+                data = []
+                for rec in ps.net_if_addrs().get(self.core.cfg.toml['network']['ip6_interface'], []):
+                    if rec.family == 10:
+                        data.append(rec.address)
+                return (True, web.json_response({'ip6_addr': data}))
         return False
     
     async def cli_docker_avaible(self) -> None:

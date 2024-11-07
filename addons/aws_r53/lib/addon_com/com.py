@@ -47,7 +47,7 @@ class Com(BaseObj):
                                 if entry['Name'] == f'{record['domain']}.' and entry['Type'] == record['type']:
                                     value = ip_data.get(record['entry'])
                                     for type_rec in entry['ResourceRecords']:
-                                        if value != type_rec['Value']:
+                                        if value and value != type_rec['Value']:
                                             batch = [{'Action': 'UPSERT', 'ResourceRecordSet': {'Name': entry['Name'], 'Type': record['type'], 'TTL': 300,
                                                       'ResourceRecords': [{'Value': value}]}}]
                                             #self.core.log.debug(batch)
