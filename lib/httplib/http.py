@@ -3,6 +3,7 @@ from aiohttp import web
 import aiohttp
 from netaddr import IPAddress, IPNetwork
 import urllib.parse
+import time
 
 from corelib import BaseObj, Core
 import cryptlib
@@ -117,6 +118,8 @@ class HTTP(BaseObj):
                                 self._jwt = cryptlib.Jwt(pem)
                         if self._jwt:
                             rd.open_id = self._jwt.validate(token)
+                            if rd.open_id['exp'] < time.time():
+                                rd.open_id = None
                     except Exception as e:
                         self.core.log.error(e)
                 if entry.func is not None:
