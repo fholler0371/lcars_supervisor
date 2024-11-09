@@ -3,6 +3,7 @@ requirejs.config({
     paths: {
         svginject: 'svg-inject',
         packery: 'packery',
+        qrcode: 'qrcode.min',
         jqxcore: 'jqwidgets/jqxcore',
         jqxinput: 'jqwidgets/jqxinput',
         jqxpassword: 'jqwidgets/jqxpasswordinput',
@@ -254,7 +255,11 @@ login = {
                 return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
             }).join(''))
             payload = JSON.parse(payload)
-            $('#header_username').text(payload.name)
+            user_name = payload.name
+            if (payload.loc != undefined && payload.loc == 1) {
+                user_name += '°'
+            }
+            $('#header_username').text(user_name)
             let next_check = login.left_access_token() - 60
             if (next_check < 0) {
                 next_check = 1
@@ -302,6 +307,7 @@ login = {
     },
     onClick : function(ev) {
         if (window.modul.login.state) {
+            localStorage.removeItem('login_token')
             window.modul.login.do_logout()
         } else {
             window.api_call(url='get_login_link', token=false).then(resp => {

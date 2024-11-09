@@ -7,6 +7,7 @@ class OpenId(BaseModel):
     iat : int 
     exp : int 
     aud : str
+    loc : int|None = 0
     name : str|None = None
     role : str|None = None
     app : str|None = None

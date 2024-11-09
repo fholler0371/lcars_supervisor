@@ -44,6 +44,7 @@ class Api(BaseObj):
         self._acl = None
         self._local_ip_valid = 0
         self.rsa_private_key = None
+        self._npm_gateway = None
         
     async def check_ip(self, ip: str) -> None:
         try:
@@ -59,6 +60,16 @@ class Api(BaseObj):
                 self._acl[0] = f'{ip_data.ip4}/32'
                 self._local_ip_valid = time.time() + 1800
             try:
+                if not self._npm_gateway:
+                    try:
+                        resp = await self.core.web_l.msg_send(HttpMsgData(dest='gateway', type='get_docker_gateway_by_container', data={'container': 'npm'}))
+                        if resp:
+                            self._npm_gateway = resp['data']
+                    except:
+                        pass
+                if self._npm_gateway == ip:
+                    self.core.log.debug('IP6 Aufruf')
+                    return False
                 _ip = IPAddress(ip)
                 for acl_ip in self._acl:
                     if _ip in IPNetwork(acl_ip):
@@ -71,7 +82,11 @@ class Api(BaseObj):
         
     async def check_app(self, ldata: UserLogin) -> None:
         if ldata.response_type == 'code':
-            app_id = await self._apps_db.table('oauth').exec('get_id_by_clientid_callback', {'clientid': ldata.clientid, 'callback': ldata.callback})
+            callback = ldata.callback.split('.')
+            if callback[0][-1] == '4':
+                callback[0] = callback[0][:-1]
+            callback = ".".join(callback)
+            app_id = await self._apps_db.table('oauth').exec('get_id_by_clientid_callback', {'clientid': ldata.clientid, 'callback': callback})
             if app_id is not None:
                 ldata.app_id = app_id['app_id']
 
@@ -151,10 +166,14 @@ class Api(BaseObj):
 
     async def validate_oauth_app(self, ldata: UserLogin, tc:TokenByCode):
         try:
+            callback = tc.callback.split('.')
+            if callback[0][-1] == '4':
+                callback[0] = callback[0][:-1]
+            callback = ".".join(callback)
             o_data = await self._apps_db.table('oauth').exec('get_client_data', {'app_id': ldata.app_id})
             if tc.grant_type not in ['code', 'refresh_token']:
                 ldata.app_id = -1
-            elif tc.grant_type == 'code' and (self.core.com._aes.decrypt(o_data['secret']) != tc.secret or o_data['callback'] != tc.callback):
+            elif tc.grant_type == 'code' and (self.core.com._aes.decrypt(o_data['secret']) != tc.secret or o_data['callback'] != callback):
                 ldata.app_id = -1
             elif tc.grant_type == 'refresh_token' and (self.core.com._aes.decrypt(o_data['secret']) != tc.secret):
                 ldata.app_id = -1
@@ -174,7 +193,8 @@ class Api(BaseObj):
                             iss= f"{request.scheme}://{request.host}/auth",
                             iat= cur_time,
                             exp= exp_time+cur_time,
-                            aud= f"{request.scheme}://{request.host}/api")
+                            aud= f"{request.scheme}://{request.host}/api",
+                            loc= 1 if ldata.secure else 0)
             if 'name' in ldata.scope:
                 user_data = await self._users_db.table('users').exec('get_name_by_id', {'id': ldata.user_id})
                 if user_data is not None:

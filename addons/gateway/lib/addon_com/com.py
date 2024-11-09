@@ -5,7 +5,7 @@ from corelib import BaseObj, Core
 
 from httplib.models import HttpHandler, HttpRequestData
 from models.network import Hostname
-from models.basic import StringList
+from models.basic import StringList, StringEntry
 
 class Com(BaseObj):
     def __init__(self, core: Core) -> None:
@@ -41,6 +41,12 @@ class Com(BaseObj):
             case 'messages/get_ip6':
                 resp = await self.core.web_l.get('network/ip6', dest='parent')
                 out = StringList(data=resp.get('ip6_addr'))
+                return (True, web.json_response(out.model_dump()))    
+            case 'messages/get_docker_gateway_by_container':
+                _data = rd.data.data
+                self.core.log.critical(_data)
+                resp = await self.core.web_l.post('network/container_gateway', dest='parent', data=_data)
+                out = StringEntry(data=resp.get('gateway'))
                 return (True, web.json_response(out.model_dump()))    
             case _:
                 self.core.log.debug(rd)

@@ -44,7 +44,25 @@ class Server(BaseObj):
                     if rec.family == 10:
                         data.append(rec.address)
                 return (True, web.json_response({'ip6_addr': data}))
+            case 'network/container_ip':
+                _data = json.loads(rd.data)
+                _ip = await self.cli_get_container_ip(_data['container']) 
+                return (True, web.json_response({'ip': _ip}))
+            case 'network/container_gateway':
+                _data = json.loads(rd.data)
+                _ip = await self.cli_get_container_gateway(_data['container']) 
+                return (True, web.json_response({'gateway': _ip}))
         return False
+    
+    async def cli_get_container_gateway(self, container):
+        _data = await self.core.docker.containers.get(container)
+        for _label in _data.attrs['NetworkSettings']['Networks']:
+            return _data.attrs['NetworkSettings']['Networks'][_label]['Gateway']
+
+    async def cli_get_container_ip(self, container):
+        _data = await self.core.docker.containers.get(container)
+        for _label in _data.attrs['NetworkSettings']['Networks']:
+            return _data.attrs['NetworkSettings']['Networks'][_label]['IPAddress']
     
     async def cli_docker_avaible(self) -> None:
         data = []
