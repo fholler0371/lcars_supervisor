@@ -114,6 +114,12 @@ class Api(BaseObj):
             try:
                 ldata.user_id = user['id']
                 ldata.user_id_s = user['user_id']
+                if not ldata.secure and ldata.totp:
+                    res = await self._pw_db.table('otp').exec('get', {'id': ldata.user_id})
+                    if res:
+                        secret = res['otp']
+                        otp = pyotp.TOTP(secret)
+                        ldata.secure = otp.verify(ldata.totp)
                 ldata.roles = ((await self._users_db.table('users').exec('get_role_sec_by_id', {'id': ldata.user_id}))['roles_sec']
                             if ldata.secure else
                             (await self._users_db.table('users').exec('get_role_by_id', {'id': ldata.user_id}))['roles'])
@@ -140,6 +146,8 @@ class Api(BaseObj):
     
     async def doLogin(self, rd:HttpRequestData, ldata: UserLogin) -> tuple:
         ldata.secure = await self.check_ip(ldata.ip) # prüfen der ip
+        if not ldata.secure:
+            ldata.totp = json.loads(rd.data.data['data'])["totp"]
         await self.check_app(ldata)
         await self.check_user_login(ldata)
         if ldata.valid:

@@ -26,9 +26,11 @@ let ASSETS = {
     '/js_lib/jqwidgets/jqxlistbox.js',
     '/js_lib/jqwidgets/jqxdropdownlist.js',
     '/js_lib/packery.js',
+    '/js_lib/qrcode.min.js',
     '/js/mod/app.js',
     // auth
-    '/auth/js/mod/auth_user.js'
+    '/auth/js/mod/auth_user.js',
+    '/auth/js/mod/auth_user_sec.js'
   ],
   image : [
     '/img/mdi/home.svg',

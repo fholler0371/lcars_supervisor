@@ -4,6 +4,7 @@ define([], function() {
         icon: '/img/mdi/account-lock.svg',
         label: 'Nutzereinstellungen',
         already_init : false,
+        qrcode : null,
         init: function () {
         },
         set_content: function() {
@@ -17,7 +18,7 @@ define([], function() {
                     html += '<tr height="20px"></tr>'
                     html += '<tr height="50px"></tr><tr><td id="content_modul_auth_user_sec_totp"></td><td></td>'
                     html += '<td><input type="button" value="TOTP erstellen" id="content_modul_auth_user_sec_get_totp" /></td>'
-                    html += '</table>'
+                    html += '<tr><td><div id="content_modul_auth_user_sec_qrcode" style="padding: 10px; background: white; display:none; width: 256px"></div></td></tr></table>'
                     $('#content_modul_auth_user_sec').append(html)
                     $("#content_modul_auth_user_sec_mail").jqxInput({placeHolder: "E-Mail", height: 30, width: 380, minLength: 5, theme: 'material' })
                     $("#content_modul_auth_user_sec_send_label").jqxButton({ width: 140, height: 40, theme: 'material' })
@@ -34,6 +35,7 @@ define([], function() {
             self.set_content()
             $("#content_modul_auth_user_sec_mail").val('')
             $("#content_modul_auth_user_sec_totp").text('')
+            $('#content_modul_auth_user_sec_qrcode').hide()
             require(['jqxinput'], function() {
                 window.api_call(url='user/get_mail').then(resp => {
                     if (resp.ok) {
@@ -45,7 +47,9 @@ define([], function() {
             })
         },
         stop: function() {
-        
+            $('#content_modul_auth_user_sec_qrcode').hide()
+            $("#content_modul_auth_user_sec_mail").val('')
+            $("#content_modul_auth_user_sec_totp").text('')
         },
         click_send_mail() {
             window.api_call(url='user/set_mail', data={mail: $("#content_modul_auth_user_sec_mail").jqxInput('val')}).then(resp => {
@@ -60,7 +64,14 @@ define([], function() {
            window.api_call(url='user/get_totp', {}).then(resp => {
                 if (resp.ok) {
                     $("#content_modul_auth_user_sec_totp").text(resp.otp)
+                    require(['qrcode'], function(qr) {
+                        $('#content_modul_auth_user_sec_qrcode').text('')
+                        window.modul['auth_user_sec'].qrcode = new QRCode(document.getElementById("content_modul_auth_user_sec_qrcode"), {text: resp.uri, colorDark : "#000000",
+                            colorLight : "#ffffff", width: 256, height: 256})
+                        $('#content_modul_auth_user_sec_qrcode').show()
+                    })
                 } else {
+                    $('#content_modul_auth_user_sec_qrcode').hide()
                     notification.show('error', 'Fehler beim erdtellen von TOTP')
                 }
             })
