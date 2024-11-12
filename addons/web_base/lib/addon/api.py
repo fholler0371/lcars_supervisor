@@ -52,6 +52,7 @@ class Api(BaseObj):
             case 'app/load_list':
                 if rd.open_id:
                     data = Apps()
+                    self.core.log.critical(self._apps)
                     for app, info in self._apps.items():
                         if (app in rd.open_id['app'] or rd.open_id['app'] == '*') and info.time > time.time()-3600*24:
                             data.append(info.model_dump())

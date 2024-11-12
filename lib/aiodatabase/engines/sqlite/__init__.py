@@ -80,6 +80,16 @@ class DB:
                 await db.execute(sql, parameters=parameters)
                 await db.commit()
                 return None
+            elif statement.mode == multi_query:
+                db.row_factory = aiodatabase.Row
+                result = await db.execute_fetchall(sql, parameters=parameters)
+                if len(result) == 0:
+                    return None
+                out = []
+                _fields = self._db.table(table)._fields
+                for row in result:
+                    out.append(self.result_to_dict(_fields, row))
+                return out
         return None
 
     async def execute_all(self, table, statement, values):
