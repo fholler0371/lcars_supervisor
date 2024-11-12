@@ -8,7 +8,7 @@ define([], function() {
         },
         set_content: function() {
             let self = window.modul['router_net']
-            if (!($('#content_modul_router_net').length)) {
+            if (!($('#content_modul_budget_net').length)) {
                 var html = '<div id="content_modul_budget_status" class="content_modul jqx-widget-content-material"><div id="content_modul_budget_status_grid">'
                 $(".main_content").append(html)
                 var source = {
@@ -51,8 +51,9 @@ define([], function() {
                         theme: 'material',  
                         showstatusbar: true,   
                         renderstatusbar: function(statusbar) {
+                            statusbar.text('')
                           let container = $("<div style='margin: 5px;'></div>")
-                          img = '<img id="content_modul_budget_status_grid_refresh" src="/js/img/mdi/refresh.svg" class="button_32" style="position: relative; top: -3px; cursor:pointer"></img>'
+                          img = '<img id="content_modul_budget_status_grid_refresh" src="/img/mdi/refresh.svg" class="button_32" style="position: relative; top: -3px; cursor:pointer"></img>'
                           rightSpan = $(`<span style='float: right; margin-right: 11px;'>${img}</span>`)
                           container.append(rightSpan)
                           statusbar.append(container)
@@ -99,21 +100,7 @@ define([], function() {
             let self = window.modul['budget_overview']
             window.modul['helper'].activate('budget_overview', self.label)
             self.set_content()
-            $('#content_modul_budget_net').show()
-        },
-        load_link: function() {
-            
-            if ($('#content_modul_router_link_fritz').parent()[0].nodeName != 'A') {
-                window.api_call(url='user/fritzlink').then(resp => {
-                    if (resp.ok) {
-                        $('#content_modul_router_link_fritz').wrap('<a href="' + resp.link +
-                                                                   '" target="_blank" style="color: var(--main-color_or); text-decoration: none;"></a>')
-                    } else {
-                        notification.show('error', 'Fritzbox-Link konnte nicht geladen werden')
-                    }
-                })
-            }
-
+            $('#content_modul_budget_status').show()
         },
         stop: function() {
         
