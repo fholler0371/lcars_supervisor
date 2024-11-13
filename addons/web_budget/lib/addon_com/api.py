@@ -5,7 +5,7 @@ import json
 from corelib import BaseObj, Core
 from httplib.models import HttpHandler, HttpRequestData, SendOk, HttpMsgData
 from models.auth import Moduls
-from models.basic import ListOfDict
+from models.basic import ListOfDict, Dict
 
 
 class Api(BaseObj):
@@ -19,7 +19,6 @@ class Api(BaseObj):
         #if auth_resp[0]:
         #    return auth_resp
         #call für dieses Modul
-        self.core.log.debug(rd)
         match '/'.join(rd.path):
             case 'get_allowed_moduls':
                 try:
@@ -30,6 +29,8 @@ class Api(BaseObj):
                 data = Moduls()
                 if rd.open_id and ('budget' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*'):
                     data.append({'mod': 'budget_overview', 'src': '/budget/js/mod/budget_overview'})
+                if rd.open_id and ('budget_sec' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*'):
+                    data.append({'mod': 'budget_cat', 'src': '/budget/js/mod/budget_cat'})
                 self.core.log.debug(data)
                 return (True, web.json_response(data.model_dump()))
             case 'budget/get_status':
@@ -42,11 +43,29 @@ class Api(BaseObj):
                     return (True, web.json_response(SendOk(data=data.model_dump()).model_dump()))
                 else:
                     return (True, web.json_response(SendOk(ok=False).model_dump()))
-            case 'user/fritzlink':
-                self.core.log.debug('get fritzlinky')
+            case 'category/get_categories':
+                self.core.log.debug('Ask for Categories')
                 bc = rd.data.data
-                if bc['open_id'] and ('router' in bc['open_id']['app'].split(' ') or bc['open_id']['app'] == '*'):
-                    return (True, web.json_response({"ok" :True, "link": self._fritzlink}))
+                if bc['open_id'] and ('budget_sec' in bc['open_id']['app'].split(' ') or bc['open_id']['app'] == '*'):
+                    resp = await self.core.web_l.msg_send(HttpMsgData(dest='budget', type='get_categories'))
+                    data = ListOfDict.model_validate(resp)
+                    return (True, web.json_response(SendOk(data=data.model_dump()).model_dump()))
+                else:
+                    return (True, web.json_response(SendOk(ok=False).model_dump()))
+            case 'category/category_new':
+                bc = rd.data.data
+                if bc['open_id'] and ('budget_sec' in bc['open_id']['app'].split(' ') or bc['open_id']['app'] == '*'):
+                    resp = await self.core.web_l.msg_send(HttpMsgData(dest='budget', type='category_new'))
+                    data = Dict.model_validate(resp)
+                    return (True, web.json_response(SendOk(data=data.model_dump()).model_dump()))
+                else:
+                    return (True, web.json_response(SendOk(ok=False).model_dump()))
+            case 'category/category_edit':
+                bc = rd.data.data
+                if bc['open_id'] and ('budget_sec' in bc['open_id']['app'].split(' ') or bc['open_id']['app'] == '*'):
+                    data = json.loads(bc['data'])
+                    await self.core.web_l.msg_send(HttpMsgData(dest='budget', type='category_edit', data=data))
+                    return (True, web.json_response(SendOk().model_dump()))
                 else:
                     return (True, web.json_response(SendOk(ok=False).model_dump()))
             case _:

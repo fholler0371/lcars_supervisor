@@ -1,6 +1,6 @@
 from aiodatabase.tables import Table
 from aiodatabase.fields import Integer, Text
-from aiodatabase.statements import QueryMulti, QuerySingle, QueryInsert
+from aiodatabase.statements import QueryMulti, QuerySingle, QueryInsert, QueryUpdate
 
 class Category(Table):
     def __init__(self):
@@ -11,6 +11,9 @@ class Category(Table):
         self.add_field(Integer('days'))
         #
         self.add_statement('get_all', QueryMulti("SELECT {fields} FROM {table} order by label", ['id', 'label', 'activ', 'days']))        
+        self.add_statement('add_new', QueryInsert("INSERT INTO {table} ('label', 'activ', 'days') VALUES (?, ?, ?)", ['label', 'activ', 'days']))        
+        self.add_statement('get_last', QuerySingle("SELECT {fields} FROM {table} ORDER BY id DESC LIMIT 1", ['id', 'label', 'activ', 'days']))        
+        self.add_statement('update', QueryUpdate("UPDATE {table} SET label=?, activ=?, days=? WHERE id=?", ['label', 'activ', 'days', 'id']))        
 
 class Budgets(Table):
     def __init__(self):

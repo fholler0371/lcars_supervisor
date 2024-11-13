@@ -25,12 +25,17 @@ let ASSETS = {
     '/js_lib/jqwidgets/jqxscrollbar.js',
     '/js_lib/jqwidgets/jqxlistbox.js',
     '/js_lib/jqwidgets/jqxdropdownlist.js',
+    '/js_lib/jqwidgets/jqxsplitter.js',
+    '/js_lib/jqwidgets/jqxcheckbox.js',
+    '/js_lib/jqwidgets/jqxnumberinput.js',
     '/js_lib/packery.js',
     '/js_lib/qrcode.min.js',
     '/js/mod/app.js',
     // auth
     '/auth/js/mod/auth_user.js',
-    '/auth/js/mod/auth_user_sec.js'
+    '/auth/js/mod/auth_user_sec.js',
+    // budget
+    'budget/js/mod/budget_overview.js'
   ],
   image : [
     '/img/mdi/home.svg',
@@ -50,7 +55,10 @@ let ASSETS = {
     '/js_lib/jqwidgets/styles/images/material-icon-down-white.png',
     '/js_lib/jqwidgets/styles/images/material-icon-up-white.png',
     '/js_lib/jqwidgets/styles/images/material-icon-left.png',
-    '/js_lib/jqwidgets/styles/images/material-icon-right.png'
+    '/js_lib/jqwidgets/styles/images/material-icon-right.png',
+    '/css/images/finance.svg',
+    '/css/images/katalog.svg',
+    '/css/images/material_check_white.png'
   ],
   css : [
     '/js_lib/jqwidgets/styles/jqx.base.css',

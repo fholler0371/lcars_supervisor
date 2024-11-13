@@ -1,7 +1,7 @@
 define([], function() {
     window.modul['budget_overview'] = {
         modul: true,
-        icon: '/css/img/finance.svg',
+        icon: '/css/images/finance.svg',
         label: 'Übersicht',
         already_init : false,
         init: function () {
