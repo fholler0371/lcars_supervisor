@@ -28,6 +28,9 @@ let ASSETS = {
     '/js_lib/jqwidgets/jqxsplitter.js',
     '/js_lib/jqwidgets/jqxcheckbox.js',
     '/js_lib/jqwidgets/jqxnumberinput.js',
+    'js_lib/jqwidgets/jqxdata.js',
+    'js_lib/jqwidgets/jqxgrid.js',
+    'js_lib/jqwidgets/jqxgrid.selection.js',
     '/js_lib/packery.js',
     '/js_lib/qrcode.min.js',
     '/js/mod/app.js',
@@ -35,7 +38,8 @@ let ASSETS = {
     '/auth/js/mod/auth_user.js',
     '/auth/js/mod/auth_user_sec.js',
     // budget
-    'budget/js/mod/budget_overview.js'
+    'budget/js/mod/budget_overview.js',
+    'budget/js/mod/budget_cat.js'
   ],
   image : [
     '/img/mdi/home.svg',
@@ -48,6 +52,7 @@ let ASSETS = {
     '/img/mdi/menu.svg',
     '/img/mdi/clock.svg',
     '/img/mdi/cog-outline.svg',
+    '/img/mdi/refresh.svg',
     '/js_lib/jqwidgets/styles/images/error.png',
     '/js_lib/jqwidgets/styles/images/info.png',
     '/js_lib/jqwidgets/styles/images/close_white.png',
@@ -56,8 +61,10 @@ let ASSETS = {
     '/js_lib/jqwidgets/styles/images/material-icon-up-white.png',
     '/js_lib/jqwidgets/styles/images/material-icon-left.png',
     '/js_lib/jqwidgets/styles/images/material-icon-right.png',
+//    '/js_lib/jqwidgets/styles/images/loader.js',
     '/css/images/finance.svg',
     '/css/images/katalog.svg',
+    'css/images/cash.svg',
     '/css/images/material_check_white.png'
   ],
   css : [

@@ -31,6 +31,7 @@ class Api(BaseObj):
                     data.append({'mod': 'budget_overview', 'src': '/budget/js/mod/budget_overview'})
                 if rd.open_id and ('budget_sec' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*'):
                     data.append({'mod': 'budget_cat', 'src': '/budget/js/mod/budget_cat'})
+                    data.append({'mod': 'budget_budgets', 'src': '/budget/js/mod/budget_budgets'})
                 self.core.log.debug(data)
                 return (True, web.json_response(data.model_dump()))
             case 'budget/get_status':
@@ -66,6 +67,35 @@ class Api(BaseObj):
                     data = json.loads(bc['data'])
                     await self.core.web_l.msg_send(HttpMsgData(dest='budget', type='category_edit', data=data))
                     return (True, web.json_response(SendOk().model_dump()))
+                else:
+                    return (True, web.json_response(SendOk(ok=False).model_dump()))
+            case 'budget/get_all':
+                bc = rd.data.data
+                if bc['open_id'] and ('budget_sec' in bc['open_id']['app'].split(' ') or bc['open_id']['app'] == '*'):
+                    resp = await self.core.web_l.msg_send(HttpMsgData(dest='budget', type='budgets'))
+                    data = ListOfDict.model_validate(resp)
+                    return (True, web.json_response(SendOk(data=data.model_dump()).model_dump()))
+                else:
+                    return (True, web.json_response(SendOk(ok=False).model_dump()))
+            case 'budget/budget_edit':
+                bc = rd.data.data
+                if bc['open_id'] and ('budget_sec' in bc['open_id']['app'].split(' ') or bc['open_id']['app'] == '*'):
+                    data = json.loads(bc['data'])
+                    await self.core.web_l.msg_send(HttpMsgData(dest='budget', type='budget_edit', data=data))
+                    return (True, web.json_response(SendOk().model_dump()))
+                else:
+                    return (True, web.json_response(SendOk(ok=False).model_dump()))
+            case 'budget/get_new':
+                bc = rd.data.data
+                if bc['open_id'] and ('budget_sec' in bc['open_id']['app'].split(' ') or bc['open_id']['app'] == '*'):
+                    resp = await self.core.web_l.msg_send(HttpMsgData(dest='budget', type='budget_new'))
+                    if resp:
+                        self.core.log.critical(resp)
+                        data = Dict.model_validate(resp)
+                        self.core.log.critical(data)
+                        return (True, web.json_response(SendOk(data=data).model_dump()))
+                    else:
+                        return (True, web.json_response(SendOk(ok=False).model_dump()))
                 else:
                     return (True, web.json_response(SendOk(ok=False).model_dump()))
             case _:

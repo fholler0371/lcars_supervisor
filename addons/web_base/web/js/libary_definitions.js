@@ -15,10 +15,13 @@ requirejs.config({
         jqxscrollbar: 'jqwidgets/jqxscrollbar',
         jqxgrid: 'jqwidgets/jqxgrid',
         jqxgrid_selection: 'jqwidgets/jqxgrid.selection',
+        jqxgrid_edit: 'jqwidgets/jqxgrid.edit',
         jqxdata: 'jqwidgets/jqxdata',
         jqxsplitter: 'jqwidgets/jqxsplitter',
         jqxcheckbox: 'jqwidgets/jqxcheckbox',
-        jqxnumberinput: 'jqwidgets/jqxnumberinput'
+        jqxnumberinput: 'jqwidgets/jqxnumberinput',
+        jqxdatetimeinput: 'jqwidgets/jqxdatetimeinput',
+        jqxcalendar: 'jqwidgets/jqxcalendar'
     },
     shim: {
         jqxinput: {deps: ["jqxcore"]},
@@ -29,12 +32,14 @@ requirejs.config({
         jqxdropdownlist: {deps: ["jqxcore", "jqxlistbox"]},
         jqxlistbox: {deps: ["jqxcore", "jqxbutton", "jqxscrollbar"]},
         jqxgrid_selection: { deps: ['jqxcore', 'jqxgrid'] },
-        jqxgrid: { deps: ['jqxscrollbar', 'jqxcore', 'jqxdata'] },
+        jqxgrid_edit: { deps: ['jqxcore', 'jqxgrid'] },
+        jqxgrid: { deps: ['jqxscrollbar', 'jqxcore', 'jqxdata', 'jqxcalendar'] },
         jqxdata: { deps: ['jqxcore'] },
         jqxscrollbar: { deps: ['jqxcore', 'jqxbutton'] },
         jqxsplitter: { deps: ['jqxcore'] },
         jqxcheckbox: { deps: ['jqxcore'] },
-        jqxnumberinput: { deps: ['jqxcore'] }
+        jqxnumberinput: { deps: ['jqxcore'] },
+        jqxdatetimeinput: { deps: ['jqxcore'] }
     }
 })
 

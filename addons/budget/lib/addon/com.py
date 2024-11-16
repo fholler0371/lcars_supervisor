@@ -108,6 +108,53 @@ class Com(BaseObj):
                 await self._budget_db.table('category').exec('update', {'label': data['label'], 'activ': 1 if data['activ'] else 0, 'days': data['days'], 'id': data['id']})
                 self._valid = 0
                 return (True, web.json_response({}))
+            case 'messages/budgets':
+                resp = await self._budget_db.table('budgets').exec('get_with_order')
+                out = []
+                if resp:
+                    for entry in resp:
+                        rec = {'id': entry['id']}
+                        rec['start'] = entry['start']
+                        rec['end'] = entry['end']
+                        rec['amount'] = entry['amount'] / 100
+                        rec['category'] = entry['category']
+                        out.append(rec)
+                resp = await self._budget_db.table('category').exec('get_all')
+                if resp:
+                    for entry in out:
+                        for cat in resp:
+                            if entry['category'] == cat['id']:
+                                  entry['category'] = cat['label']
+                                  continue    
+                out = sorted(out, key = lambda y: y['category'])                 
+                out = sorted(out, key = lambda y: y['end'], reverse=True)                 
+                out = ListOfDict(data=out)
+                return (True, web.json_response(out.model_dump()))
+            case 'messages/budget_edit':
+                data = rd.data.data
+                resp = await self._budget_db.table('category').exec('get_all')
+                for cat in resp:
+                    if data['category'] == cat['label']:
+                        data['category'] = cat['id']
+                    continue
+                await self._budget_db.table('budgets').exec('edit', {'category': data['category'], 'start': data['start'], 
+                                                            'end': data['end'], 'amount': int(data['amount'] * 100), 'id': data['id']})
+                self._valid = 0
+                return (True, web.json_response({}))
+            case 'messages/budget_new':
+                resp = await self._budget_db.table('budgets').exec('id_new')
+                if resp:
+                      return (False, web.json_response({}))
+                await self._budget_db.table('budgets').exec('add_new', {'category': 1, 'start': '2000-01-01', 'end': '2000-01-01', 'amount': 0})
+                resp = await self._budget_db.table('budgets').exec('id_new')
+                rec = {'id': resp['id'], 'category': 1, 'start': '2000-01-01', 'end': '2000-01-01', 'amount': 0}
+                resp = await self._budget_db.table('category').exec('get_all')
+                for cat in resp:
+                    if rec['category'] == cat['id']:
+                        rec['category'] = cat['label']
+                    continue
+                out = Dict(data=rec)
+                return (True, web.json_response(out.model_dump()))
             case _:
                 self.core.log.error(rd)
                        

@@ -26,6 +26,11 @@ class Budgets(Table):
         #
         self.add_statement('get_by_category', QueryMulti("SELECT {fields} FROM {table} where category=? order by end", 
                                                          ['id', 'category', 'start', 'end', 'amount'],['category']))        
+        self.add_statement('get_with_order', QueryMulti("SELECT {fields} FROM {table} order by end desc", 
+                                                         ['id', 'category', 'start', 'end', 'amount']))    
+        self.add_statement('edit', QueryUpdate("UPDATE {table} SET category=?, start=?, end=?, amount=? WHERE id=?", ["category", "start", "end", "amount", "id"])) 
+        self.add_statement('id_new', QuerySingle("SELECT {fields} FROM {table} WHERE start='2000-01-01'", ['id']))
+        self.add_statement('add_new', QueryInsert("INSERT INTO {table} (category, start, end, amount) VALUES (?, ?, ?, ?)", ["category", "start", "end", "amount"]))
 
 class Bought(Table):
     def __init__(self):
