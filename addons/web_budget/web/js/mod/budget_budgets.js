@@ -131,29 +131,5 @@ define([], function() {
     window.modul['budget_budgets'].init()
 });
 
-// define(function () {
-//   var _modul = {
-//     icon: '/js/img/mdi/cash.svg',
-//     already_init : false,
-//     label: 'Bugets',
-//     categories: [],
-//     init: function() {
-//       if (!modul.budget_time.already_init) {
-//         modul.budget_time.already_init = true
-//       }
-//     },
-//     show: function() {
-//       console.log('show budget_time')
-//       $('#header_appname').text(modul.budget_time.label)
-//       require([ 'jqxdatetimeinput', 'jqxdropdownlist', 'jqxgrid.selection', 'jqxgrid.edit'], function() {
-//         if (!($('#content_modul_budget_time').length)) {
-//         }
-//         $('#content_modul_budget_time').show()
-//       })
-//     }
-//   }
-//   window.modul.budget_time = _modul
-//   console.log("budget_time")
-//   return _modul
-// })
+
   

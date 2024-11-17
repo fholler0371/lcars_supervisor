@@ -2,6 +2,7 @@ from aiohttp import web
 from datetime import datetime
 from asyncio import Lock
 import time
+import json
 
 import clilib.data as cd
 from corelib import BaseObj, Core
@@ -153,8 +154,83 @@ class Com(BaseObj):
                     if rec['category'] == cat['id']:
                         rec['category'] = cat['label']
                     continue
+                self._valid = 0
                 out = Dict(data=rec)
                 return (True, web.json_response(out.model_dump()))
+            case 'messages/buy_get':
+                out = {'categories': [], 'names': []}
+                buy_data = await self._budget_db.table('bought').exec('get_500')
+                categories = await self._budget_db.table('category').exec('get_all')
+                for category in categories:
+                    out['categories'].append(category['label'])
+                out['categories'] = sorted(out['categories'], key = lambda y: y)
+                for entry in buy_data:
+                    entry['amount'] = entry['amount'] / 100
+                    if entry['name'] not in out['names']:
+                        out['names'].append(entry['name'])
+                    for category in categories:
+                        if entry['category'] == category['id']:
+                            entry['category'] = category['label']
+                            continue
+                food_data = await self._food_db.table('bought').exec('get_500')
+                for entry in food_data:
+                    if entry['name'] not in out['names']:
+                        out['names'].append(entry['name'])
+                    entry['amount'] = entry['amount'] / 100
+                    entry['category'] = self.food_label
+                    entry['id'] += 1_000_000
+                    buy_data.append(entry)
+                out['names'] = sorted(out['names'], key = lambda y: y)
+                buy_data = sorted(buy_data, key = lambda y: y['date'], reverse=True)
+                while len(buy_data) > 500:
+                    buy_data.pop()                    
+                out['list'] = buy_data
+                out = Dict(data=out)
+                return (True, web.json_response(out.model_dump()))
+            case 'messages/buy_edit':
+                data = json.loads(rd.data.data)
+                if data['id'] > 0:
+                    db_old = 0 if data['id'] < 1_000_000 else 1
+                    db_new = 1 if data['category'] == self.food_label else 0
+                    if db_old == db_new:
+                        if db_old == 0:
+                            for category in (await self._budget_db.table('category').exec('get_all')):
+                                if category['label'] == data['category']:
+                                    _category = category['id']
+                                    continue
+                            await self._budget_db.table('bought').exec('edit', {'id': data['id'], 'date': data['date'], 'category': _category,
+                                                                                  'name': data['name'], 'amount': int(data['amount'] * 100), 'count': data['count']})
+                        else: # db_new
+                            await self._food_db.table('bought').exec('edit', {'id': data['id'] - 1_000_000, 'date': data['date'],
+                                                                                'name': data['name'], 'amount': int(data['amount'] * 100), 'count': data['count']})
+                    else: #delete
+                        if db_old == 0:
+                            self.core.log.error({'id': data['id']})
+                            await self._budget_db.table('bought').exec('delete', {'id': data['id']})
+                            self.core.log.error({'id': data['id']})
+                        else: #db_new
+                            self.core.log.error({'id': data['id'] - 1_000_000})
+                            await self._food_db.table('bought').exec('delete', {'id': data['id'] - 1_000_000})
+                            self.core.log.error({'id': data['id'] - 1_000_000})
+                        data['id'] = -1
+                if data['id'] == -1:
+                    db_new = 1 if data['category'] == self.food_label else 0
+                    if db_new == 0:
+                        for category in await self._budget_db.table('category').exec('get_all'):
+                            if category['label'] == data['category']:
+                                _category = category['id']
+                                continue
+                        await self._budget_db.table('bought').exec('add', {'date': data['date'], 'category': _category,
+                                                                           'name': data['name'], 'amount': int(data['amount'] * 100), 'count': data['count']})
+                        data['id'] = (await self._budget_db.table('bought').exec('get_max_id'))['id']
+                    else: #db_new
+                        await self._food_db.table('bought').exec('add', {'date': data['date'],
+                                                                         'name': data['name'], 'amount': int(data['amount'] * 100), 'count': data['count']})
+                        self.core.log.critical(await self._food_db.table('bought').exec('get_max_id'))
+                        data['id'] = (await self._food_db.table('bought').exec('get_max_id'))['id'] + 1_000_000
+                out = Dict(data=data)    
+                self._valid = 0
+                return (True, web.json_response(out.model_dump()))        
             case _:
                 self.core.log.error(rd)
                        

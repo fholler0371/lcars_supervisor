@@ -32,7 +32,8 @@ class Api(BaseObj):
                 if rd.open_id and ('budget_sec' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*'):
                     data.append({'mod': 'budget_cat', 'src': '/budget/js/mod/budget_cat'})
                     data.append({'mod': 'budget_budgets', 'src': '/budget/js/mod/budget_budgets'})
-                self.core.log.debug(data)
+                if rd.open_id and ('budget' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*'):
+                    data.append({'mod': 'budget_buy', 'src': '/budget/js/mod/budget_buy'})
                 return (True, web.json_response(data.model_dump()))
             case 'budget/get_status':
                 self.core.log.debug('Ask for Status')
@@ -96,6 +97,23 @@ class Api(BaseObj):
                         return (True, web.json_response(SendOk(data=data).model_dump()))
                     else:
                         return (True, web.json_response(SendOk(ok=False).model_dump()))
+                else:
+                    return (True, web.json_response(SendOk(ok=False).model_dump()))
+            case 'budget/buy_get':
+                bc = rd.data.data
+                if bc['open_id'] and ('budget' in bc['open_id']['app'].split(' ') or bc['open_id']['app'] == '*'):
+                    resp = await self.core.web_l.msg_send(HttpMsgData(dest='budget', type='buy_get'))
+                    data = Dict.model_validate(resp)
+                    return (True, web.json_response(SendOk(data=data.model_dump()).model_dump()))
+                else:
+                    return (True, web.json_response(SendOk(ok=False).model_dump()))
+            case 'budget/buy_edit':
+                self.core.log.debug('Ask Buy Data')
+                bc = rd.data.data
+                if bc['open_id'] and ('budget' in bc['open_id']['app'].split(' ') or bc['open_id']['app'] == '*'):
+                    resp = await self.core.web_l.msg_send(HttpMsgData(dest='budget', type='buy_edit', data=bc['data']))
+                    data = Dict.model_validate(resp)
+                    return (True, web.json_response(SendOk(data=data.model_dump()).model_dump()))
                 else:
                     return (True, web.json_response(SendOk(ok=False).model_dump()))
             case _:

@@ -21,7 +21,8 @@ requirejs.config({
         jqxcheckbox: 'jqwidgets/jqxcheckbox',
         jqxnumberinput: 'jqwidgets/jqxnumberinput',
         jqxdatetimeinput: 'jqwidgets/jqxdatetimeinput',
-        jqxcalendar: 'jqwidgets/jqxcalendar'
+        jqxcalendar: 'jqwidgets/jqxcalendar',
+        jqxcombobox: 'jqwidgets/jqxcombobox'
     },
     shim: {
         jqxinput: {deps: ["jqxcore"]},
@@ -33,13 +34,14 @@ requirejs.config({
         jqxlistbox: {deps: ["jqxcore", "jqxbutton", "jqxscrollbar"]},
         jqxgrid_selection: { deps: ['jqxcore', 'jqxgrid'] },
         jqxgrid_edit: { deps: ['jqxcore', 'jqxgrid'] },
-        jqxgrid: { deps: ['jqxscrollbar', 'jqxcore', 'jqxdata', 'jqxcalendar'] },
+        jqxgrid: { deps: ['jqxscrollbar', 'jqxcore', 'jqxdata', 'jqxcalendar', 'jqxcombobox'] },
         jqxdata: { deps: ['jqxcore'] },
         jqxscrollbar: { deps: ['jqxcore', 'jqxbutton'] },
         jqxsplitter: { deps: ['jqxcore'] },
         jqxcheckbox: { deps: ['jqxcore'] },
         jqxnumberinput: { deps: ['jqxcore'] },
-        jqxdatetimeinput: { deps: ['jqxcore'] }
+        jqxdatetimeinput: { deps: ['jqxcore'] },
+        jqxcombobox: { deps: ['jqxcore', 'jqxlistbox'] }
     }
 })
 
