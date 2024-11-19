@@ -14,6 +14,7 @@ class Com(BaseObj):
     def __init__(self, core: Core) -> None:
         BaseObj.__init__(self, core)
         self._apps = {}
+        self._notify_token = None
         
     async def static(self, path: str) -> tuple:
         if path == '':
@@ -63,7 +64,7 @@ class Com(BaseObj):
             await self.core.web_l.msg_send(HttpMsgData(dest='web_base', type='register_app', data=data))
         except Exception as e:
             self.core.log.error(e)
-
+            
     async def _astart(self):
         self.core.log.debug('starte com')
         await self.core.call_random(10, self.register_web_app)

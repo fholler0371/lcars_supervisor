@@ -31,7 +31,7 @@ requirejs.config({
         jqxnotification: {deps: ["jqxcore"]},
         jqxwindow: {deps: ["jqxcore"]},
         jqxdropdownlist: {deps: ["jqxcore", "jqxlistbox"]},
-        jqxlistbox: {deps: ["jqxcore", "jqxbutton", "jqxscrollbar"]},
+        jqxlistbox: {deps: ["jqxcore", "jqxbutton", "jqxscrollbar", 'jqxdata']},
         jqxgrid_selection: { deps: ['jqxcore', 'jqxgrid'] },
         jqxgrid_edit: { deps: ['jqxcore', 'jqxgrid'] },
         jqxgrid: { deps: ['jqxscrollbar', 'jqxcore', 'jqxdata', 'jqxcalendar', 'jqxcombobox'] },
@@ -366,7 +366,7 @@ helper = {
         self.set_label(label)
         self.hide_all()
         Object.entries(window.modul).forEach(element => {
-            if (element[0] != mod && element[1].modul) {
+            if (element[1].modul) {
                 element[1].stop()
             }
         })
@@ -395,7 +395,7 @@ modul_clock = {
     stopped: false,
     already_init : false,
     init: function () {
-        window.modul.helper.hide_all()
+        window.modul.helper.activate('modul_clock', modul_clock.label)
         modul.clock.already_init = true
         window.modul.clock.show()
     },

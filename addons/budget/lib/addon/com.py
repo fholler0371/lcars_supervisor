@@ -8,6 +8,7 @@ import clilib.data as cd
 from corelib import BaseObj, Core
 from httplib.models import HttpMsgData, HttpHandler, HttpRequestData
 from models.basic import ListOfDict, Dict
+from models.notify import NotifyApp, NotifyMessage
 
 import aiodatabase
 import aiotomllib
@@ -18,8 +19,11 @@ class Com(BaseObj):
     def __init__(self, core: Core) -> None:
         BaseObj.__init__(self, core)
         self._overview = []
+        self.positiv = []
+        self.days = []
         self._valid = 0
         self._recalc_lock = Lock()
+        self._notify_token = None
         
     async def recalc(self, restart=True):
         def str_to_dt(date):
@@ -60,7 +64,23 @@ class Com(BaseObj):
                     except Exception as e:
                         self.core.log.error(repr(e)) 
                     self._overview.append(category)
-                    self._valid = 3 * 3600 + int(time.time())
+                    self._valid = 900 + int(time.time())
+                if self._notify_token is not None:
+                    positiv = []
+                    days = []
+                    for entry in self._overview:
+                        if entry['budget'] > entry['out']:
+                            positiv.append(entry['label'])
+                            if entry['label'] not in self.positiv:
+                                data = NotifyMessage(token=self._notify_token, text=f'Das Buget: <b>{entry["label"]}</b> kann genutzt werden')
+                                await self.core.web_l.msg_send(HttpMsgData(dest='web_notify', type='notify_message', data=data))
+                        elif entry['days'] > entry['last']:
+                            days.append(entry['label'])
+                            if entry['label'] not in self.days:
+                                data = NotifyMessage(token=self._notify_token, text=f'Es kann wieder etwas gekauft werden im Buget: <b>{entry["label"]}</b>')
+                                await self.core.web_l.msg_send(HttpMsgData(dest='web_notify', type='notify_message', data=data))
+                    self.positiv = positiv
+                    self.days = days
                 
     async def handler(self, request: web.Request, rd: HttpRequestData) -> bool:
         match '/'.join(rd.path):
@@ -240,16 +260,30 @@ class Com(BaseObj):
         self.food_label = conf['food']['label']
         await self.core.web.add_handler(HttpHandler(domain = 'com', func = self.handler, auth='local', acl='lcars_docker'))
         
+    async def register_notify(self)->None:
+        self.core.log.debug('get_notify_token')
+        if self._notify_token is None:
+            await self.core.call_random(60, self.register_notify)
+            data = NotifyApp(label='Budget',
+                            icon='/img/mdi/cash-multiple.svg',
+                            app='budget')
+            resp = await self.core.web_l.msg_send(HttpMsgData(dest='web_notify', type='register_notify_app', data=data))
+            if resp and resp['ok']:
+                self._notify_token = resp['data']['data']
+            self.core.log.debug(f"NotifyToken: {self._notify_token}")
 
     async def _astart(self):
         self.core.log.debug('Starte com')
+        await self.core.call_random(20, self.register_notify)
         try:
             self._budget_db = aiodatabase.DB(f"sqlite:///{self.core.path.data}/budget.sqlite3")
             self._budget_db.add_table(db_settings.Category())
             self._budget_db.add_table(db_settings.Budgets())
             self._budget_db.add_table(db_settings.Bought())
+            await self._budget_db.setup()
             self._food_db = aiodatabase.DB(f"sqlite:///{self.core.path.data}/food.sqlite3")
             self._food_db.add_table(db_settings.FoodBought())
+            await self._food_db.setup()
         except Exception as e:
             self.core.log.error(repr(e))
         await self.core.call_random(30, self.recalc)
