@@ -333,10 +333,6 @@ class Api(BaseObj):
                     if user:
                         token = pyotp.random_base32()
                         _project =  (await aiotomllib.loader(self.core.path.config / 'secret.toml')).get('project', '')
-                        self.core.log.critical('TTOOTTPP') 
-                        self.core.log.critical(pyotp.random_hex()) 
-                        self.core.log.critical(rd.open_id) 
-                        self.core.log.critical(user['id'])
                         otp = await self._pw_db.table('otp').exec('get', {'id': user['id']})
                         if otp:
                             await self._pw_db.table('otp').exec('update', {'id': user['id'], 'otp': token})
@@ -381,6 +377,71 @@ class Api(BaseObj):
                         for entry in resp.get('apps_sec', '').split(' '):
                             rec['rights_sec'].append(entry)
                     return (True, web.json_response(rec))
+            case 'admin/user_add':
+                rd = HttpMsgData.model_validate(rd.data)
+                rd = HttpRequestData.model_validate(rd.data)
+                if rd.open_id and ('user_admin' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*'):
+                    data = json.loads(rd.data)
+                    id = await self._users_db.table('users').exec('get_user_by_name', {'name': data['name']})
+                    if id:
+                        return (True, web.json_response({'ok': False}))
+                    else:
+                        user_id_s = cryptlib.key_gen(16)
+                        await self._users_db.table('users').exec('insert', {'user_id': user_id_s, 'name': data['name']})
+                        return (True, web.json_response({'ok': True}))
+            case 'admin/user_del':
+                rd = HttpMsgData.model_validate(rd.data)
+                rd = HttpRequestData.model_validate(rd.data)
+                if rd.open_id and ('user_admin' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*'):
+                    data = json.loads(rd.data)
+                    await self._users_db.table('users').exec('delete', {'name': data['name']})
+                    return (True, web.json_response({'ok': True}))
+            case 'admin/user_edit':
+                rd = HttpMsgData.model_validate(rd.data)
+                rd = HttpRequestData.model_validate(rd.data)
+                if rd.open_id and ('user_admin' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*'):
+                    data = json.loads(rd.data)
+                    id = await self._users_db.table('users').exec('get_user_by_name', {'name': data['name']})
+                    await self._users_db.table('users').exec('update_label_by_user_id', {'user_id': id['user_id'], 'label': data['label']})
+                    await self._users_db.table('users').exec('update_mail_by_user_id', {'user_id': id['user_id'], 'mail': data['mail']})
+                    return (True, web.json_response({'ok': True}))
+            case 'admin/set_password':
+                rd = HttpMsgData.model_validate(rd.data)
+                rd = HttpRequestData.model_validate(rd.data)
+                if rd.open_id and ('user_admin' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*'):
+                    data = json.loads(rd.data)
+                    id = await self._users_db.table('users').exec('get_user_by_name', {'name': data['name']})
+                    pw_hash = bcrypt.hashpw((self.core.com._salt+data['password']).encode(), bcrypt.gensalt()).decode()
+                    result = await self._pw_db.table('pw').exec('get_password_by_id', {'id': id['user_id']})
+                    if result is None:
+                        await self._pw_db.table('pw').exec('insert', {'id': id['user_id'], 'password': pw_hash})
+                    else:
+                        await self._pw_db.table('pw').exec('update', {'id': id['user_id'], 'password': pw_hash})
+                    return (True, web.json_response({'ok': True}))
+            case 'admin/set_apps':
+                rd = HttpMsgData.model_validate(rd.data)
+                rd = HttpRequestData.model_validate(rd.data)
+                if rd.open_id and ('user_admin' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*'):
+                    data = json.loads(rd.data)
+                    id = await self._users_db.table('users').exec('get_user_by_name', {'name': data['name']})
+                    await self._users_db.table('users').exec('update_apps_by_user_id', {'user_id': id['user_id'], 'apps': " ".join(data['apps']),
+                                                                                        'apps_sec': " ".join(data['apps_sec'])})
+                return (True, web.json_response({'ok': True}))
+            case 'admin/mfa':
+                rd = HttpMsgData.model_validate(rd.data)
+                rd = HttpRequestData.model_validate(rd.data)
+                if rd.open_id and ('user_admin' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*'):
+                    data = json.loads(rd.data)
+                    id = await self._users_db.table('users').exec('get_user_by_name', {'name': data['name']})
+                    if id:
+                        token = pyotp.random_base32()
+                        _project =  (await aiotomllib.loader(self.core.path.config / 'secret.toml')).get('project', '')
+                        otp = await self._pw_db.table('otp').exec('get', {'id': id['id']})
+                        if otp:
+                            await self._pw_db.table('otp').exec('update', {'id': id['id'], 'otp': token})
+                        else:
+                            await self._pw_db.table('otp').exec('insert', {'id': id['id'], 'otp': token})
+                return (True, web.json_response({'ok': True, 'token': token}))
             case _:
                 self.core.log.critical('/'.join(rd.path))
     

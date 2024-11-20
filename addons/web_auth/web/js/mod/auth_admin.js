@@ -29,7 +29,7 @@ define([], function() {
                     html += '<input type="button" value="Aktualiesieren" id="auth_admin_rec_send" />'
                     html += '</td></tr><tr style="border-bottom: 1pt solid #99c"><td style="height: 4px"></td></tr><tr><td style="height: 16px"></td></tr>'
                     html += '<tr><td>Passwort: </td><td><input type="password" id="auth_admin_user_password"></td><td></td><td>'
-                    html += '<input type="button" value="Senden" id="auth_admin_password_send" /></td></tr><tr><td>MFA: </td><td></td><td></td>'
+                    html += '<input type="button" value="Senden" id="auth_admin_password_send" /></td></tr><tr><td>MFA: </td><td colspan="2" id="auth_admin_token"></td>'
                     html += '<td><input type="button" value="Erstellen" id="auth_admin_sec" /></td></tr><tr style="border-bottom: 1pt solid #99c">'
                     html += '<td style="height: 4px"></td></tr><tr><td></td><td>Standard</td><td>mit MFA</td><td></td><tr><td style="vertical-align: top">Rechte: </td>'
                     html += '<td><div id="auth_admin_rights"></div></td><td><div id="auth_admin_rights_sec"></div></td><td style="vertical-align: bottom">'
@@ -48,7 +48,6 @@ define([], function() {
                         if (args) {
                           var item = args.item
                           var label = item.label
-                          console.log(label)
                           window.api_call(url='admin/get_user', data={name: label}).then(resp => {
                             if (resp.ok) {
                                 if (resp.label != null) {
@@ -73,46 +72,57 @@ define([], function() {
                                     var item = $('#auth_admin_rights_sec').jqxListBox('getItem', resp.rights_sec[i])
                                     $('#auth_admin_rights_sec').jqxListBox('checkItem', item )
                                 }
+                                $('#auth_admin_token').text('')
                             }
                           })  
                         }
                     })
+                    $('#auth_admin_user_add').on('click', function()  {
+                        var name = $('#auth_admin_user_new').jqxInput('val')
+                        var item = $('#modul_auth_admin_user_list').jqxListBox('getItemByValue', name)
+                        if (item == undefined && name != '') {
+                            window.api_call(url='admin/user_add', data={name: name}).then(resp => {
+                                if (resp.ok) {
+                                    $('#modul_auth_admin_user_list').jqxListBox('addItem', name)
+                                    $('#modul_auth_admin_user_list').jqxListBox('selectIndex', $('#modul_auth_admin_user_list').jqxListBox('getItems').length-1)
+                                }
+                            })
+                        }
+                    })
                     $('#auth_admin_user_del').on('click', function()  {
                         var name = $('#modul_auth_admin_user_list').jqxListBox('getSelectedItem').label
-                        // postData('/api', { 'action': 'user_del', 'user': name }, token=true).then(data => {
-                        //   if (data.error != null) {
-                        //     console.error(data)
-                        //   } else {
-                        //     if (data.ok) {
-                        //       $("#modul_auth_admin_user_list").jqxListBox('removeItem', name)
-                        //       $('#modul_auth_admin_user_list').jqxListBox('selectIndex', 0 )
-                        //     }
-                        //   }
-                        // })
+                        window.api_call(url='admin/user_del', data={name: name}).then(resp => {
+                            if (resp.ok) {
+                                $("#modul_auth_admin_user_list").jqxListBox('removeItem', name)
+                                $('#modul_auth_admin_user_list').jqxListBox('selectIndex', 0 )
+                            }
+                        })
                     })
                     $('#auth_admin_rec_send').on('click', function() {
                         var name = $('#modul_auth_admin_user_list').jqxListBox('getSelectedItem').label,
-                            firstname = $('#auth_admin_user_firstname').jqxInput('val'),
-                            lastname = $('#auth_admin_user_lastname').jqxInput('val'),
+                            label = $('#auth_admin_user_name').jqxInput('val'),
                             mail = $('#auth_admin_user_mail').jqxInput('val')
-                        // postData('/api', { 'action': 'user_rec_set', 'name': name, 'firstname': firstname, 
-                        //                                              'lastname': lastname, 'mail': mail }, token=true).then(data => {
-                        //   if (data.error != null) {
-                        //     console.error(data)
-                        //   }
-                        // })
+                        window.api_call(url='admin/user_edit', data={name: name, label: label, mail: mail}).then(resp => {
+                            if (resp.ok) {
+                            }
+                        })
                     })
                     $('#auth_admin_password_send').on('click', function() {
                         var name = $('#modul_auth_admin_user_list').jqxListBox('getSelectedItem').label,
                             password = $('#auth_admin_user_password').jqxPasswordInput('val')
-                        // postData('/api', { 'action': 'user_password', 'name': name, 'password': password}, token=true).then(data => {
-                        //   if (data.error != null) {
-                        //     console.error(data)
-                        //   }
-                        // })
+                        if (password.length > 6) {
+                            window.api_call(url='admin/set_password', data={name: name, password: password}).then(resp => {
+                            })
+                        }       
                     })
                     $('#auth_admin_sec').on('click', function() {
                         var name = $('#modul_auth_admin_user_list').jqxListBox('getSelectedItem').label
+                        console.log('#auth_admin_sec', name)
+                        window.api_call(url='admin/mfa', data={name: name}).then(resp => {
+                            if (resp.ok) {
+                                $('#auth_admin_token').text(resp.token)
+                            }
+                        })
                         // postData('/api', { 'action': 'user_sec', 'name': name}, token=true).then(data => {
                         //   if (data.error != null) {
                         //     console.error(data)
@@ -146,11 +156,9 @@ define([], function() {
                         for (var i=0; i<entries.length; i++) {
                           rights_sec.push(entries[i].label)
                         }
-                        // postData('/api', { 'action': 'user_rights_set', 'name': name, rights: rights, rights_sec: rights_sec}, token=true).then(data => {
-                        //   if (data.error != null) {
-                        //     console.error(data)
-                        //   }
-                        // })
+                        window.api_call(url='admin/set_apps', data={name: name, apps: rights, apps_sec: rights_sec}).then(resp => {
+                            // console.log(name, rights, rights_sec)
+                        })
                     })
                     self.load_users()                  
                 })

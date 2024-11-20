@@ -1,6 +1,6 @@
 from aiodatabase.tables import Table
 from aiodatabase.fields import Integer, Text
-from aiodatabase.statements import QuerySingle, QueryInsert, QueryUpdate, QueryMulti
+from aiodatabase.statements import QuerySingle, QueryInsert, QueryUpdate, QueryMulti, QueryDelete
 
 class Users(Table):
     def __init__(self):
@@ -31,3 +31,4 @@ class Users(Table):
         self.add_statement('update_label_by_user_id', QueryUpdate("UPDATE {table} SET label=? WHERE user_id=?", ['label', 'user_id']))        
         self.add_statement('get_mail_by_user_id', QuerySingle("SELECT {fields} FROM {table} WHERE user_id=?", ['mail'], ['user_id']))        
         self.add_statement('update_mail_by_user_id', QueryUpdate("UPDATE {table} SET mail=? WHERE user_id=?", ['mail', 'user_id']))        
+        self.add_statement('delete', QueryDelete("DELETE FROM {table} WHERE name=?", ['name']))        
