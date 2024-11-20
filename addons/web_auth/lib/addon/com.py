@@ -115,6 +115,11 @@ class Com(BaseObj):
                     return (True, web.json_response(SendOk().model_dump()))
                 except Exception as e:
                     self.core.log.error(e)
+            case 'messages/set_scopes':
+                if rd.auth:
+                    data = rd.data.data
+                    await self.core.api.set_scopes(data)
+                return (True, web.json_response(SendOk().model_dump()))
             case _:   
                 msg = HttpMsgData.model_validate(rd.data)
                 self.core.log.debug(rd)

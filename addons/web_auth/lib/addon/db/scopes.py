@@ -15,5 +15,5 @@ class Scopes(Table):
                                                  ['label', 'timestamp']))
         self.add_statement('update', QueryUpdate("UPDATE {table} SET timestamp=? WHERE label=?", 
                                                  ['timestamp', 'label']))
-        self.add_statement('get_all', QueryMulti('SELECT {fields} from {table} WHERE timestamp>?', ['label'], ['timestamp']))
+        self.add_statement('get_all', QueryMulti('SELECT {fields} from {table} WHERE timestamp>? ORDER BY label', ['label'], ['timestamp']))
 

@@ -263,8 +263,6 @@ class Api(BaseObj):
                 await self.validate_oauth_app(ldata, tc)
                 if ldata.valid:
                     return await self.craete_token(msg2, ldata)
-                self.core.log.debug(msg2)
-                self.core.log.debug(ldata)
             case 'get_allowed_moduls':
                 try:
                     rd = HttpMsgData.model_validate(rd.data)
@@ -367,7 +365,7 @@ class Api(BaseObj):
                     data = json.loads(rd.data)
                     id = await self._users_db.table('users').exec('get_user_by_name', {'name': data['name']})
                     resp = await self._users_db.table('users').exec('get_name_by_id', {'id': id['id']})
-                    rec = {'label': resp['label'], 'ok':True, 'rights_avail': []}
+                    rec = {'label': resp['label'], 'ok':True, 'rights_avail': [], 'rights': [], 'rights_sec': []}
                     if not rec['label']:
                         rec['label'] = resp['name']
                     resp = await self._users_db.table('users').exec('get_mail_by_user_id', {'user_id': id['user_id']})
@@ -375,11 +373,13 @@ class Api(BaseObj):
                     if (resp := await self._scopes_db.table('scopes').exec('get_all', {'timestamp': int(time.time() - 7 * 86400)})):
                         for entry in resp:
                             rec['rights_avail'].append(entry['label'])
-                    
-                    
-                    self.core.log.critical(id)
-                    self.core.log.critical(resp)
-                    self.core.log.critical(rec)
+                    if (resp := await self._users_db.table('users').exec('get_app_by_id', {'id': id['id']})) and resp['apps']:
+                        for entry in resp.get('apps', '').split(' '):
+                            rec['rights'].append(entry)
+                    if (resp := await self._users_db.table('users').exec('get_app_sec_by_id', {'id': id['id']})) and resp['apps_sec']:
+                        self.core.log.critical(resp)
+                        for entry in resp.get('apps_sec', '').split(' '):
+                            rec['rights_sec'].append(entry)
                     return (True, web.json_response(rec))
             case _:
                 self.core.log.critical('/'.join(rd.path))
@@ -392,19 +392,22 @@ class Api(BaseObj):
         await self._pw_db.setup()
         await self._scopes_db.setup()
         
-    async def add_scopes(self):
-        self.core.log.debug('scopes aktualiesieren')
-        await self.core.call_random(12*3600, self.add_scopes)
-        for entry in ['user', 'user_sec', 'user_admin']:
+    async def set_scopes(self, scopes):
+        for entry in scopes:
             resp = await self._scopes_db.table('scopes').exec('get_timestamp', {'label': entry})
             if resp:
                 await self._scopes_db.table('scopes').exec('update', {'label': entry, 'timestamp': int(time.time())})
             else:
                 await self._scopes_db.table('scopes').exec('insert', {'label': entry, 'timestamp': int(time.time())})
+        
+    async def own_scopes(self):
+        self.core.log.debug('scopes aktualiesieren')
+        await self.core.call_random(12*3600, self.own_scopes)
+        await self.set_scopes(['user', 'user_sec', 'user_admin'])
             
     async def _astart(self):
         self.core.log.debug('starte api')
-        await self.core.call_random(30, self.add_scopes)
+        await self.core.call_random(30, self.own_scopes)
         try:
             self.rsa_private_file = pathlib.Path('/lcars/data/rsa_private.pem')
             self.rsa_public_file = pathlib.Path('/lcars/data/rsa_public.pem')

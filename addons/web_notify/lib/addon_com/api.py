@@ -60,6 +60,11 @@ class Api(BaseObj):
             case _:
                 self.core.log.critical('/'.join(rd.path))
     
+    async def add_scopes(self):
+        self.core.log.debug('scopes aktualiesieren')
+        await self.core.call_random(12*3600 , self.add_scopes) #
+        await self.core.web_l.msg_send(HttpMsgData(dest='web_auth', type='set_scopes', data=['notify']))
+        
     async def _ainit(self):
         self.core.log.debug('Initaliesiere api')
         try:
@@ -70,3 +75,4 @@ class Api(BaseObj):
         
     async def _astart(self):
         self.core.log.debug('starte api')
+        await self.core.call_random(30, self.add_scopes)
