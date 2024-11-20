@@ -107,11 +107,14 @@ class Api(BaseObj):
                 self.core.log.error(e)
         else:            
             user = await self._users_db.table('users').exec('get_user_by_name', {'name': ldata.name})
-
+            self.core.log.error(user)
             if user is not None:
                 pw = await self._pw_db.table('pw').exec('get_password_by_id', {'id': user['id']})
+                self.core.log.error(pw)
                 if pw is not None:
                     ok = bcrypt.checkpw((self.core.com._salt+ldata.password).encode(), pw['password'].encode())
+                    self.core.log.error(ok)
+
 
         if ok:
             try:
@@ -411,12 +414,18 @@ class Api(BaseObj):
                 if rd.open_id and ('user_admin' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*'):
                     data = json.loads(rd.data)
                     id = await self._users_db.table('users').exec('get_user_by_name', {'name': data['name']})
-                    pw_hash = bcrypt.hashpw((self.core.com._salt+data['password']).encode(), bcrypt.gensalt()).decode()
-                    result = await self._pw_db.table('pw').exec('get_password_by_id', {'id': id['user_id']})
-                    if result is None:
-                        await self._pw_db.table('pw').exec('insert', {'id': id['user_id'], 'password': pw_hash})
-                    else:
-                        await self._pw_db.table('pw').exec('update', {'id': id['user_id'], 'password': pw_hash})
+                    try:
+                        self.core.log.error(self.core.com._salt+data['password'])
+                        
+                        pw_hash = bcrypt.hashpw((self.core.com._salt+data['password']).encode(), bcrypt.gensalt()).decode()
+                        result = await self._pw_db.table('pw').exec('get_password_by_id', {'id': id['id']})
+                        self.core.log.error(result)
+                        if result is None:
+                            await self._pw_db.table('pw').exec('insert', {'id': id['id'], 'password': pw_hash})
+                        else:
+                            await self._pw_db.table('pw').exec('update', {'id': id['id'], 'password': pw_hash})
+                    except Exception as e:
+                        self.core.log.error(repr(e))
                     return (True, web.json_response({'ok': True}))
             case 'admin/set_apps':
                 rd = HttpMsgData.model_validate(rd.data)

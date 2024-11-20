@@ -37,7 +37,7 @@ class Api(BaseObj):
         #call für dieses Modul
         match "/".join(rd.path):
             case 'get_allowed_moduls':
-                #self.core.log.critical(rd)
+                #self.core.log.critical(self.core.const.app)
                 if rd.open_id and (self.core.const.app in rd.open_id['app'] or rd.open_id['app'] == '*'):
                     try:
                         data = Moduls()
@@ -64,6 +64,11 @@ class Api(BaseObj):
                 self.core.log.debug(rd)
         return
         
+    async def add_scopes(self):
+        self.core.log.debug('scopes aktualiesieren')
+        await self.core.call_random(12*3600 , self.add_scopes) #
+        await self.core.web_l.msg_send(HttpMsgData(dest='web_auth', type='set_scopes', data=[self.core.const.app]))
+
     async def _ainit(self):
         self.core.log.debug('Initaliesiere api')
         try:
@@ -73,3 +78,4 @@ class Api(BaseObj):
 
     async def _astart(self):
         self.core.log.debug('starte api')
+        await self.core.call_random(30, self.add_scopes)

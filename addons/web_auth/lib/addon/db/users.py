@@ -20,7 +20,7 @@ class Users(Table):
         self.add_statement('get_user_by_user_id', QuerySingle("SELECT {fields} FROM {table} WHERE user_id=?", ['id', 'user_id'], ['user_id']))        
         self.add_statement('get_id_by_user_id', QuerySingle("SELECT {fields} FROM {table} WHERE user_id=?", ['id'], ['user_id']))        
         self.add_statement('get_name_by_id', QuerySingle("SELECT {fields} FROM {table} WHERE id=?", ['name', 'label'], ['id']))        
-        self.add_statement('insert', QueryInsert("INSERT INTO {table} (user_id, name) VALUES (?, ?)", 
+        self.add_statement('insert', QueryInsert("INSERT INTO {table} (user_id, name, roles, roles_sec) VALUES (?, ?, '-', '-')", 
                                                  ['user_id', 'name']))
         self.add_statement('update_roles_by_user_id', QueryUpdate("UPDATE {table} SET roles=?, roles_sec=? WHERE user_id=?", ['roles', 'roles_sec', 'user_id']))        
         self.add_statement('get_role_by_id', QuerySingle("SELECT {fields} FROM {table} WHERE id=?", ['roles'], ['id']))        
