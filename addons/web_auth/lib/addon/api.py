@@ -19,6 +19,7 @@ import aiodatabase
 from httplib.models import HttpHandler, HttpRequestData, SendOk, HttpMsgData
 from models.auth import Moduls
 from models.network import IpData
+from models.basic import StringList
 import cryptlib
 import aioauth
 
@@ -41,6 +42,8 @@ class Api(BaseObj):
         self._code_db.add_table(db_settings.Code())
         self._token_db = aiodatabase.DB(f"sqlite:///{self.core.path.data}/token.sqlite3")
         self._token_db.add_table(db_settings.RefreshToken())
+        self._scopes_db = aiodatabase.DB(f"sqlite:///{self.core.path.data}/scopes.sqlite3")
+        self._scopes_db.add_table(db_settings.Scopes())
         self._acl = None
         self._local_ip_valid = 0
         self.rsa_private_key = None
@@ -270,9 +273,12 @@ class Api(BaseObj):
                     pass
                 if rd.open_id and ('user' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*'):
                     data = Moduls()
-                    data.append({'mod': 'auth_user', 'src': '/auth/js/mod/auth_user'})
+                    if 'user' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*':
+                        data.append({'mod': 'auth_user', 'src': '/auth/js/mod/auth_user'})
                     if 'user_sec' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*':
                         data.append({'mod': 'auth_user_sec', 'src': '/auth/js/mod/auth_user_sec'})
+                    if 'user_admin' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*':
+                        data.append({'mod': 'auth_admin', 'src': '/auth/js/mod/auth_admin'})
                     return (True, web.json_response(data.model_dump()))
                 else:
                     return (True, web.json_response(SendOk(ok=False).model_dump()))
@@ -341,7 +347,40 @@ class Api(BaseObj):
                         uri = pyotp.totp.TOTP(token).provisioning_uri(name=rd.open_id['name'], issuer_name=_project)
 
                         return (True, web.json_response({'ok': True, 'otp': token, 'uri': uri}))
-                        self.core.log.critical(otp)
+            case 'admin/get':
+                self.core.log.debug('get user list')
+                rd = HttpMsgData.model_validate(rd.data)
+                rd = HttpRequestData.model_validate(rd.data)
+                if rd.open_id and ('user_admin' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*'):
+                    names = await self._users_db.table('users').exec('get_names')
+                    self.core.log.critical(names)
+                    out = []
+                    if names:
+                        for entry in names:
+                            out.append(entry['name'])
+                    out = StringList(data=out)
+                    return (True, web.json_response({'ok': True, 'data': out.model_dump()}))
+            case 'admin/get_user':
+                rd = HttpMsgData.model_validate(rd.data)
+                rd = HttpRequestData.model_validate(rd.data)
+                if rd.open_id and ('user_admin' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*'):
+                    data = json.loads(rd.data)
+                    id = await self._users_db.table('users').exec('get_user_by_name', {'name': data['name']})
+                    resp = await self._users_db.table('users').exec('get_name_by_id', {'id': id['id']})
+                    rec = {'label': resp['label'], 'ok':True, 'rights_avail': []}
+                    if not rec['label']:
+                        rec['label'] = resp['name']
+                    resp = await self._users_db.table('users').exec('get_mail_by_user_id', {'user_id': id['user_id']})
+                    rec['mail'] = resp['mail'] if resp['mail'] else ''
+                    if (resp := await self._scopes_db.table('scopes').exec('get_all', {'timestamp': int(time.time() - 7 * 86400)})):
+                        for entry in resp:
+                            rec['rights_avail'].append(entry['label'])
+                    
+                    
+                    self.core.log.critical(id)
+                    self.core.log.critical(resp)
+                    self.core.log.critical(rec)
+                    return (True, web.json_response(rec))
             case _:
                 self.core.log.critical('/'.join(rd.path))
     
@@ -351,9 +390,21 @@ class Api(BaseObj):
         await self._code_db.setup()
         await self._token_db.setup()
         await self._pw_db.setup()
+        await self._scopes_db.setup()
         
+    async def add_scopes(self):
+        self.core.log.debug('scopes aktualiesieren')
+        await self.core.call_random(12*3600, self.add_scopes)
+        for entry in ['user', 'user_sec', 'user_admin']:
+            resp = await self._scopes_db.table('scopes').exec('get_timestamp', {'label': entry})
+            if resp:
+                await self._scopes_db.table('scopes').exec('update', {'label': entry, 'timestamp': int(time.time())})
+            else:
+                await self._scopes_db.table('scopes').exec('insert', {'label': entry, 'timestamp': int(time.time())})
+            
     async def _astart(self):
         self.core.log.debug('starte api')
+        await self.core.call_random(30, self.add_scopes)
         try:
             self.rsa_private_file = pathlib.Path('/lcars/data/rsa_private.pem')
             self.rsa_public_file = pathlib.Path('/lcars/data/rsa_public.pem')

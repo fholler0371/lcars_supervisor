@@ -22,7 +22,8 @@ requirejs.config({
         jqxnumberinput: 'jqwidgets/jqxnumberinput',
         jqxdatetimeinput: 'jqwidgets/jqxdatetimeinput',
         jqxcalendar: 'jqwidgets/jqxcalendar',
-        jqxcombobox: 'jqwidgets/jqxcombobox'
+        jqxcombobox: 'jqwidgets/jqxcombobox',
+        jqxpasswordinput:'jqwidgets/jqxpasswordinput'
     },
     shim: {
         jqxinput: {deps: ["jqxcore"]},
@@ -41,7 +42,8 @@ requirejs.config({
         jqxcheckbox: { deps: ['jqxcore'] },
         jqxnumberinput: { deps: ['jqxcore'] },
         jqxdatetimeinput: { deps: ['jqxcore'] },
-        jqxcombobox: { deps: ['jqxcore', 'jqxlistbox'] }
+        jqxcombobox: { deps: ['jqxcore', 'jqxlistbox'] },
+        jqxpasswordinput: { deps: ['jqxcore'] }
     }
 })
 
@@ -417,10 +419,10 @@ modul_clock = {
     },
     show: function () {
         let self = window.modul['clock']
-        self.stopped = false
         window.modul['helper'].activate('clock', self.label)
         self.set_content()
         $('#content_modul_clock').show()
+        self.stopped = false
         self.refresh_time()
     },
     stop: function() {

@@ -4,3 +4,4 @@ from .pw import Pw
 from .pw import Otp
 from .code import Code
 from .refresh_token import RefreshToken
+from .scopes import Scopes

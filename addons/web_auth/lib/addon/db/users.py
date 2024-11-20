@@ -1,6 +1,6 @@
 from aiodatabase.tables import Table
 from aiodatabase.fields import Integer, Text
-from aiodatabase.statements import QuerySingle, QueryInsert, QueryUpdate
+from aiodatabase.statements import QuerySingle, QueryInsert, QueryUpdate, QueryMulti
 
 class Users(Table):
     def __init__(self):
@@ -15,6 +15,7 @@ class Users(Table):
         self.add_field(Text('label'))
         self.add_field(Text('mail'))
         #
+        self.add_statement('get_names', QueryMulti("SELECT {fields} FROM {table} ORDER BY name", ['name']))        
         self.add_statement('get_user_by_name', QuerySingle("SELECT {fields} FROM {table} WHERE name=?", ['id', 'user_id'], ['name']))        
         self.add_statement('get_user_by_user_id', QuerySingle("SELECT {fields} FROM {table} WHERE user_id=?", ['id', 'user_id'], ['user_id']))        
         self.add_statement('get_id_by_user_id', QuerySingle("SELECT {fields} FROM {table} WHERE user_id=?", ['id'], ['user_id']))        
