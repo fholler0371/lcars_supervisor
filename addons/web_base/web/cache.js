@@ -55,6 +55,7 @@ let ASSETS = {
     '/img/mdi/refresh.svg',
     '/img/mdi/information-box-outline.svg',
     '/img/mdi/cash-multiple.svg',
+    'img/mdi/information-variant.svg',
     '/js_lib/jqwidgets/styles/images/error.png',
     '/js_lib/jqwidgets/styles/images/info.png',
     '/js_lib/jqwidgets/styles/images/close_white.png',

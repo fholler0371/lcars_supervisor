@@ -1,0 +1,12 @@
+name = "withings"
+label = "LCARS Withings"
+
+[docker]
+name = "lcars/python:%Y.%m"
+folder = 'python'
+
+[lib]
+web = "httplib.HTTP"
+web_l = "httplib.ClientLocal"
+com = "addon.Com"
+api = "addon.Api"

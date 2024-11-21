@@ -1,0 +1,50 @@
+app = 'web_withings'
+
+[logger]
+version = 1
+disable_existing_loggers = true
+formatters.simple.format = "%(levelname)s: %(message)s"
+formatters.detailed.format = "[%(levelname)s|%(module)s|L%(lineno)d] %(asctime)s: %(message)s"
+formatters.detailed.datefmt = "%Y-%m-%dT%H:%M:%S%z"
+
+[logger.formatters.json]
+"()" = "loggerlib.MyJSONFormatter"
+
+[logger.formatters.json.fmt_keys]
+level = "levelname"
+message = "message"
+timestamp = "timestamp"
+logger = "name"
+module = "module"
+function = "funcName"
+line = "lineno"
+thread_name = "threadName"
+
+[logger.loggers.root]
+level = "DEBUG"
+handlers = ["stdout", "file", "json"]
+
+[logger.handlers.stdout]
+class = "logging.StreamHandler"
+formatter = "simple"
+level = "DEBUG"
+stream = "ext://sys.stdout"
+
+[logger.handlers.file]
+class = "logging.handlers.RotatingFileHandler"
+formatter = "detailed"
+level = "DEBUG"
+filename = "%log_folder%/my_log.log"
+maxBytes = 100000
+backupCount = 3
+
+[logger.handlers.json]
+class = "logging.handlers.RotatingFileHandler"
+formatter = "json"
+level = "DEBUG"
+filename = "%log_folder%/my_log.json"
+maxBytes = 10000000
+backupCount = 9
+
+[avm]
+fritzlink = ""
