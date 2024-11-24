@@ -250,7 +250,7 @@ async def main() -> None:
         await check_network(core, name, data)
     container_data = await aioyamllib.save_load(core.path.data / 'docker.yml')
     if not (core.path.temp / 'compose').exists():
-        await os.mkdir(core.path.temp / 'compose', force=True)
+        await os.makedirs(core.path.temp / 'compose', exist_ok=False)
     for container in container_data.get('apps', []):
         if (cont_data := await core.docker.containers.get(container)) is None:
             await container_add(core, container)
