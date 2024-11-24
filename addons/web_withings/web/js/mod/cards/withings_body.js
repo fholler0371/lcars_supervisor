@@ -6,6 +6,7 @@ define(function () {
         window.api_call(url='sm/cards_source', data={'panel': panel, 'card': id,
                                                      'items': ['gewicht', 'fett_anteil', 'muskeln', 'wasser', 'knochen']}).then(resp => {
           if (resp.ok) {
+            let data = resp.data
             var height = 32
             var values = {}
             var sources = {}
@@ -62,7 +63,7 @@ define(function () {
             if (packery != undefined) {
               packery.layout()
             }
-            window.modul['page_'+panel].hitory_create(id)
+            window.modul[panel].history_create(panel, id)
           }
         })
       },

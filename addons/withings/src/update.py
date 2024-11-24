@@ -2,7 +2,7 @@ import asyncio
 import importlib
 
 LIBS = {
-#   "sqlite3" : "sqlite3"
+   "aiosqlite" : "aiosqlite"
 }
 
 async def main() -> None:

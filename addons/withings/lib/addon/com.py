@@ -11,6 +11,10 @@ from . import models
 
 from models.notify import NotifyApp, NotifyMessage
 
+import aiodatabase
+
+import addon.db as db_settings
+
 
 class _token:
     def __init__(self) -> None:
@@ -70,14 +74,41 @@ class Com(BaseObj):
             #         data = IpData(ip4=self._state.ip4, prefix=self._state.prefix, ip6=self._state.ip6, home_ip6=self._state.home_ip6)
             #         #self.core.log.critical(data)
             #         return (True, web.json_response(data.model_dump()))
-                case _:
+                case 'messages/set_token':
                     data = rd.data.data
                     await self.token.set_token(data['token'], data['refresh_token'], data['timeout'])
                     return (True, web.json_response({}))
+                case 'sm':
+                    data = rd.data.data
+                    match rd.path[2]:
+                        case 'get_sensor':
+                            table, sensor = data['sensor'].split('.')
+                            if table == 'body':
+                                res = await self._data_db.table('vital').exec('get_last_by_type', {'type': sensor})
+                                if res:
+                                    return (True, web.json_response(SendOk(data={'value': res['value']}).model_dump()))
+                                else:
+                                    return (True, web.json_response(SendOk(ok=False).models_dump()))
+                        case 'get_history':
+                            _table, _sensor = data['sensor'].split('.')
+                            _interval = 30 * 86400
+                            if _table == 'body':
+                                res = await self._data_db.table('vital').exec('get_history', {'type': _sensor, 'date': int(time.time() - _interval)})
+                                if res:
+                                    return (True, web.json_response(SendOk(data=res).model_dump()))
+                                else:
+                                    return (True, web.json_response(SendOk(ok=False).models_dump()))
+                            self.core.log.critical(rd)
+                            self.core.log.critical('xXx 2')
+                            self.core.log.critical(data)
+                case _:
+                     self.core.log.critical(rd)
                         
     async def _ainit(self):
         self.core.log.debug('Initaliesiere com')
         await self.core.web.add_handler(HttpHandler(domain = 'com', func = self.handler, auth='local', acl='lcars_docker'))
+        self._data_db = aiodatabase.DB(f"sqlite:///{self.core.path.data}/data.sqlite3")
+        self._data_db.add_table(db_settings.Vital())
         
     async def get_device_data(self):
         await self.core.call_random(3 * 3600, self.get_device_data)
@@ -121,6 +152,7 @@ class Com(BaseObj):
         self.core.log.debug('starte com')
         await self.core.call_random(30, self.get_device_data)
         await self.core.call_random(20, self.register_notify)
+        await self._data_db.setup()
 
     async def _astop(self):
         self.core.log.debug('stoppe com')

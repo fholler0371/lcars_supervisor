@@ -1,15 +1,20 @@
-define([], function() {
+define(['lcsmdefaultpanel'], function() {
     window.modul['withings_base'] = {
         modul: true,
         icon: '/img/mdi/human-handsdown.svg',
         label: 'Basisdaten',
         already_init : false,
+        panel:'withings_base',
         init: function () {
+          let _default_panel_ = window.modul['__default_panel__']
+          let self = window.modul['withings_base']
+          self.history_click = _default_panel_.history_click
+          self.history_create = _default_panel_.history_create
         },
         set_content: function() {
             let self = window.modul['withings_base']
-            if (!($('#content_modul_withings_base').length)) {
-                let html = '<div id="content_withings_base_panel" class="content_modul"></div>'
+            if (!($('#content_modul_page_withings_base').length)) {
+                let html = '<div id="content_modul_page_withings_base" class="content_modul"></div>'
                 $(".main_content").append(html)
                 require([], function() {
                     window.api_call(url='sm/get_cards', data={'panel': 'base'}).then(resp => {
@@ -36,7 +41,7 @@ define([], function() {
                                             item_data.push(items[j].data[k])
                                         }
                                     }
-                                    cards[type].create('withings_panel', items[j]['label'], j, item_data)
+                                    cards[type].create('withings_base', items[j]['label'], j, item_data)
                                     console.log(items[j])
                                 }
                             })
@@ -45,7 +50,7 @@ define([], function() {
                     })
                 })
             } 
-            $('#content_modul_withings_base').show()
+            $('#content_modul_page_withings_base').show()
         },
         show: function () {
             let self = window.modul['withings_base']

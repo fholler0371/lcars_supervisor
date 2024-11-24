@@ -8,11 +8,32 @@ import time
 from corelib import BaseObj, Core
 from httplib.models import HttpHandler, HttpRequestData, SendOk, HttpMsgData
 from models.auth import Moduls
-from models.network import IpData
+from models.sm import HistoryFullOut
 import aioauth
 
 import aiotomllib
 
+
+PANELS = {'base': {
+             'cards' : [{'name': 'withings_body', 'type': 'app'}],
+             'items' : [{"label": "Körper", "type": "withings_body"}]       
+                  }
+         }
+
+CARDS = {'withings_base': [
+            {"gewicht": {"source": "withings.body.gewicht"},
+             "fett_anteil": {"source": "withings.body.fett_anteil"},
+             "muskeln": {"source": "withings.body.muskeln"},
+             "wasser": {"source": "withings.body.wasser"},
+             "knochen": {"source": "withings.body.knochen"}}
+        ]}
+
+HISTORY = {'withings_base': {
+               'withings.body.gewicht' : {"label": "Gewicht", "intervalls": "A,Y,Q,M", "style": "line", "interval": "M"}
+          }}
+
+HISTORY_DATA = {'withings.body.gewicht': [{'label': 'Gewicht',
+                                           'decimal': 2}]}
 
 class Api(BaseObj):
     def __init__(self, core: Core) -> None:
@@ -35,12 +56,48 @@ class Api(BaseObj):
                     rd = HttpRequestData.model_validate(rd.data)
                 except:
                     pass
+                data = Moduls()
+                if rd.open_id and ('withings' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*'):
+                    data.append({'mod': 'withings_base', 'src': '/withings/js/mod/withings_base'})
                 if rd.open_id and ('withings_sec' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*'):
-                    data = Moduls()
                     data.append({'mod': 'withings_setup', 'src': '/withings/js/mod/withings_setup'})
-                    return (True, web.json_response(data.model_dump()))
-                else:
+                return (True, web.json_response(data.model_dump()))
+            case 'sm/get_cards':
+                bc = rd.data.data
+                if bc['open_id'] and ('withings' in bc['open_id']['app'].split(' ') or bc['open_id']['app'] == '*'):
+                    data = json.loads(bc['data'])
+                    return (True, web.json_response(SendOk(data=PANELS[data['panel']]).model_dump()))
+            case 'sm/cards_source':
+                bc = rd.data.data
+                if bc['open_id'] and ('withings' in bc['open_id']['app'].split(' ') or bc['open_id']['app'] == '*'):
+                    data = json.loads(bc['data'])
+                    out = {}
+                    for item in data['items']:
+                        panel = CARDS.get(data['panel'], [])
+                        self.core.log.critical(panel) 
+                        if _item := panel[data['card']].get(item):
+                            if value := await self.core.cache.get_value(_item['source']):
+                                out[item] = {'value': value,
+                                             'source': _item['source'],
+                                             'params': _item.get('params', [])} 
+                    return (True, web.json_response(SendOk(data=out).model_dump()))
+            case 'sm/history_chart':
+                bc = rd.data.data
+                if bc['open_id'] and ('withings' in bc['open_id']['app'].split(' ') or bc['open_id']['app'] == '*'):
+                    data = json.loads(bc['data'])
+                    if h_data := HISTORY.get(data['panel'], {}).get(data['sensor']):
+                        h_data['sensor'] = data['sensor']
+                        return (True, web.json_response(SendOk(data=h_data).model_dump()))
                     return (True, web.json_response(SendOk(ok=False).model_dump()))
+            case 'sm/history_chart_data':
+                bc = rd.data.data
+                if bc['open_id'] and ('withings' in bc['open_id']['app'].split(' ') or bc['open_id']['app'] == '*'):
+                    data = json.loads(bc['data'])
+                    for rec in HISTORY_DATA[data['sensor']]:
+                        rec_out = HistoryFullOut(label= rec['label'], decimal= rec['decimal'], 
+                                                 data= await self.core.cache.get_history(rec.get('source', data['sensor']), data['interval']))
+                    self.core.log.critical(data)
+                return (True, web.json_response(SendOk(data=rec_out).model_dump()))
             case 'setup/get_url':
                 self.core.log.debug('Ask for url')
                 bc = rd.data.data
@@ -54,13 +111,6 @@ class Api(BaseObj):
                         self._state = str(int(time.time()))
                         url += f"&state={self._state}"
                     return (True, web.json_response(SendOk(data={'url': url}).model_dump()))
-                else:
-                    return (True, web.json_response(SendOk(ok=False).model_dump()))
-            case 'user/fritzlink':
-                self.core.log.debug('get fritzlinky')
-                bc = rd.data.data
-                if bc['open_id'] and ('withings' in bc['open_id']['app'].split(' ') or bc['open_id']['app'] == '*'):
-                    return (True, web.json_response({"ok" :True, "link": self._fritzlink}))
                 else:
                     return (True, web.json_response(SendOk(ok=False).model_dump()))
             case _:
@@ -99,3 +149,124 @@ class Api(BaseObj):
     async def _astart(self):
         self.core.log.debug('starte api')
         await self.core.call_random(30, self.add_scopes)
+
+# [
+#     {
+#         "label": "Gewicht",
+#         "decimal": 2,
+#         "data": [
+#             {
+#                 "value": 87.418,
+#                 "date": 1730009445
+#             },
+#             {
+#                 "value": 87.435,
+#                 "date": 1730091258
+#             },
+#             {
+#                 "value": 86.083,
+#                 "date": 1730167034
+#             },
+#             {
+#                 "value": 85.862,
+#                 "date": 1730250611
+#             },
+#             {
+#                 "value": 86.467,
+#                 "date": 1730333031
+#             },
+#             {
+#                 "value": 86.227,
+#                 "date": 1730444085
+#             },
+#             {
+#                 "value": 86.721,
+#                 "date": 1730504801
+#             },
+#             {
+#                 "value": 86.721,
+#                 "date": 1730504801
+#             },
+#             {
+#                 "value": 85.59,
+#                 "date": 1730789575
+#             },
+#             {
+#                 "value": 86.711,
+#                 "date": 1730860030
+#             },
+#             {
+#                 "value": 86.044,
+#                 "date": 1730963675
+#             },
+#             {
+#                 "value": 85.81,
+#                 "date": 1731038933
+#             },
+#             {
+#                 "value": 86.427,
+#                 "date": 1731132596
+#             },
+#             {
+#                 "value": 87.303,
+#                 "date": 1731223595
+#             },
+#             {
+#                 "value": 86.95100000000001,
+#                 "date": 1731302120
+#             },
+#             {
+#                 "value": 87.761,
+#                 "date": 1731374700
+#             },
+#             {
+#                 "value": 87.239,
+#                 "date": 1731475634
+#             },
+#             {
+#                 "value": 85.78,
+#                 "date": 1731568746
+#             },
+#             {
+#                 "value": 85.381,
+#                 "date": 1731649482
+#             },
+#             {
+#                 "value": 87.021,
+#                 "date": 1731729899
+#             },
+#             {
+#                 "value": 87.34400000000001,
+#                 "date": 1731821200
+#             },
+#             {
+#                 "value": 86.55,
+#                 "date": 1731914823
+#             },
+#             {
+#                 "value": 86.671,
+#                 "date": 1731997961
+#             },
+#             {
+#                 "value": 86.812,
+#                 "date": 1732073816
+#             },
+#             {
+#                 "value": 86.654,
+#                 "date": 1732173125
+#             },
+#             {
+#                 "value": 87.014,
+#                 "date": 1732266005
+#             },
+#             {
+#                 "value": 87.003,
+#                 "date": 1732350934
+#             },
+#             {
+#                 "value": 86.95,
+#                 "date": 1732438482
+#             }
+#         ]
+#     }
+# ]

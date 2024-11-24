@@ -4,6 +4,7 @@ requirejs.config({
         svginject: 'svg-inject',
         packery: 'packery',
         qrcode: 'qrcode.min',
+        hc: '/js/highcharts/highcharts',
         jqxcore: 'jqwidgets/jqxcore',
         jqxinput: 'jqwidgets/jqxinput',
         jqxpassword: 'jqwidgets/jqxpasswordinput',
@@ -23,8 +24,16 @@ requirejs.config({
         jqxdatetimeinput: 'jqwidgets/jqxdatetimeinput',
         jqxcalendar: 'jqwidgets/jqxcalendar',
         jqxcombobox: 'jqwidgets/jqxcombobox',
-        jqxpasswordinput:'jqwidgets/jqxpasswordinput'
-    },
+        jqxpasswordinput:'jqwidgets/jqxpasswordinput',
+// lcars
+        lccore: '/js/lc/lccore',
+        lcsmcard: '/js/lc/lcsmcard',
+        lcsmdefaultpanel: '/js/lc/lcsmdefaultpanel',
+        lcwindowchart: '/js/lc/lcwindowchart',
+        lcwindow: '/js/lc/lcwindow',
+        lcmodal: '/js/lc/lcmodal',
+        lcbuttons: '/js/lc/lcbuttons'
+},
     shim: {
         jqxinput: {deps: ["jqxcore"]},
         jqxpassword: {deps: ["jqxcore"]},
