@@ -4,7 +4,7 @@ requirejs.config({
         svginject: 'svg-inject',
         packery: 'packery',
         qrcode: 'qrcode.min',
-        hc: '/js/highcharts/highcharts',
+        'highcharts/highcharts': 'highcharts',
         jqxcore: 'jqwidgets/jqxcore',
         jqxinput: 'jqwidgets/jqxinput',
         jqxpassword: 'jqwidgets/jqxpasswordinput',
@@ -52,7 +52,8 @@ requirejs.config({
         jqxnumberinput: { deps: ['jqxcore'] },
         jqxdatetimeinput: { deps: ['jqxcore'] },
         jqxcombobox: { deps: ['jqxcore', 'jqxlistbox'] },
-        jqxpasswordinput: { deps: ['jqxcore'] }
+        jqxpasswordinput: { deps: ['jqxcore'] },
+        'highcharts/highcharts': {exports: "Highcharts", deps: ["jquery"]}
     }
 })
 

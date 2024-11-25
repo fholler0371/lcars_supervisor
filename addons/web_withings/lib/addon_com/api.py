@@ -15,8 +15,14 @@ import aiotomllib
 
 
 PANELS = {'base': {
-             'cards' : [{'name': 'withings_body', 'type': 'app'}],
-             'items' : [{"label": "Körper", "type": "withings_body"}]       
+             'cards' : [{'name': 'withings_body', 'type': 'app'},
+                        {'name': 'withings_weight_trend', 'type': 'app'},
+                        {'name': 'withings_heart', 'type': 'app'},
+                        {'name': 'withings_temp', 'type': 'app'}],
+             'items' : [{"label": "Körper", "type": "withings_body"},
+                        {'label': 'Gewichtsentwicklung', 'type': 'withings_weight_trend'},       
+                        {'label': 'Herz', 'type': 'withings_heart'},     
+                        {'label': 'Temperatur', 'type': 'withings_temp'}]       
                   }
          }
 
@@ -25,15 +31,43 @@ CARDS = {'withings_base': [
              "fett_anteil": {"source": "withings.body.fett_anteil"},
              "muskeln": {"source": "withings.body.muskeln"},
              "wasser": {"source": "withings.body.wasser"},
-             "knochen": {"source": "withings.body.knochen"}}
+             "knochen": {"source": "withings.body.knochen"}},
+            {'gewicht_month': {"source": "withings.weight_trend.gewicht_month"},
+             'gewicht_quartal': {"source": "withings.weight_trend.gewicht_quartal"},
+             'gewicht_year': {"source": "withings.weight_trend.gewicht_year"}},
+            {'diastole': {"source": "withings.heart.diastole"},
+             'systole': {"source": "withings.heart.systole"},
+             'gefaess_alter': {"source": "withings.heart.gefaess_alter"},
+             'puls': {'source': 'withings.heart.puls'},
+             'puls_wellen_elasitzitaet': {'source': 'withings.heart.puls_wellen_elasitzitaet'}},
+            {'body_temp': {"source": "withings.temperatur.body_temp"},
+             'skin_temp': {"source": "withings.temperatur.skin_temp"}}
         ]}
 
 HISTORY = {'withings_base': {
-               'withings.body.gewicht' : {"label": "Gewicht", "intervalls": "A,Y,Q,M", "style": "line", "interval": "M"}
+               'withings.body.gewicht' : {"label": "Gewicht", "intervalls": "A,Y,Q,M", "style": "line", "interval": "M"},
+               'withings.heart.puls' : {"label": "Herzfequenz", "intervalls": "A,Y,Q,M", "style": "line", "interval": "M"},
+               'withings.heart.systole' : {"label": "Blutdruck", "intervalls": "A,Y,Q,M", "style": "line", "interval": "M"},
+               'withings.heart.puls_wellen_elasitzitaet' : {"label": "Pulswellengeschwindikeit", "intervalls": "A,Y,Q,M", "style": "line", "interval": "M"},
+               'withings.heart.gefaess_alter' : {"label": "Gefässalter", "intervalls": "A,Y,Q,M", "style": "line", "interval": "M"},
+               'withings.temperatur.body_temp' : {"label": "Gefässalter", "intervalls": "A,Y,Q,M", "style": "line", "interval": "M"}
           }}
 
 HISTORY_DATA = {'withings.body.gewicht': [{'label': 'Gewicht',
-                                           'decimal': 2}]}
+                                           'decimal': 2}],
+                'withings.heart.puls': [{'label': 'Herzfrequenz',
+                                         'decimal': 0}],
+                'withings.heart.systole': [{'label': 'Systole',
+                                            'decimal': 0},
+                                           {'label': 'Diastole',
+                                            'decimal': 0,
+                                            'source': 'withings.heart.diastole'}],
+                'withings.heart.puls_wellen_elasitzitaet': [{'label': 'Pulswellengeschwindikeit',
+                                                             'decimal': 2}],
+                'withings.heart.gefaess_alter': [{'label': 'Gefässalter',
+                                                  'decimal': 1}],
+                'withings.temperatur.body_temp': [{'label': 'Temperatur',
+                                                  'decimal': 1}]}
 
 class Api(BaseObj):
     def __init__(self, core: Core) -> None:
@@ -93,11 +127,12 @@ class Api(BaseObj):
                 bc = rd.data.data
                 if bc['open_id'] and ('withings' in bc['open_id']['app'].split(' ') or bc['open_id']['app'] == '*'):
                     data = json.loads(bc['data'])
+                    out = []
                     for rec in HISTORY_DATA[data['sensor']]:
                         rec_out = HistoryFullOut(label= rec['label'], decimal= rec['decimal'], 
                                                  data= await self.core.cache.get_history(rec.get('source', data['sensor']), data['interval']))
-                    self.core.log.critical(data)
-                return (True, web.json_response(SendOk(data=rec_out).model_dump()))
+                        out.append(rec_out)
+                return (True, web.json_response(SendOk(data=out).model_dump()))
             case 'setup/get_url':
                 self.core.log.debug('Ask for url')
                 bc = rd.data.data

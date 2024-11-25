@@ -81,26 +81,52 @@ class Com(BaseObj):
                 case 'sm':
                     data = rd.data.data
                     match rd.path[2]:
+            #                         {'gewicht_month': {"source": "withings.weight_trend.gewicht_month"},
+            #  'gewicht_quartal': {"source": "withings.weight_trend.gewicht_quartal"},
+            #  'gewicht_year': {"source": "withings.weight_trend.gewicht_year"}}
+
                         case 'get_sensor':
                             table, sensor = data['sensor'].split('.')
-                            if table == 'body':
-                                res = await self._data_db.table('vital').exec('get_last_by_type', {'type': sensor})
-                                if res:
-                                    return (True, web.json_response(SendOk(data={'value': res['value']}).model_dump()))
-                                else:
-                                    return (True, web.json_response(SendOk(ok=False).models_dump()))
+                            match table:
+                                case 'body' | 'heart' | 'temperatur':
+                                    res = await self._data_db.table('vital').exec('get_last_by_type', {'type': sensor})
+                                    if res:
+                                        return (True, web.json_response(SendOk(data={'value': res['value']}).model_dump()))
+                                    else:
+                                        return (True, web.json_response(SendOk(ok=False).models_dump()))
+                                case 'weight_trend':
+                                    base_value = 0
+                                    avg_value = 0
+                                    if res := await self._data_db.table('vital').exec('get_last_by_type', {'type': 'gewicht'}):
+                                        base_value = res['value']
+                                    self.core.log.critical(sensor.split('_')[1][0])
+                                    match sensor.split('_')[1][0]:
+                                        case 'm':
+                                            _interval = 30 * 86400
+                                        case 'q':
+                                            _interval = 92 * 86400
+                                        case 'y':
+                                            _interval = 365 * 86400
+                                    if res := await self._data_db.table('vital').exec('get_avg', {'date': int(time.time() - _interval)}):
+                                        avg_value = res['value']
+                                    return (True, web.json_response(SendOk(data={'value':  base_value - avg_value}).model_dump()))    
                         case 'get_history':
                             _table, _sensor = data['sensor'].split('.')
-                            _interval = 30 * 86400
-                            if _table == 'body':
+                            match data['interval']:
+                                case 'M':
+                                    _interval = 30 * 86400
+                                case 'Q':
+                                    _interval = 92 * 86400
+                                case 'Y':
+                                    _interval = 365 * 86400
+                                case _:
+                                    _interval = 100 * 365 * 86400
+                            if _table in ['body', 'heart', 'temperatur']:
                                 res = await self._data_db.table('vital').exec('get_history', {'type': _sensor, 'date': int(time.time() - _interval)})
                                 if res:
                                     return (True, web.json_response(SendOk(data=res).model_dump()))
                                 else:
                                     return (True, web.json_response(SendOk(ok=False).models_dump()))
-                            self.core.log.critical(rd)
-                            self.core.log.critical('xXx 2')
-                            self.core.log.critical(data)
                 case _:
                      self.core.log.critical(rd)
                         

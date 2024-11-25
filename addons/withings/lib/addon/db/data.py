@@ -14,6 +14,8 @@ class Vital(Table):
                                                            ['value'], ['type']))
         self.add_statement('get_history', QueryMulti("SELECT {fields} FROM {table} WHERE type=? and date>? ORDER BY date DESC", 
                                                            ['value', 'date'], ['type', 'date']))
+        self.add_statement('get_avg', QuerySingle("SELECT avg(value) as {fields} FROM {table} WHERE date>? and type='gewicht' ORDER BY date DESC", 
+                                                           ['value'], ['date']))
         
         
         

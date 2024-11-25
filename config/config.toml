@@ -69,7 +69,7 @@ jQWidgets = "https://git.holler.pro/fholler/jQWidgets.git"
 MaterialDesign-SVG = "https://git.holler.pro/fholler/MaterialDesign-SVG.git"
 packery = "https://git.holler.pro/fholler/packery.git"
 qrcodejs = "https://git.holler.pro/fholler/qrcodejs"
-highcharts = "https://git.holler.pro/fholler/highcharts.js"
+highcharts = "https://git.holler.pro/fholler/highcharts"
 
 [network]
 ip6_interface = "ethx0"

@@ -30,9 +30,7 @@ define(['lcsmdefaultpanel'], function() {
                                 req.push('card_'+_cards[i].name)
                             }
                             let items = resp.data.items
-                            console.log(req)
                             require(req, function(Packery){
-                                console.log(req)
                                 for (var j=0; j<items.length; j++) {
                                     let type = items[j].type
                                     let item_data = [items[j].type]
@@ -42,8 +40,8 @@ define(['lcsmdefaultpanel'], function() {
                                         }
                                     }
                                     cards[type].create('withings_base', items[j]['label'], j, item_data)
-                                    console.log(items[j])
                                 }
+                                $('#content_modul_page_withings_base').data('packery', new Packery( '#content_modul_page_withings_base', {itemSelector: '.sh_card', gutter: 20}))
                             })
                             console.log(resp)
                         }

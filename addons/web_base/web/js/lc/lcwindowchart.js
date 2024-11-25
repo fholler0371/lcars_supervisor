@@ -77,8 +77,8 @@ define('lcwindowchart', ['lcwindow', 'lcbuttons'], function() {
           var _options = $(ctl).data('lcWindowChart')
           window.api_call(url='sm/history_chart_data', data={'interval': interval, 'sensor': _options.sensor}).then(resp => {
             if (resp.ok) {
-              let data = resp.data.data
-              require(['hc'], function(Highcharts) {
+              let data = resp.data
+              require(['highcharts/highcharts'], function(Highcharts) {
                 let _id = $(ctl).attr('id')
                 series = []
                 for (var i=0; i<data.length; i++) {
