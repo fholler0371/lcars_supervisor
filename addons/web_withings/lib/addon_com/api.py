@@ -23,8 +23,17 @@ PANELS = {'base': {
                         {'label': 'Gewichtsentwicklung', 'type': 'withings_weight_trend'},       
                         {'label': 'Herz', 'type': 'withings_heart'},     
                         {'label': 'Temperatur', 'type': 'withings_temp'}]       
-                  }
+                  },
+          'daily': {
+              'cards' : [{'name': 'withings_daily', 'type': 'app'}],
+              'items' : [{"label": "Körper (gestern)", "type": "withings_daily"},
+                         {"label": "Körper (Woche)", "type": "withings_daily"},
+                         {"label": "Körper (Monat)", "type": "withings_daily"},
+                         {"label": "Körper (Quartal)", "type": "withings_daily"},
+                         {"label": "Körper (Jahr)", "type": "withings_daily"}]       
+                   }
          }
+
 
 CARDS = {'withings_base': [
             {"gewicht": {"source": "withings.body.gewicht"},
@@ -41,8 +50,44 @@ CARDS = {'withings_base': [
              'puls': {'source': 'withings.heart.puls'},
              'puls_wellen_elasitzitaet': {'source': 'withings.heart.puls_wellen_elasitzitaet'}},
             {'body_temp': {"source": "withings.temperatur.body_temp"},
-             'skin_temp': {"source": "withings.temperatur.skin_temp"}}
-        ]}
+             'skin_temp': {"source": "withings.temperatur.skin_temp"}}],
+         'withings_daily': [
+            {'steps': {'source': 'withings.sum_m.steps', 'params': ['hist']}, 
+             'activ_intense' : {'source': 'withings.sum_m.intense'},
+             'activ_moderate' : {'source': 'withings.sum_m.moderate'},
+             'activ_soft' : {'source': 'withings.sum_m.soft'},
+             'activecalories' : {'source': 'withings.sum_m.calories'},
+             'totalcalories' : {'source': 'withings.sum_m.totalcalories'},
+             'distance' : {'source': 'withings.sum_m.distance'}},
+            {'steps': {'source': 'withings.sum_m.steps_w'}, 
+             'activ_intense' : {'source': 'withings.sum_m.intense_w'},
+             'activ_moderate' : {'source': 'withings.sum_m.moderate_w'},
+             'activ_soft' : {'source': 'withings.sum_m.soft_w'},
+             'activecalories' : {'source': 'withings.sum_m.calories_w'},
+             'totalcalories' : {'source': 'withings.sum_m.totalcalories_w'},
+             'distance' : {'source': 'withings.sum_m.distance_w'}},
+            {'steps': {'source': 'withings.sum_m.steps_m'}, 
+             'activ_intense' : {'source': 'withings.sum_m.intense_m'},
+             'activ_moderate' : {'source': 'withings.sum_m.moderate_m'},
+             'activ_soft' : {'source': 'withings.sum_m.soft_m'},
+             'activecalories' : {'source': 'withings.sum_m.calories_m'},
+             'totalcalories' : {'source': 'withings.sum_m.totalcalories_m'},
+             'distance' : {'source': 'withings.sum_m.distance_m'}},
+            {'steps': {'source': 'withings.sum_m.steps_q'}, 
+             'activ_intense' : {'source': 'withings.sum_m.intense_q'},
+             'activ_moderate' : {'source': 'withings.sum_m.moderate_q'},
+             'activ_soft' : {'source': 'withings.sum_m.soft_q'},
+             'activecalories' : {'source': 'withings.sum_m.calories_q'},
+             'totalcalories' : {'source': 'withings.sum_m.totalcalories_q'},
+             'distance' : {'source': 'withings.sum_m.distance_q'}},
+            {'steps': {'source': 'withings.sum_m.steps_y'}, 
+             'activ_intense' : {'source': 'withings.sum_m.intense_y'},
+             'activ_moderate' : {'source': 'withings.sum_m.moderate_y'},
+             'activ_soft' : {'source': 'withings.sum_m.soft_y'},
+             'activecalories' : {'source': 'withings.sum_m.calories_y'},
+             'totalcalories' : {'source': 'withings.sum_m.totalcalories_y'},
+             'distance' : {'source': 'withings.sum_m.distance_y'}}]
+         }
 
 HISTORY = {'withings_base': {
                'withings.body.gewicht' : {"label": "Gewicht", "intervalls": "A,Y,Q,M", "style": "line", "interval": "M"},
@@ -51,7 +96,11 @@ HISTORY = {'withings_base': {
                'withings.heart.puls_wellen_elasitzitaet' : {"label": "Pulswellengeschwindikeit", "intervalls": "A,Y,Q,M", "style": "line", "interval": "M"},
                'withings.heart.gefaess_alter' : {"label": "Gefässalter", "intervalls": "A,Y,Q,M", "style": "line", "interval": "M"},
                'withings.temperatur.body_temp' : {"label": "Gefässalter", "intervalls": "A,Y,Q,M", "style": "line", "interval": "M"}
-          }}
+          },
+           'withings_daily': {
+               'withings.sum_m.steps' : {"label": "Schritte", "intervalls": "A,Y,Q,M", "style": "line", "interval": "M"}}
+          } 
+           
 
 HISTORY_DATA = {'withings.body.gewicht': [{'label': 'Gewicht',
                                            'decimal': 2}],
@@ -67,7 +116,9 @@ HISTORY_DATA = {'withings.body.gewicht': [{'label': 'Gewicht',
                 'withings.heart.gefaess_alter': [{'label': 'Gefässalter',
                                                   'decimal': 1}],
                 'withings.temperatur.body_temp': [{'label': 'Temperatur',
-                                                  'decimal': 1}]}
+                                                  'decimal': 1}],
+                'withings.sum_m.steps': [{'label': 'Schritte',
+                                                  'decimal': 0}]}
 
 class Api(BaseObj):
     def __init__(self, core: Core) -> None:
@@ -93,6 +144,7 @@ class Api(BaseObj):
                 data = Moduls()
                 if rd.open_id and ('withings' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*'):
                     data.append({'mod': 'withings_base', 'src': '/withings/js/mod/withings_base'})
+                    data.append({'mod': 'withings_daily', 'src': '/withings/js/mod/withings_daily'})
                 if rd.open_id and ('withings_sec' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*'):
                     data.append({'mod': 'withings_setup', 'src': '/withings/js/mod/withings_setup'})
                 return (True, web.json_response(data.model_dump()))
@@ -110,7 +162,8 @@ class Api(BaseObj):
                         panel = CARDS.get(data['panel'], [])
                         self.core.log.critical(panel) 
                         if _item := panel[data['card']].get(item):
-                            if value := await self.core.cache.get_value(_item['source']):
+                            value = await self.core.cache.get_value(_item['source'])
+                            if value is not None:
                                 out[item] = {'value': value,
                                              'source': _item['source'],
                                              'params': _item.get('params', [])} 

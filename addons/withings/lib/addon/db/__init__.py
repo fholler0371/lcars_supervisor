@@ -1,1 +1,1 @@
-from .data import Vital
+from .data import Vital, Daily

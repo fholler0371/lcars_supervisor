@@ -36,7 +36,7 @@ define(function () {
             if (packery != undefined) {
               packery.layout()
             }
-            window.modul['page_'+panel].hitory_create(id)
+            window.modul[panel].history_create(panel, id)
           }
         })
       },
