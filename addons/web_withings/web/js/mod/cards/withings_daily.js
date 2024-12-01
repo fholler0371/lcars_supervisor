@@ -70,7 +70,7 @@ define(function () {
               html += ' class="sh_card_history"'
             }
             html += '><span class="sh_card_item_labels" style="left: 5px; position: relative">Aktiv (leicht)</span>'
-            html += '<div class="sh_card_item_value"><span></span> min</div></div>'
+            html += '<div class="sh_card_item_value"><span></span> h</div></div>'
             $(ele).append(html)
             values['activ_soft'] = data.activ_soft.value
             sources['activ_soft'] = data.activ_soft.source
@@ -79,7 +79,7 @@ define(function () {
             height += 24
             var html = '<div data-entry="activ_moderate"'
             html += '><span class="sh_card_item_labels" style="left: 5px; position: relative">Aktiv (mittlere)</span>'
-            html += '<div class="sh_card_item_value"><span></span> min</div></div>'
+            html += '<div class="sh_card_item_value"><span></span> h</div></div>'
             $(ele).append(html)
             values['activ_moderate'] = data.activ_moderate.value
             sources['activ_moderate'] = data.activ_moderate.source
@@ -88,7 +88,7 @@ define(function () {
             height += 24
             var html = '<div data-entry="activ_intense"'
             html += '><span class="sh_card_item_labels" style="left: 5px; position: relative">Aktiv (hoch)</span>'
-            html += '<div class="sh_card_item_value"><span></span> min</div></div>'
+            html += '<div class="sh_card_item_value"><span></span> h</div></div>'
             $(ele).append(html)
             values['activ_intense'] = data.activ_intense.value
             sources['activ_intense'] = data.activ_intense.source
@@ -121,7 +121,7 @@ define(function () {
           var div_ele = $(ele).find('.sh_card_item_value'),
               span_ele = $(div_ele[0]).find('span'),
               old_text = $(span_ele[0]).text(),
-              new_text = values['distance'].toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})
+              new_text = (values['distance']/1000).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})
           //if (old_text != new_text) { $(div_ele[0]).addClass('sh_card_item_highlight') }
           $(span_ele[0]).text(new_text)
         }
@@ -145,7 +145,7 @@ define(function () {
           var div_ele = $(ele).find('.sh_card_item_value'),
               span_ele = $(div_ele[0]).find('span'),
               old_text = $(span_ele[0]).text(),
-              new_text = values['activ_soft'].toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1})
+              new_text = (values['activ_soft'] / 3600).toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1})
           //if (old_text != new_text) { $(div_ele[0]).addClass('sh_card_item_highlight') }
           $(span_ele[0]).text(new_text)
         }
@@ -153,7 +153,7 @@ define(function () {
           var div_ele = $(ele).find('.sh_card_item_value'),
               span_ele = $(div_ele[0]).find('span'),
               old_text = $(span_ele[0]).text(),
-              new_text = values['activ_moderate'].toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1})
+              new_text = (values['activ_moderate'] / 3600).toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1})
           //if (old_text != new_text) { $(div_ele[0]).addClass('sh_card_item_highlight') }
           $(span_ele[0]).text(new_text)
         }
@@ -161,7 +161,7 @@ define(function () {
           var div_ele = $(ele).find('.sh_card_item_value'),
               span_ele = $(div_ele[0]).find('span'),
               old_text = $(span_ele[0]).text(),
-              new_text = values['activ_intense'].toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1})
+              new_text = (values['activ_intense'] / 3600).toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1})
           //if (old_text != new_text) { $(div_ele[0]).addClass('sh_card_item_highlight') }
           $(span_ele[0]).text(new_text)
         }
