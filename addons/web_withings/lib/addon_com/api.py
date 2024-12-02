@@ -52,41 +52,41 @@ CARDS = {'withings_base': [
             {'body_temp': {"source": "withings.temperatur.body_temp"},
              'skin_temp': {"source": "withings.temperatur.skin_temp"}}],
          'withings_daily': [
-            {'steps': {'source': 'withings.sum_m.steps', 'params': ['hist']}, 
-             'activ_intense' : {'source': 'withings.sum_m.intense'},
-             'activ_moderate' : {'source': 'withings.sum_m.moderate'},
-             'activ_soft' : {'source': 'withings.sum_m.soft'},
-             'activecalories' : {'source': 'withings.sum_m.calories'},
-             'totalcalories' : {'source': 'withings.sum_m.totalcalories'},
-             'distance' : {'source': 'withings.sum_m.distance'}},
-            {'steps': {'source': 'withings.sum_m.steps_w'}, 
-             'activ_intense' : {'source': 'withings.sum_m.intense_w'},
-             'activ_moderate' : {'source': 'withings.sum_m.moderate_w'},
-             'activ_soft' : {'source': 'withings.sum_m.soft_w'},
-             'activecalories' : {'source': 'withings.sum_m.calories_w'},
-             'totalcalories' : {'source': 'withings.sum_m.totalcalories_w'},
-             'distance' : {'source': 'withings.sum_m.distance_w'}},
-            {'steps': {'source': 'withings.sum_m.steps_m'}, 
-             'activ_intense' : {'source': 'withings.sum_m.intense_m'},
-             'activ_moderate' : {'source': 'withings.sum_m.moderate_m'},
-             'activ_soft' : {'source': 'withings.sum_m.soft_m'},
-             'activecalories' : {'source': 'withings.sum_m.calories_m'},
-             'totalcalories' : {'source': 'withings.sum_m.totalcalories_m'},
-             'distance' : {'source': 'withings.sum_m.distance_m'}},
-            {'steps': {'source': 'withings.sum_m.steps_q'}, 
-             'activ_intense' : {'source': 'withings.sum_m.intense_q'},
-             'activ_moderate' : {'source': 'withings.sum_m.moderate_q'},
-             'activ_soft' : {'source': 'withings.sum_m.soft_q'},
-             'activecalories' : {'source': 'withings.sum_m.calories_q'},
-             'totalcalories' : {'source': 'withings.sum_m.totalcalories_q'},
-             'distance' : {'source': 'withings.sum_m.distance_q'}},
-            {'steps': {'source': 'withings.sum_m.steps_y'}, 
-             'activ_intense' : {'source': 'withings.sum_m.intense_y'},
-             'activ_moderate' : {'source': 'withings.sum_m.moderate_y'},
-             'activ_soft' : {'source': 'withings.sum_m.soft_y'},
-             'activecalories' : {'source': 'withings.sum_m.calories_y'},
-             'totalcalories' : {'source': 'withings.sum_m.totalcalories_y'},
-             'distance' : {'source': 'withings.sum_m.distance_y'}}]
+            {'steps': {'source': 'withings.sum_m.steps', 'label': 'Schritte', 'params': {'hist': True}}, 
+             'activ_intense' : {'source': 'withings.sum_m.intense', 'label': 'Aktiv (hoch)', 'unit': 'h'},
+             'activ_moderate' : {'source': 'withings.sum_m.moderate', 'label': 'Aktiv (mittlere)', 'unit': 'h'},
+             'activ_soft' : {'source': 'withings.sum_m.soft', 'label': 'Aktiv (leicht)', 'unit': 'h', 'params': {'hist': True}},
+             'activecalories' : {'source': 'withings.sum_m.calories', 'label': 'Kalorien (aktiv)', 'unit': 'kcal'},
+             'totalcalories' : {'source': 'withings.sum_m.totalcalories', 'label': 'Kalorien (gesamt)', 'unit': 'kcal'},
+             'distance' : {'source': 'withings.sum_m.distance', 'label': 'Strecke', 'unit': 'km'}},
+            {'steps': {'source': 'withings.sum_m.steps_w', 'label': 'Schritte'}, 
+             'activ_intense' : {'source': 'withings.sum_m.intense_w', 'label': 'Aktiv (hoch)', 'unit': 'h'},
+             'activ_moderate' : {'source': 'withings.sum_m.moderate_w', 'label': 'Aktiv (mittlere)', 'unit': 'h'},
+             'activ_soft' : {'source': 'withings.sum_m.soft_w', 'label': 'Aktiv (leicht)', 'unit': 'h'},
+             'activecalories' : {'source': 'withings.sum_m.calories_w', 'label': 'Kalorien (aktiv)', 'unit': 'kcal'},
+             'totalcalories' : {'source': 'withings.sum_m.totalcalories_w', 'label': 'Kalorien (gesamt)', 'unit': 'kcal'},
+             'distance' : {'source': 'withings.sum_m.distance_w', 'label': 'Strecke', 'unit': 'km'}},
+            {'steps': {'source': 'withings.sum_m.steps_m', 'label': 'Schritte'}, 
+             'activ_intense' : {'source': 'withings.sum_m.intense_m', 'label': 'Aktiv (hoch)', 'unit': 'h'},
+             'activ_moderate' : {'source': 'withings.sum_m.moderate_m', 'label': 'Aktiv (mittlere)', 'unit': 'h'},
+             'activ_soft' : {'source': 'withings.sum_m.soft_m', 'label': 'Aktiv (leicht)', 'unit': 'h'},
+             'activecalories' : {'source': 'withings.sum_m.calories_m', 'label': 'Kalorien (aktiv)', 'unit': 'kcal'},
+             'totalcalories' : {'source': 'withings.sum_m.totalcalories_m', 'label': 'Kalorien (gesamt)', 'unit': 'kcal'},
+             'distance' : {'source': 'withings.sum_m.distance_m', 'label': 'Strecke', 'unit': 'km'}},
+            {'steps': {'source': 'withings.sum_m.steps_q', 'label': 'Schritte'}, 
+             'activ_intense' : {'source': 'withings.sum_m.intense_q', 'label': 'Aktiv (hoch)', 'unit': 'h'},
+             'activ_moderate' : {'source': 'withings.sum_m.moderate_q', 'label': 'Aktiv (mittlere)', 'unit': 'h'},
+             'activ_soft' : {'source': 'withings.sum_m.soft_q', 'label': 'Aktiv (leicht)', 'unit': 'h'},
+             'activecalories' : {'source': 'withings.sum_m.calories_q', 'label': 'Kalorien (aktiv)', 'unit': 'kcal'},
+             'totalcalories' : {'source': 'withings.sum_m.totalcalories_q', 'label': 'Kalorien (gesamt)', 'unit': 'kcal'},
+             'distance' : {'source': 'withings.sum_m.distance_q', 'label': 'Strecke', 'unit': 'km'}},
+            {'steps': {'source': 'withings.sum_m.steps_y', 'label': 'Schritte'}, 
+             'activ_intense' : {'source': 'withings.sum_m.intense_y', 'label': 'Aktiv (hoch)', 'unit': 'h'},
+             'activ_moderate' : {'source': 'withings.sum_m.moderate_y', 'label': 'Aktiv (mittlere)', 'unit': 'h'},
+             'activ_soft' : {'source': 'withings.sum_m.soft_y', 'label': 'Aktiv (leicht)', 'unit': 'h'},
+             'activecalories' : {'source': 'withings.sum_m.calories_y', 'label': 'Kalorien (aktiv)', 'unit': 'kcal'},
+             'totalcalories' : {'source': 'withings.sum_m.totalcalories_y', 'label': 'Kalorien (gesamt)', 'unit': 'kcal'},
+             'distance' : {'source': 'withings.sum_m.distance_y', 'label': 'Strecke', 'unit': 'km'}}]
          }
 
 HISTORY = {'withings_base': {
@@ -164,9 +164,10 @@ class Api(BaseObj):
                         if _item := panel[data['card']].get(item):
                             value = await self.core.cache.get_value(_item['source'])
                             if value is not None:
-                                out[item] = {'value': value,
-                                             'source': _item['source'],
-                                             'params': _item.get('params', [])} 
+                                out[item] = _item.copy()
+                                out[item]['value'] = value
+#                                             'source': _item['source'],
+#                                             'params': _item.get('params', [])} 
                     return (True, web.json_response(SendOk(data=out).model_dump()))
             case 'sm/history_chart':
                 bc = rd.data.data

@@ -2,96 +2,37 @@ define(function () {
   var card = {
     create : function(panel, label, id, params) {
       var history = false
+      let _items = ['steps', 'distance', 'totalcalories', 'activecalories', 'activ_soft', 'activ_moderate', 'activ_intense']
       if (params.length > 1 && params[1] == 'H') {
         history = true
       } 
       var html = '<div class="sh_card" data-panel="'+panel+'" data-id="'+id+'" data-type="withings_daily"><div class="sh_card_label">'+label+'</div></div>'
       $('#content_modul_page_'+panel).append(html)
       window.api_call(url='sm/cards_source', data={'panel': panel, 'card': id,
-        'items': ['steps', 'distance', 'totalcalories', 'activecalories', 'activ_soft', 'activ_moderate', 'activ_intense']}).then(resp => {
+        'items': _items}).then(resp => {
         if (resp.ok) {
-        let data = resp.data
+          let data = resp.data
           var height = 32
           var values = {}
           var sources = {}
           var ele = $('#content_modul_page_'+panel).children()[id]
-          if (data.steps != null && data.steps.value != null) {
-            height += 24
-            var html = '<div data-entry="steps"'
-            if (data.steps.params.includes('hist')) {
-              html += ' class="sh_card_history"'
+          for (let i=0; i<_items.length; i++) {
+            _line_item = _items[i]
+            if (data[_line_item] != null && data[_line_item].value != null) {
+              if (data[_line_item].params == undefined) data[_line_item].params = {}
+              height += 24
+              let html = '<div data-entry="' + _line_item + '"'
+              if (data[_line_item].params.hist != undefined) {
+                html += ' class="sh_card_history"'
+              }
+              html += '><span class="sh_card_item_labels"  style="left: 5px; position: relative">' + data[_line_item].label + '</span>'
+              html += '<div class="sh_card_item_value"><span></span>'
+              if (data[_line_item].unit != undefined) html += ' ' + data[_line_item].unit
+              html += '</div></div>'
+              $(ele).append(html)
+              values[_line_item] = data[_line_item].value
+              sources[_line_item] = data[_line_item].source
             }
-            html += '><span class="sh_card_item_labels"  style="left: 5px; position: relative">Schritte</span>'
-            html += '<div class="sh_card_item_value"><span></span></div></div>'
-            $(ele).append(html)
-            values['steps'] = data.steps.value
-            sources['steps'] = data.steps.source
-          }
-          if (data.distance != null && data.distance.value != null) {
-            height += 24
-            var html = '<div data-entry="distance"'
-            if (history) {
-              html += ' class="sh_card_history"'
-            }
-            html += '><span class="sh_card_item_labels" style="left: 5px; position: relative">Strecke</span>'
-            html += '<div class="sh_card_item_value"><span></span> km</div></div>'
-            $(ele).append(html)
-            values['distance'] = data.distance.value
-            sources['distance'] = data.distance.source
-          }
-          if (data.totalcalories != null && data.totalcalories.value != null) {
-            height += 24
-            var html = '<div data-entry="totalcalories"'
-            if (history) {
-              html += ' class="sh_card_history"'
-            }
-            html += '><span class="sh_card_item_labels" style="left: 5px; position: relative">Kalorien (gesamt)</span>'
-            html += '<div class="sh_card_item_value"><span></span> kcal</div></div>'
-            $(ele).append(html)
-            values['totalcalories'] = data.totalcalories.value
-            sources['totalcalories'] = data.totalcalories.source
-          }
-          if ((data.activecalories != null) && (data.activecalories.value != null)) {
-            height += 24
-            var html = '<div data-entry="activecalories"'
-            if (history) {
-              html += ' class="sh_card_history"'
-            }
-            html += '><span class="sh_card_item_labels" style="left: 5px; position: relative">Kalorien (aktiv)</span>'
-            html += '<div class="sh_card_item_value"><span></span> kcal</div></div>'
-            $(ele).append(html)
-            values['activecalories'] = data.activecalories.value
-            sources['activecalories'] = data.activecalories.source
-          }
-          if ((data.activ_soft != null) && (data.activ_soft.value != null)) {
-            height += 24
-            var html = '<div data-entry="activ_soft"'
-            if (history) {
-              html += ' class="sh_card_history"'
-            }
-            html += '><span class="sh_card_item_labels" style="left: 5px; position: relative">Aktiv (leicht)</span>'
-            html += '<div class="sh_card_item_value"><span></span> h</div></div>'
-            $(ele).append(html)
-            values['activ_soft'] = data.activ_soft.value
-            sources['activ_soft'] = data.activ_soft.source
-          }
-          if ((data.activ_moderate != null) && (data.activ_moderate.value != null)) {
-            height += 24
-            var html = '<div data-entry="activ_moderate"'
-            html += '><span class="sh_card_item_labels" style="left: 5px; position: relative">Aktiv (mittlere)</span>'
-            html += '<div class="sh_card_item_value"><span></span> h</div></div>'
-            $(ele).append(html)
-            values['activ_moderate'] = data.activ_moderate.value
-            sources['activ_moderate'] = data.activ_moderate.source
-          }
-          if ((data.activ_intense != null) && (data.activ_intense.value != null)) {
-            height += 24
-            var html = '<div data-entry="activ_intense"'
-            html += '><span class="sh_card_item_labels" style="left: 5px; position: relative">Aktiv (hoch)</span>'
-            html += '<div class="sh_card_item_value"><span></span> h</div></div>'
-            $(ele).append(html)
-            values['activ_intense'] = data.activ_intense.value
-            sources['activ_intense'] = data.activ_intense.source
           }
           $(ele).height(height)
           $(ele).data('sources', sources)
