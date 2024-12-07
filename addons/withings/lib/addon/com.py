@@ -70,7 +70,7 @@ class Com(BaseObj):
                                     if res := await self._data_db.table('vital').exec('get_avg', {'date': int(time.time() - _interval)}):
                                         avg_value = res['value']
                                     return (True, web.json_response(SendOk(data={'value':  base_value - avg_value}).model_dump()))    
-                                case 'sum_m':
+                                case 'sum_m' | 'heart_d':
                                     count_letter = sensor.split('_')[-1]
                                     match count_letter:
                                         case 'y':
@@ -96,6 +96,10 @@ class Com(BaseObj):
                                                                                                                    'date_min': date_min.strftime('%Y-%m-%d'),
                                                                                                                    'type': _sensor}):
                                         value = res['value']
+                                    self.core.log.critical(res)
+                                    self.core.log.critical(_sensor)
+                                    self.core.log.critical(date_max)
+                                    self.core.log.critical(date_min)
                                     self.core.log.critical(f"{value}")
                                     return (True, web.json_response(SendOk(data={'value':  value }).model_dump())) 
                                 case _:
@@ -116,9 +120,9 @@ class Com(BaseObj):
                                     _interval = 100 * 365 * 86400
                                     _days = 100 * 365
                             match _table:
-                                case 'body'| 'heart'| 'temperatur':
+                                case 'body' | 'heart'| 'temperatur':
                                     res = await self._data_db.table('vital').exec('get_history', {'type': _sensor, 'date': int(time.time() - _interval)})
-                                case 'sum_m':
+                                case 'sum_m' | 'heart_d':
                                     res = await self._data_db.table('daily').exec('get_history', {'type': _sensor, 
                                                                                                   'date': (datetime.today() - timedelta(days= _days)).strftime('%Y-%m-%d')})
                                     if res:
