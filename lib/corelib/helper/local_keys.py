@@ -10,7 +10,7 @@ class LocalKeys:
         self.__core : object = core
         self.__data : dict = None
         self.__file : dict = None
-        self.__ip : dict = None
+        self.__ip : dict = {}
         
     async def _ainit(self, sv: bool= False) -> None:
         if sv:
@@ -24,7 +24,10 @@ class LocalKeys:
             self.__data = {'local': os.getenv('LCARS_KEY')}
             #add keys von secrets
             if secret_data := self.__core.secret.lcars:
-                self.__core.log.info(secret_data)
+                for host, data in secret_data.items():
+                    if data['token'] != self.__data['local']:
+                        self.__data[host] = data['token']
+                        self.__ip[host] = data['ip'] 
         else:
             self.__data = {'local': secrets.token_hex(32)}
             await self.__save()
@@ -34,6 +37,10 @@ class LocalKeys:
         await aioyamllib.dump(self.__file, self.__data)
         
     def __getattr__(self, name):
-        if name == 'keys':
-            return self.__data.keys()
-        return self.__data.get(name, None)
+        match name:
+            case 'keys':
+                return self.__data.keys()
+            case 'ip':
+                return self.__ip
+            case _:
+                return self.__data.get(name, None)
