@@ -82,8 +82,10 @@ define('lcwindowchart', ['lcwindow', 'lcbuttons'], function() {
                 let _id = $(ctl).attr('id')
                 series = []
                 for (var i=0; i<data.length; i++) {
+                  let factor = 1
+                  if (data[i].factor != undefined) factor = data[i].factor
                   for (var j=0; j<data[i].data.length; j++) {
-                    data[i].data[j] = [data[i].data[j].date*1000, data[i].data[j].value]
+                    data[i].data[j] = [data[i].data[j].date*1000, data[i].data[j].value * factor]
                   }
                   series.push({
                     name: data[i].label,

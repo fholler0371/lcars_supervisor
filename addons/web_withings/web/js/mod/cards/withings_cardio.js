@@ -2,11 +2,11 @@ define(function () {
   var card = {
     create : function(panel, label, id, params) {
       var history = false
-      let _items = ['steps', 'distance', 'totalcalories', 'activecalories', 'activ_soft', 'activ_moderate', 'activ_intense']
+      let _items = ['average', 'max', 'min', 'zone0', 'zone1', 'zone2', 'zone3']
       if (params.length > 1 && params[1] == 'H') {
         history = true
       } 
-      var html = '<div class="sh_card" data-panel="'+panel+'" data-id="'+id+'" data-type="withings_daily"><div class="sh_card_label">'+label+'</div></div>'
+      var html = '<div class="sh_card" data-panel="'+panel+'" data-id="'+id+'" data-type="withings_cardio"><div class="sh_card_label">'+label+'</div></div>'
       $('#content_modul_page_'+panel).append(html)
       window.api_call(url='sm/cards_source', data={'panel': panel, 'card': id,
         'items': _items}).then(resp => {
@@ -36,7 +36,7 @@ define(function () {
           }
           $(ele).height(height)
           $(ele).data('sources', sources)
-          cards.withings_daily.update(panel, id, values)
+          cards.withings_cardio.update(panel, id, values)
           var packery = $(ele).parent().data('packery')
           if (packery != undefined) {
             packery.layout()
@@ -50,59 +50,59 @@ define(function () {
       $($('#content_modul_page_'+panel).children()[id]).find('.sh_card_item_highlight').removeClass('sh_card_item_highlight')
       for (var i=0; i<eles.length; i++) {
         var ele = eles[i]
-        if (($(ele).data('entry') == 'steps') && (values['steps'] != null)) {
+        if (($(ele).data('entry') == 'average') && (values['average'] != null)) {
           var div_ele = $(ele).find('.sh_card_item_value'),
               span_ele = $(div_ele[0]).find('span'),
               old_text = $(span_ele[0]).text(),
-              new_text = values['steps'].toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0})
+              new_text = values['average'].toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0})
           //if (old_text != new_text) { $(div_ele[0]).addClass('sh_card_item_highlight') }
           $(span_ele[0]).text(new_text)
         }
-        if (($(ele).data('entry') == 'distance') && (values['distance'] != null)) {
+        if (($(ele).data('entry') == 'max') && (values['max'] != null)) {
           var div_ele = $(ele).find('.sh_card_item_value'),
               span_ele = $(div_ele[0]).find('span'),
               old_text = $(span_ele[0]).text(),
-              new_text = (values['distance']/1000).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})
+              new_text = values['max'].toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0})
           //if (old_text != new_text) { $(div_ele[0]).addClass('sh_card_item_highlight') }
           $(span_ele[0]).text(new_text)
         }
-        if (($(ele).data('entry') == 'totalcalories') && (values['totalcalories'] != null)) {
+        if (($(ele).data('entry') == 'min') && (values['min'] != null)) {
           var div_ele = $(ele).find('.sh_card_item_value'),
               span_ele = $(div_ele[0]).find('span'),
               old_text = $(span_ele[0]).text(),
-              new_text = values['totalcalories'].toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0})
+              new_text = values['min'].toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0})
           //if (old_text != new_text) { $(div_ele[0]).addClass('sh_card_item_highlight') }
           $(span_ele[0]).text(new_text)
         }
-        if (($(ele).data('entry') == 'activecalories') && (values['activecalories'] != null)) {
+        if (($(ele).data('entry') == 'zone0') && (values['zone0'] != null)) {
           var div_ele = $(ele).find('.sh_card_item_value'),
               span_ele = $(div_ele[0]).find('span'),
               old_text = $(span_ele[0]).text(),
-              new_text = values['activecalories'].toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0})
+              new_text = (values['zone0'] / 3600).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})
           //if (old_text != new_text) { $(div_ele[0]).addClass('sh_card_item_highlight') }
           $(span_ele[0]).text(new_text)
         }
-        if (($(ele).data('entry') == 'activ_soft') && (values['activ_soft'] != null)) {
+        if (($(ele).data('entry') == 'zone1') && (values['zone1'] != null)) {
           var div_ele = $(ele).find('.sh_card_item_value'),
               span_ele = $(div_ele[0]).find('span'),
               old_text = $(span_ele[0]).text(),
-              new_text = (values['activ_soft'] / 3600).toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1})
+              new_text = (values['zone1'] / 3600).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})
           //if (old_text != new_text) { $(div_ele[0]).addClass('sh_card_item_highlight') }
           $(span_ele[0]).text(new_text)
         }
-        if (($(ele).data('entry') == 'activ_moderate') && (values['activ_moderate'] != null)) {
+        if (($(ele).data('entry') == 'zone2') && (values['zone2'] != null)) {
           var div_ele = $(ele).find('.sh_card_item_value'),
               span_ele = $(div_ele[0]).find('span'),
               old_text = $(span_ele[0]).text(),
-              new_text = (values['activ_moderate'] / 3600).toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1})
+              new_text = (values['zone2'] / 3600).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})
           //if (old_text != new_text) { $(div_ele[0]).addClass('sh_card_item_highlight') }
           $(span_ele[0]).text(new_text)
         }
-        if (($(ele).data('entry') == 'activ_intense') && (values['activ_intense'] != null)) {
+        if (($(ele).data('entry') == 'zone3') && (values['zone3'] != null)) {
           var div_ele = $(ele).find('.sh_card_item_value'),
               span_ele = $(div_ele[0]).find('span'),
               old_text = $(span_ele[0]).text(),
-              new_text = (values['activ_intense'] / 3600).toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1})
+              new_text = (values['zone3'] / 3600).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})
           //if (old_text != new_text) { $(div_ele[0]).addClass('sh_card_item_highlight') }
           $(span_ele[0]).text(new_text)
         }
@@ -110,5 +110,5 @@ define(function () {
     }
   }
   if (window.cards == undefined) { window.cards = {}}
-  window.cards['withings_daily'] = card
+  window.cards['withings_cardio'] = card
 })
