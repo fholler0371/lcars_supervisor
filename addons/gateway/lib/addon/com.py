@@ -24,7 +24,8 @@ class Com(BaseObj):
                     return (True, web.json_response(Hostname(hostname=self.core.web_l._hostname).model_dump()))
             case 'network/app_list':
                 _out = StringList()
-                for host in self.core.web_l.local_keys.data.keys():
+                for host in self.core.web_l.local_keys.keys:
+                    print(f'host in list: {host}')
                     app_data = self._apps.setdefault(host, {'valid': 0, 'apps': []}) 
                     if app_data['valid'] < time.time():
                         if host == 'local':

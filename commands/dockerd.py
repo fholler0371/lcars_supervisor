@@ -81,30 +81,40 @@ async def create_image(core: corelib.Core, image_name: str, image_folder: str) -
 async def container_add(core: corelib.Core, container: str) -> None:
     #check image 
     manifest = await aiotomllib.loader(core.path.base / 'addons' / container / 'manifest.toml')
-    if (img_name := manifest.get('docker', {}).get('name')):
-        if '%Y' in img_name:
-            d = dt.now()
-            img_name = d.strftime(img_name)
-        to_build = True
-        for image in await core.docker.images.list():
-            for tag in image.attrs['RepoTags']:
-                if tag == img_name:
-                    to_build = False
-                    break
-            if not to_build:
+    main_version = int(manifest.get('version', '0.00').split('.')[0])
+    #Bereitsetellen des Images
+    #TODO kann raus wenn alle Manifeste auf Version 1
+    img_name = manifest.get('docker', {}).get('name') if main_version == 0 else manifest.get('docker', {}).get('image')
+    if '%Y' in img_name:
+        d = dt.now()
+        img_name = d.strftime(img_name)
+    to_build = True
+    for image in await core.docker.images.list():
+        for tag in image.attrs['RepoTags']:
+            if tag == img_name:
+                to_build = False
                 break
-        if to_build:
-            await create_image(core, img_name, manifest.get('docker', {}).get('folder'))
+        if not to_build:
+            break
+    if to_build:
+        await create_image(core, img_name, manifest.get('docker', {}).get('folder'))
     toml = await aiotomllib.loader(core.path.base / 'addons' / container / 'docker_data.toml')
     comp = {}
     comp['services'] = {}
     comp['services'][toml['name']] = {}
-    img_name = toml['image'] 
-    if '%Y' in img_name:
-        d = dt.now()
-        img_name = d.strftime(img_name)
+    #TODO kann raus wenn alle Manifeste auf Version 1
+    if main_version == 0:
+        img_name = toml['image'] 
+        if '%Y' in img_name:
+            d = dt.now()
+            img_name = d.strftime(img_name)
+    #setzen des Images
     comp['services'][toml['name']]['image'] = img_name
-    comp['services'][toml['name']]['container_name'] = toml['name']
+    #setzen des Containernamens
+    comp['services'][toml['name']]['container_name'] = manifest['name']
+    #TODO kann raus wenn alle Manifeste auf Version 1
+    if main_version == 0:
+        comp['services'][toml['name']]['container_name'] = toml['name']
     if 'ports' in toml:
         comp['services'][toml['name']]['ports'] = []
         for port in toml['ports']:
@@ -135,6 +145,19 @@ async def container_add(core: corelib.Core, container: str) -> None:
         config_folder = base_config_folder / toml['name']
         git_folder = core.path.base / '.git'
         comp['services'][toml['name']]['volumes'] = []
+        #Version 1 auto config
+        if main_version > 0:
+            if manifest['docker']['lcars'] and manifest['docker']['python']:
+                comp['services'][toml['name']]['volumes'].append(f"{base_config_folder}/acl.toml:/lcars/config/acl.toml:ro")
+                comp['services'][toml['name']]['volumes'].append(f"{core.path.base}/addons/{manifest['name']}/manifest.toml:/lcars/config/manifest.toml:ro")
+                comp['services'][toml['name']]['volumes'].append(f"{data_folder}:/lcars/data")
+                comp['services'][toml['name']]['volumes'].append(f"{log_folder}:/lcars/log")
+                comp['services'][toml['name']]['volumes'].append(f"{temp_folder}:/lcars/temp")
+                comp['services'][toml['name']]['volumes'].append(f"{core.path.base}/lib:/lcars/lib")
+                comp['services'][toml['name']]['volumes'].append(f"{core.path.base}/addons/{manifest['name']}/src/run.py:/lcars/starter/run.py:ro")
+                comp['services'][toml['name']]['volumes'].append(f"{core.path.base}/addons/{manifest['name']}/lib:/lcars/lib2")
+                if 'secret' in manifest:
+                    comp['services'][toml['name']]['volumes'].append(f"{base_config_folder}/secret.toml:/lcars/config/secret.toml:ro")
         if 'device' in toml['volumes']:
             for source, dest in toml['volumes']['device'].items():
                 comp['services'][toml['name']]['volumes'].append(f"{source}:{dest}")
@@ -168,6 +191,7 @@ async def container_add(core: corelib.Core, container: str) -> None:
                         stdout=asyncio.subprocess.PIPE)
                     await p.wait()
                 comp['services'][toml['name']]['volumes'].append(f"{source}:{entry['dest']}:ro")
+        #TODO kann raus wenn alle Manifeste auf Version 1
         if 'base' in toml['volumes']:
             for source, dest in toml['volumes']['base'].items():
                 source = source.replace('%data_base_folder%', str(data_base_folder))
