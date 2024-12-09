@@ -26,7 +26,6 @@ class Com(BaseObj):
                     return (True, web.json_response(Hostname(hostname=self.core.web_l._hostname).model_dump()))
             case 'network/app_list':
                 _out = StringList()
-                print(f'host in list: {self.core._local_keys.keys}')
                 for host in self.core._local_keys.keys:
                     app_data = self._apps.setdefault(host, {'valid': 0, 'apps': []}) 
                     if app_data['valid'] < time.time():
@@ -40,13 +39,13 @@ class Com(BaseObj):
                             hostname = await self.core.web_l.hostname
                         else:
                             resp = await self.core.lc_req.msg(host=host, app='gateway', msg=MsgGetLocalApps())
-                            print(resp)
-                            self._apps[host] = app_data = {'valid': time.time()+self.core.random(60),
-                                                           'apps': apps}
-                    print('xxx')
-                    print(f'host in list: {[f'{hostname}.{name}' for name in app_data['apps']]}')
+                            self.core.log.info(resp)
+                            #self._apps[host] = app_data = {'valid': time.time()+self.core.random(60),
+                            #                               'apps': apps}
+                    self.core.log.info('xxx')
+                    self.core.log.info(f'host in list: {[f'{hostname}.{name}' for name in app_data['apps']]}')
                     _out.data.extend([f'{hostname}.{name}' for name in app_data['apps']])
-                    print(f'host in list: {_out}')
+                    self.core.log.info(f'host in list: {_out}')
                 return (True, web.json_response(_out.model_dump()))
             case 'messages/get_ip6':
                 resp = await self.core.web_l.get('network/ip6', dest='parent')

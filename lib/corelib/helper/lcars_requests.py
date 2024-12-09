@@ -7,6 +7,6 @@ class LcarsRequests:
         self.__core = core
     
     async def msg(self, app: str, msg: MsgBase, host: str|None = None) -> dict:
-        print(app)
-        print(msg)
-        print(host)
+        self.__core.log.info(app)
+        self.__core.log.info(msg)
+        self.__core.log.info(host)
