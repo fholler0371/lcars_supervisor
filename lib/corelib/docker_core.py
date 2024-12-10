@@ -8,6 +8,7 @@ import loggerlib
 import signallib
 
 from .core import Core
+from .helper import Secret, LocalKeys, LcarsRequests
 
 class DockerCore(Core):
     def __init__(self) -> None:
@@ -29,6 +30,9 @@ class DockerCore(Core):
         await self.add('log', loggerlib.Logger)
         await self.add('running', asyncio.Event())
         await self.add('signal', signallib.Signal)
+        await self.add('secret', Secret)
+        await self.add('_local_keys', LocalKeys)
+        await self.add('lc_req', LcarsRequests)
         for key, cls in classes.items():
             await self.add(key, cls)
         self.log.info(f'starte {self.const.app} (pid: {self.const.pid})')

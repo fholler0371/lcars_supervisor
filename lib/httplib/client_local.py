@@ -8,7 +8,7 @@ from corelib.aio_property import aproperty
 from models.basic import StringList
 from models.network import Hostname
 
-from .local_keys import LocalKeys
+from .helper.local_keys import LocalKeys
 from .models import HttpMsgData, RespRaw
 
 class RetryException(BaseException):

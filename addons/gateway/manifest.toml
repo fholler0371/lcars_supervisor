@@ -1,13 +1,21 @@
 name = "gateway"
 label = "LCARS Gateway"
+version = "1.00"
+
+secret = [
+    'lcars'
+]
 
 [docker]
-name = "lcars/python:%Y.%m"
+image = "lcars/python:%Y.%m"
 folder = 'python'
+lcars = true
+python = true
+
 
 [lib]
 docker = "aiodockerlib.Docker"
 web = "httplib.HTTP"
 web_l = "httplib.ClientLocal"
-com = "addon_com.Com"
-cli = "addon_com.Cli"
+com = "addon.Com"
+cli = "addon.Cli"

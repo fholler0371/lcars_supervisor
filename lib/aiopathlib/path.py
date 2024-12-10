@@ -15,7 +15,8 @@ class Path(BaseObj):
         self.cfg = {'base': '/lcars',
                     'lcars': '/lcars',
                     'data': '/lcars/data',
-                    'web': '/lcars/web'}
+                    'web': '/lcars/web',
+                    'config': '/lcars/config'}
         
     def __getattr__(self, propName: str) -> any:
         if propName.startswith('_'):
