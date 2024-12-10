@@ -29,6 +29,7 @@ class HTTP(BaseObj):
             self.acl_lcars_docker.append(ip)
             self.acl_home.append(ip)
         if self.core.cfg.acl is not None and (ip := self.core.cfg.acl.get('docker')) is not None:
+            self.acl_lcars.append(ip)
             self.acl_docker.append(ip)
             self.acl_lcars_docker.append(ip)
             self.acl_home.append(ip)

@@ -25,7 +25,7 @@ class LcarsRequests:
             header = {}
             data = {}
         else:
-            url = f"http://{self.__core._local_keys.ip[host]}:1235/com/1/{msg.path})"
+            url = f"http://{self.__core._local_keys.ip[host]}:1235/com/1/{msg.path}"
             header = {'X-Auth': getattr(self.__core._local_keys, host)}
             data = msg.data.copy()
             data['type'] = msg.type
