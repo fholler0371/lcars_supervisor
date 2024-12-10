@@ -31,7 +31,6 @@ class Com(BaseObj):
         if msg_type == 1 and rd.auth:
             match '/'.join(rd.path):
                 case 'network/get_local_apps':
-                    self.core.log.info(StringList(data=await self.get_apps_from_docker()))
                     return (True, web.json_response(SendOk(data=StringList(data=await self.get_apps_from_docker())).model_dump()))
         else:
             match '/'.join(rd.path):
@@ -56,18 +55,20 @@ class Com(BaseObj):
                                 self._apps[host] = app_data = {'valid': time.time()+self.core.random(600),
                                                             'apps': apps}
                                 hostname = await self.core.web_l.hostname
-                            #else:
-                            #    resp = await self.core.lc_req.msg(host=host, app='gateway', msg=MsgGetLocalApps())
-                            #    self.core.log.info(resp)
-                                #self._apps[host] = app_data = {'valid': time.time()+self.core.random(60),
-                                #                               'apps': apps}
-                        self.core.log.info('xxx')
+                            else:
+                                apps = []
+                                if resp := await self.core.lc_req.msg(host=host, app='gateway', msg=MsgGetLocalApps()):
+                                    try:
+                                        apps = resp['data']['data']
+                                    except:
+                                        ...
+                                self._apps[host] = app_data = {'valid': time.time()+self.core.random(60),
+                                                                       'apps': apps}
+                                hostname = host
                         try:
-                            self.core.log.info(f'host in list: {[f'{hostname}.{name}' for name in app_data['apps']]}')
                             _out.data.extend([f'{hostname}.{name}' for name in app_data['apps']])
                         except:
                             ...
-                        self.core.log.info(f'host in list: {_out}')
                     return (True, web.json_response(_out.model_dump()))
                 case 'messages/get_ip6':
                     resp = await self.core.web_l.get('network/ip6', dest='parent')
