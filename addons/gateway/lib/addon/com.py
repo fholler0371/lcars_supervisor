@@ -7,6 +7,8 @@ from httplib.models import HttpHandler, HttpRequestData
 from models.network import Hostname
 from models.basic import StringList, StringEntry
 
+from models.msg import MsgGetLocalApps  
+
 class Com(BaseObj):
     def __init__(self, core: Core) -> None:
         BaseObj.__init__(self, core)
@@ -24,8 +26,7 @@ class Com(BaseObj):
                     return (True, web.json_response(Hostname(hostname=self.core.web_l._hostname).model_dump()))
             case 'network/app_list':
                 _out = StringList()
-                for host in self.core.web_l.local_keys.keys:
-                    print(f'host in list: {host}')
+                for host in self.core._local_keys.keys:
                     app_data = self._apps.setdefault(host, {'valid': 0, 'apps': []}) 
                     if app_data['valid'] < time.time():
                         if host == 'local':
@@ -33,11 +34,18 @@ class Com(BaseObj):
                             for container in await self.core.docker.containers.list():
                                 if 'pro.holler.lcars.python' in container.labels:
                                     apps.append(container.name)
-                        self._apps[host] = app_data = {'valid': time.time()+self.core.random(600),
-                                                       'apps': apps}
-                    if host == 'local':
-                        hostname = await self.core.web_l.hostname
+                            self._apps[host] = app_data = {'valid': time.time()+self.core.random(600),
+                                                           'apps': apps}
+                            hostname = await self.core.web_l.hostname
+                        else:
+                            resp = await self.core.lc_req.msg(host=host, app='gateway', msg=MsgGetLocalApps())
+                            self.core.log.info(resp)
+                            #self._apps[host] = app_data = {'valid': time.time()+self.core.random(60),
+                            #                               'apps': apps}
+                    self.core.log.info('xxx')
+                    self.core.log.info(f'host in list: {[f'{hostname}.{name}' for name in app_data['apps']]}')
                     _out.data.extend([f'{hostname}.{name}' for name in app_data['apps']])
+                    self.core.log.info(f'host in list: {_out}')
                 return (True, web.json_response(_out.model_dump()))
             case 'messages/get_ip6':
                 resp = await self.core.web_l.get('network/ip6', dest='parent')

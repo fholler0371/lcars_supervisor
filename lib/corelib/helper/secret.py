@@ -22,7 +22,6 @@ class Secret:
         for key in data.keys():
             if key in self.__allowed:
                 self.__data[key] = data[key]
-        self.__core.log.info(self.__data)
 
     def __getattr__(self, name:str) -> dict|None:
         return self.__data.get(name)
