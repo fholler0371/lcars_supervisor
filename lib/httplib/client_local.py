@@ -212,6 +212,7 @@ class ClientLocal(BaseObj):
             for app in await self.app_list:
                 if app.endswith(f'.{data.dest}'):
                     dest_app = app
+                    continue
         if dest_app is None:
             return
         hostname = dest_app.split('.')[0]
