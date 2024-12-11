@@ -1,5 +1,7 @@
 name = "homematic"
 label = "LCARS Homematic"
+label_short = "Homematic"
+icon = "/css/images/homematic.svg"
 
 [docker]
 name = "lcars/python:%Y.%m"

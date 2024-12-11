@@ -59,9 +59,10 @@ class ApiXML(BaseObj):
         self.core.log.debug('get_notify_token')
         if self._notify_token is None:
             await self.core.call_random(60, self._register_notify)
-            data = NotifyApp(label='Budget',
-                            icon='/img/mdi/cash-multiple.svg',
-                            app='budget')
+            data = NotifyApp(label= self.core.cfg.manifest['label_short'],
+                             icon= self.core.cfg.manifest['icon'],
+                             app= self.core.cfg.manifest['name'])
+            self.core.log.critical(data)
             resp = await self.core.web_l.msg_send(HttpMsgData(dest='web_notify', type='register_notify_app', data=data))
             if resp and resp['ok']:
                 self._notify_token = resp['data']['data']
