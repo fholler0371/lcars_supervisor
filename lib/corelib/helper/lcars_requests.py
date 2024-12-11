@@ -25,7 +25,7 @@ class LcarsRequests:
             header = {}
             data = {}
         else:
-            url = f"http://{self.__core._local_keys.ip[host]}:1235/com/1/{msg.path})"
+            url = f"http://{self.__core._local_keys.ip[host]}:1235/com/1/{msg.path}"
             header = {'X-Auth': getattr(self.__core._local_keys, host)}
             data = msg.data.copy()
             data['type'] = msg.type
@@ -37,13 +37,16 @@ class LcarsRequests:
     async def _post_retry(self, url: str, header:str =None, data: dict =None) -> dict:
         header = {} if header is None else header
         data = {} if data is None else data
-        self.__core.log.info(url)        
-        self.__core.log.info(header)        
-        self.__core.log.info(data)
         async with aiohttp.ClientSession(headers=header, timeout=self.session_timeout, connector=self.session_connector) as session:
             async with session.post(url, json=data) as response:
                 if response.status != 200:
-                    raise RetryException
-                self.__core.log.info(response)
-                self.__core.log.info(response.headers)
+                    raise 
+                try:
+                    return await response.json()
+                except:
+                    ...
+                try:
+                    return await response.text()
+                except:
+                    ...
                 return await response.read()
