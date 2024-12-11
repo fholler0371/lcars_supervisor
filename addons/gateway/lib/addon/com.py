@@ -66,15 +66,12 @@ class Com(BaseObj):
                                     self._apps[hostname] = app_data = {'valid': time.time()+self.core.random(600),
                                                                         'apps': apps}
                             hostname = host if host != 'local' else await self.core.web_l.hostname
-                            print(hostname)
-                            print(app_data)
                             try:
                                 _out.data.extend([f'{hostname}.{name}' for name in app_data['apps']])
                             except:
                                 ...
                     except Exception as e:
                         self.core.log.error(repr(e))    
-                    print(_out)
                     return (True, web.json_response(_out.model_dump()))
                 case 'messages/get_ip6':
                     resp = await self.core.web_l.get('network/ip6', dest='parent')
