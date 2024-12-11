@@ -30,7 +30,7 @@ class LcarsRequests:
             data = msg.data.copy()
             data['type'] = msg.type
         ret = await self._post_retry(url, header=header, data=data)
-        #self.__core.log.info(ret)
+        self.__core.log.info(ret)
         return ret
 
     @aioretry.retry(retry_policy)
