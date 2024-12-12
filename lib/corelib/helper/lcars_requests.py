@@ -2,7 +2,7 @@ import aiohttp
 import time
 import aioretry
 
-from models.msg import MsgBase, MsgAppList, MsgGetHostName
+from models.msg import MsgBase, MsgAppList, MsgGetHostName, MsgRelay
 from models.basic import StringList
 from models.network import Hostname
 from corelib.aio_property import aproperty
@@ -32,40 +32,46 @@ class LcarsRequests:
                 ...
             else:
                 for z_full in await self.app_list:
-                    self.__core.log.critical(z_full)
+                    #self.__core.log.critical(z_full)
                     if app in z_full:
                         z_host, _ = z_full.split('.')
                         if z_host != await self.hostname:
-                            self.__core.log.critical(z_host)
+                            msg = MsgRelay(app=app, data=msg.data.model_dump(), host=z_host)
+                            app = 'gateway'
                         break
                     else:
                         self.__app_list_valid = 0
-                        
-            self.__core.log.critical('xxx')
-            self.__core.log.critical(app)
         if host is None:
             url= f"http://{app}:1235/com/1/{msg.path}"
             header = {'X-Auth': self.__core._local_keys.local}
             data = msg.data.copy()
             data['type'] = msg.type
+            if hasattr(msg, 'app'):
+                data['dest_app'] = msg.app
+            if hasattr(msg, 'host'):
+                data['dest_host'] = msg.host
         else:
             url = f"http://{self.__core._local_keys.ip[host]}:1235/com/1/{msg.path}"
             header = {'X-Auth': getattr(self.__core._local_keys, host)}
             data = msg.data.copy()
             data['type'] = msg.type
         self.__core.log.info(url)
+        self.__core.log.info(header)
+        self.__core.log.info(data)
         ret = await self._post_retry(url, header=header, data=data)
-        self.__core.log.info(ret)
+        self.__core.log.info(f'{ret} {url}')
         return ret
 
-    @aioretry.retry(retry_policy)
+    #@aioretry.retry(retry_policy)
     async def _post_retry(self, url: str, header:str =None, data: dict =None) -> dict:
+        self.__core.log.info('run post')
         header = {} if header is None else header
         data = {} if data is None else data
-        async with aiohttp.ClientSession(headers=header, timeout=self.session_timeout, connector=self.session_connector) as session:
+        async with aiohttp.ClientSession(headers=header, timeout=self.session_timeout) as session: #, connector=self.session_connector
             async with session.post(url, json=data) as response:
+                self.__core.log.info(response)
                 if response.status != 200:
-                    raise 
+                    raise RetryException()
                 try:
                     return await response.json()
                 except:
@@ -89,7 +95,13 @@ class LcarsRequests:
     @aproperty
     async def hostname(self):
         if self.__hostname is None:
-            resp = await self.msg(app='gateway', msg=MsgGetHostName(), host_check=False)
-            data = Hostname.model_validate(resp)
-            self.__hostname = data.hostname
+            #self.__core.log.critical(f'start {time.time()}')
+            try:
+                resp = await self.msg(app='gateway', msg=MsgGetHostName(), host_check=False)
+                #self.__core.log.critical(resp)
+            except:
+                ...
+            #self.__core.log.critical(f'end {time.time()}')
+            #data = Hostname.model_validate(resp)
+            self.__hostname = resp['hostname']
         return self.__hostname

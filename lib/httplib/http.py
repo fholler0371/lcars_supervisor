@@ -73,6 +73,7 @@ class HTTP(BaseObj):
                         rd.path = rd.path[1:]
                 except:
                     pass #keine Version
+                self.core.log.error(rd) # TODO: entfernen
                 if entry.auth:
                     match entry.auth:
                         case 'local':
