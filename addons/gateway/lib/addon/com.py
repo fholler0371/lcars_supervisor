@@ -32,6 +32,37 @@ class Com(BaseObj):
             match '/'.join(rd.path):
                 case 'network/get_local_apps':
                     return (True, web.json_response(SendOk(data=StringList(data=await self.get_apps_from_docker())).model_dump()))
+                case 'network/app_list':
+                    _out = StringList()
+                    try:
+                        for host in self.core._local_keys.keys:
+                            hostname = host if host != 'local' else await self.core.web_l.hostname
+                            app_data = self._apps.setdefault(hostname, {'valid': 0, 'apps': []}) 
+                            if app_data['valid'] < time.time():
+                                if host == 'local':
+                                    apps = await self.get_apps_from_docker()
+                                    self._apps[hostname] = app_data = {'valid': time.time()+self.core.random(600),
+                                                                'apps': apps}
+                                else:
+                                    apps = []
+                                    try:
+                                        if resp := await self.core.lc_req.msg(host=host, app='gateway', msg=MsgGetLocalApps()):
+                                            try:
+                                                apps = resp['data']['data']
+                                            except:
+                                                ...
+                                    except Exception as e:
+                                        self.core.log.error(repr(e)) 
+                                    self._apps[hostname] = app_data = {'valid': time.time()+self.core.random(600),
+                                                                        'apps': apps}
+                            hostname = host if host != 'local' else await self.core.web_l.hostname
+                            try:
+                                _out.data.extend([f'{hostname}.{name}' for name in app_data['apps']])
+                            except:
+                                ...
+                    except Exception as e:
+                        self.core.log.error(repr(e))    
+                    return (True, web.json_response(_out.model_dump()))
         else:
             match '/'.join(rd.path):
                 case 'network/hostname':

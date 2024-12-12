@@ -2,7 +2,9 @@ import aiohttp
 import time
 import aioretry
 
-from models.msg import MsgBase, MsgAppList
+from models.msg import MsgBase, MsgAppList, MsgGetHostName
+from models.basic import StringList
+from models.network import Hostname
 from corelib.aio_property import aproperty
 
 
@@ -18,6 +20,7 @@ class LcarsRequests:
         self.__core = core
         self.__app_list_valid = 0
         self.__app_list = []
+        self.__hostname = None
         self.session_timeout = aiohttp.ClientTimeout(total=None,sock_connect=1,sock_read=5)
         self.session_connector = aiohttp.TCPConnector(verify_ssl=False)
     
@@ -25,12 +28,23 @@ class LcarsRequests:
         if msg.data is None:
             msg.data = {}
         if host is None and host_check:
+            if '.' in app:
+                ...
+            else:
+                for z_full in await self.app_list:
+                    self.__core.log.critical(z_full)
+                    if app in z_full:
+                        z_host, _ = z_full.split('.')
+                        if z_host != await self.hostname:
+                            self.__core.log.critical(z_host)
+                        break
+                    else:
+                        self.__app_list_valid = 0
+                        
             self.__core.log.critical('xxx')
             self.__core.log.critical(app)
-            _app = await self.app_list
-            self.__core.log.critical(_app)
         if host is None:
-            url= f"http://{app}:1234/com/1/{msg.path}"
+            url= f"http://{app}:1235/com/1/{msg.path}"
             header = {'X-Auth': self.__core._local_keys.local}
             data = msg.data.copy()
             data['type'] = msg.type
@@ -39,6 +53,7 @@ class LcarsRequests:
             header = {'X-Auth': getattr(self.__core._local_keys, host)}
             data = msg.data.copy()
             data['type'] = msg.type
+        self.__core.log.info(url)
         ret = await self._post_retry(url, header=header, data=data)
         self.__core.log.info(ret)
         return ret
@@ -65,9 +80,16 @@ class LcarsRequests:
     async def app_list(self):
         if self.__app_list_valid < time.time():
             resp = await self.msg(app='gateway', msg=MsgAppList(), host_check=False)
-            self.__core.log.info(resp)
-        #     if resp is not None:
-        #         data = StringList.model_validate(resp)
-        #         self._app_list = data.data
-        #         self._app_list_valid = time.time() + self.core.random(600)
+            if resp is not None:
+                data = StringList.model_validate(resp)
+                self.__app_list = data.data
+                self.__app_list_valid = time.time() + self.__core.random(600)
         return self.__app_list
+
+    @aproperty
+    async def hostname(self):
+        if self.__hostname is None:
+            resp = await self.msg(app='gateway', msg=MsgGetHostName(), host_check=False)
+            data = Hostname.model_validate(resp)
+            self.__hostname = data.hostname
+        return self.__hostname
