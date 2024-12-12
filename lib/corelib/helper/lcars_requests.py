@@ -62,7 +62,7 @@ class LcarsRequests:
         self.__core.log.info(f'{ret} {url}')
         return ret
 
-    #@aioretry.retry(retry_policy)
+    @aioretry.retry(retry_policy)
     async def _post_retry(self, url: str, header:str =None, data: dict =None) -> dict:
         self.__core.log.info('run post')
         header = {} if header is None else header

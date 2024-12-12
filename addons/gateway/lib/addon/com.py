@@ -9,7 +9,7 @@ from httplib.models import HttpHandler, HttpRequestData, SendOk
 from models.network import Hostname
 from models.basic import StringList, StringEntry
 
-from models.msg import MsgGetLocalApps  
+from models.msg import MsgGetLocalApps, MsgRelay
 
 class Com(BaseObj):
     def __init__(self, core: Core) -> None:
@@ -79,6 +79,22 @@ class Com(BaseObj):
                     except Exception as e:
                         self.core.log.error(repr(e))
             return False
+        elif msg_type == 2 and rd.auth:
+            self.core.log.info(f"call(type 2) {'/'.join(rd.path)}") 
+            match '/'.join(rd.path):
+                case 'relay':
+                    data = json.loads(rd.data)
+                    host = data['dest_host']
+                    del data['dest_host']
+                    app = data['dest_app']
+                    del data['dest_app']
+                    del data['type']
+                    if host == await self.core.web_l.hostname:
+                        ...
+                    else:
+                        msg = MsgRelay(host=host, app=app, data=data)
+                        if resp := await self.core.lc_req.msg(host=host, app='gateway', msg=msg, host_check=False):
+                            return (True, web.json_response(resp))
         else:
             match '/'.join(rd.path):
                 case 'network/hostname':
