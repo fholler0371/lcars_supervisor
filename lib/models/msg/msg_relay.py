@@ -6,3 +6,4 @@ class MsgRelay(MsgBase):
     path : str = 'relay'
     app: str
     host: str
+    app_path: str

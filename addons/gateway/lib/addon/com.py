@@ -9,7 +9,7 @@ from httplib.models import HttpHandler, HttpRequestData, SendOk
 from models.network import Hostname
 from models.basic import StringList, StringEntry
 
-from models.msg import MsgGetLocalApps, MsgRelay
+from models.msg import MsgGetLocalApps, MsgRelay, MsgBase, MSG_DIRECT, MSG_RELAY
 
 class Com(BaseObj):
     def __init__(self, core: Core) -> None:
@@ -57,7 +57,7 @@ class Com(BaseObj):
             msg_type = json.loads(rd.data).get('type', 0)
         except:
             ...
-        if msg_type == 1 and rd.auth:
+        if msg_type == MSG_DIRECT and rd.auth:
             self.core.log.info(f"call(type 1) {'/'.join(rd.path)}") 
             match '/'.join(rd.path):
                 case 'network/get_local_apps':
@@ -84,18 +84,24 @@ class Com(BaseObj):
                     except Exception as e:
                         self.core.log.error(repr(e))
             return False
-        elif msg_type == 2 and rd.auth:
+        elif msg_type == MSG_RELAY and rd.auth:
             self.core.log.info(f"call(type 2) {'/'.join(rd.path)}") 
             match '/'.join(rd.path):
                 case 'relay':
                     data = json.loads(rd.data)
-                    host = data['dest_host']
+                    host = data.get('dest_host')
                     del data['dest_host']
-                    app = data['dest_app']
-                    del data['dest_app']
+                    app = data.get('dest_app')
+                    del data.get['dest_app']
+                    path = data.get('dest_path')
                     del data['type']
                     if host == await self.core.web_l.hostname:
-                        ...
+                        self.core.log.critical(data)
+                        del data.get['dest_path']
+                        msg = MsgBase(data=data, type=MSG_DIRECT, path=path)
+                        if resp := await self.core.lc_req.msg(app=app, msg=msg, host_check=False):
+                            self.core.log.critical(resp)
+                            return (True, web.json_response(resp))
                     else:
                         msg = MsgRelay(host=host, app=app, data=data)
                         if resp := await self.core.lc_req.msg(host=host, app='gateway', msg=msg, host_check=False):

@@ -36,7 +36,7 @@ class LcarsRequests:
                     if app in z_full:
                         z_host, _ = z_full.split('.')
                         if z_host != await self.hostname:
-                            msg = MsgRelay(app=app, data=msg.data.model_dump(), host=z_host)
+                            msg = MsgRelay(app=app, data=msg.data.model_dump(), host=z_host, app_path=msg.path)
                             app = 'gateway'
                         break
                     else:
@@ -50,6 +50,8 @@ class LcarsRequests:
                 data['dest_app'] = msg.app
             if hasattr(msg, 'host'):
                 data['dest_host'] = msg.host
+            if hasattr(msg, 'app_path'):
+                data['dest_path'] = msg.app_path
         else:
             url = f"http://{self.__core._local_keys.ip[host]}:1235/com/1/{msg.path}"
             header = {'X-Auth': getattr(self.__core._local_keys, host)}
@@ -59,6 +61,8 @@ class LcarsRequests:
                 data['dest_app'] = msg.app
             if hasattr(msg, 'host'):
                 data['dest_host'] = msg.host
+            if hasattr(msg, 'app_path'):
+                data['dest_path'] = msg.app_path
         self.__core.log.info(url)
         self.__core.log.info(header)
         self.__core.log.info(data)

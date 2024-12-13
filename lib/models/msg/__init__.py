@@ -7,5 +7,6 @@ from .msg_base import MsgBase
 
 from .msg_base import (
     MSG_NONE,
-    MSG_DIRECT
+    MSG_DIRECT,
+    MSG_RELAY
 )
