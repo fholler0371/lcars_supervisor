@@ -61,6 +61,8 @@ define([], function() {
                       let app_name = entry.app_name
                       if (entry.type == 'info') {
                         color = ' var(--main-color_be)'
+                      } else if (entry.type == 'warn') {
+                        color = ' var(--main-color_gr)'
                       }
                       let cross = ''
                       let html = '<div style="border: 1px solid'+ color +'; border-radius: 8px;"><table style="width: 100%"><tr><td width="40px">' 

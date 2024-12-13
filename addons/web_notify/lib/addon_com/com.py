@@ -62,6 +62,28 @@ class Com(BaseObj):
                         token = resp['token']
                     token = StringEntry(data= token)
                     return (True, web.json_response(SendOk(data=token.data).model_dump()))
+                case 'notify_message':
+                    data = rd.data
+                    resp = await self._apps_db.table('apps').exec('get_id_by_token', {'token': data['token']})
+                    if not resp:
+                        return (True, web.json_response({'ok': True}))
+                    app_id = resp['id']
+                    self.core.log.critical(data)
+                    resp = await self._msg_db.table('message').exec('get_timestamp_by_md5', {'md5': data['md5']})    
+                    match data['type']:
+                        case 'info':
+                            _type = 1
+                        case 'warn':
+                            _type = 2
+                        case _:
+                            _type = 1
+                    if resp is not None:
+                        return (True, web.json_response({'ok': True}))
+                    await self._msg_db.table('message').exec('add', {'app': app_id, 'type': _type, 'text': data['text'], 
+                                                                     'md5': data['md5'], 'timestamp': data['timestamp']})
+                    return (True, web.json_response({'ok': True}))
+                case _:
+                    self.core.log.critical(rd)
         else:       
             match '/'.join(rd.path):
                 case 'messages/relay':
@@ -86,7 +108,6 @@ class Com(BaseObj):
                         if not resp:
                             return (False, web.json_response({}))
                         app_id = resp['id']
-                        self.core.log.error(data)                    
                         resp = await self._msg_db.table('message').exec('get_timestamp_by_md5', {'md5': data.md5})    
                         self.core.log.error(resp)                    
                         if resp is not None:
