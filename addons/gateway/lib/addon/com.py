@@ -92,7 +92,7 @@ class Com(BaseObj):
                     host = data.get('dest_host')
                     del data['dest_host']
                     app = data.get('dest_app')
-                    del data.get['dest_app']
+                    del data['dest_app']
                     path = data.get('dest_path')
                     del data['type']
                     if host == await self.core.web_l.hostname:
