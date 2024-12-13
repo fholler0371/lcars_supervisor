@@ -103,7 +103,7 @@ class Com(BaseObj):
                             self.core.log.critical(resp)
                             return (True, web.json_response(resp))
                     else:
-                        msg = MsgRelay(host=host, app=app, data=data)
+                        msg = MsgRelay(host=host, app=app, data=data, app_path=path)
                         if resp := await self.core.lc_req.msg(host=host, app='gateway', msg=msg, host_check=False):
                             return (True, web.json_response(resp))
         else:
