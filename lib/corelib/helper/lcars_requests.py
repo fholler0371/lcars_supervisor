@@ -55,6 +55,10 @@ class LcarsRequests:
             header = {'X-Auth': getattr(self.__core._local_keys, host)}
             data = msg.data.copy()
             data['type'] = msg.type
+            if hasattr(msg, 'app'):
+                data['dest_app'] = msg.app
+            if hasattr(msg, 'host'):
+                data['dest_host'] = msg.host
         self.__core.log.info(url)
         self.__core.log.info(header)
         self.__core.log.info(data)
