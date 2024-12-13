@@ -70,16 +70,9 @@ class Com(BaseObj):
                     app_id = resp['id']
                     self.core.log.critical(data)
                     resp = await self._msg_db.table('message').exec('get_timestamp_by_md5', {'md5': data['md5']})    
-                    match data['type']:
-                        case 'info':
-                            _type = 1
-                        case 'warn':
-                            _type = 2
-                        case _:
-                            _type = 1
                     if resp is not None:
                         return (True, web.json_response({'ok': True}))
-                    await self._msg_db.table('message').exec('add', {'app': app_id, 'type': _type, 'text': data['text'], 
+                    await self._msg_db.table('message').exec('add', {'app': app_id, 'type': data['level'], 'text': data['text'], 
                                                                      'md5': data['md5'], 'timestamp': data['timestamp']})
                     return (True, web.json_response({'ok': True}))
                 case _:
