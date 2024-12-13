@@ -17,7 +17,7 @@ class NotifyMessage(BaseModel):
         if not self.timestamp:
             self.timestamp = timestamp()
             if self.md5 == '':
-                text = f"{self.token}{self.type}{self.text}"
+                text = f"{self.token}{self.level}{self.text}"
                 if self.use_timestamp:
                     text = f"{text}{self.timestamp}"
             else:

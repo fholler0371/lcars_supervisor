@@ -12,11 +12,11 @@ class Notify(BaseObj):
         self.core.log.debug('starte notify')
         await self.core.call_random(20, self._register_notify)
         
-    async def send(self, msg: str, type: str = 'info') -> None:
+    async def send(self, msg: str, level: str = 'info') -> None:
         if self.__notify_token is None:
             return
         data = NotifyMessage(token= self.__notify_token,
-                             level= type,
+                             level= level,
                              text= msg)
         await self.core.lc_req.msg(app='web_notify', msg=MsgNotifyMsg(data=data))
 
