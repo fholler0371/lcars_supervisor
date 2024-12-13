@@ -15,10 +15,6 @@ class Api(BaseObj):
     async def handler(self, request: web.Request, rd: HttpRequestData) -> bool:
         #prüfen ob einträge für allgemeine auth handler ist
         self.core.log.debug('get call')
-        #auth_resp = await self._auth.handler(request, rd)
-        #if auth_resp[0]:
-        #    return auth_resp
-        #call für dieses Modul
         match '/'.join(rd.path):
             case 'get_allowed_moduls':
                 try:
