@@ -97,7 +97,7 @@ class Com(BaseObj):
                     del data['type']
                     if host == await self.core.web_l.hostname:
                         self.core.log.critical(data)
-                        del data.get['dest_path']
+                        del data['dest_path']
                         msg = MsgBase(data=data, type=MSG_DIRECT, path=path)
                         if resp := await self.core.lc_req.msg(app=app, msg=msg, host_check=False):
                             self.core.log.critical(resp)
