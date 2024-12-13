@@ -1,6 +1,6 @@
 from corelib import BaseObj, Core
 
-from ..models import NotifyApp, NotifyMessage, MsgNotifyRegApp
+from ..models import NotifyApp, NotifyMessage, MsgNotifyRegApp, MsgNotifyMsg
 
 
 class Notify(BaseObj):
@@ -11,6 +11,14 @@ class Notify(BaseObj):
     async def _astart(self):
         self.core.log.debug('starte notify')
         await self.core.call_random(20, self._register_notify)
+        
+    async def send(self, msg: str, type: str = 'info') -> None:
+        if self.__notify_token is None:
+            return
+        data = NotifyMessage(token= self.__notify_token,
+                             type= type,
+                             text= msg)
+        await self.core.lc_req.msg(app='web_notify', msg=MsgNotifyMsg(data=data))
 
     async def _register_notify(self)->None:
         self.core.log.debug('get_notify_token')
@@ -19,12 +27,7 @@ class Notify(BaseObj):
             data = NotifyApp(label= self.core.cfg.manifest['app_data']['label_short'],
                              icon= self.core.cfg.manifest['app_data']['icon'],
                              app= self.core.cfg.manifest['name'])
-            try:
-                resp = await self.core.lc_req.msg(app='web_notify', msg=MsgNotifyRegApp(data=data))
-            except Exception as e:
-                print(e)
-            self.core.log.critical(data)
-            
-            if resp and resp['ok']:
-                self.__notify_token = resp['data']['data']
+            if resp := await self.core.lc_req.msg(app='web_notify', msg=MsgNotifyRegApp(data=data)):
+                if resp['ok']:
+                    self.__notify_token = resp['data']
             self.core.log.debug(f"NotifyToken: {self.__notify_token}")

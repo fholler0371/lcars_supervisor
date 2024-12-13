@@ -63,21 +63,16 @@ class LcarsRequests:
                 data['dest_host'] = msg.host
             if hasattr(msg, 'app_path'):
                 data['dest_path'] = msg.app_path
-        self.__core.log.info(url)
-        self.__core.log.info(header)
-        self.__core.log.info(data)
         ret = await self._post_retry(url, header=header, data=data)
-        self.__core.log.info(f'{ret} {url}')
+        #self.__core.log.info(f'{ret} {url}')
         return ret
 
     @aioretry.retry(retry_policy)
     async def _post_retry(self, url: str, header:str =None, data: dict =None) -> dict:
-        self.__core.log.info('run post')
         header = {} if header is None else header
         data = {} if data is None else data
         async with aiohttp.ClientSession(headers=header, timeout=self.session_timeout) as session: #, connector=self.session_connector
             async with session.post(url, json=data) as response:
-                self.__core.log.info(response)
                 if response.status != 200:
                     raise RetryException()
                 try:

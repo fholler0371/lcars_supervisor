@@ -50,6 +50,9 @@ class ApiXML(BaseObj):
                         item = entry.split("name='")[1].split("'")[0]
                         _, device, type = item.split('.')
                         device = device.split(':')[0]
+                        match type:
+                            case 'UNREACH':
+                                await self.core.notify.send(f'Homematic-Sensor {device} ist nicht erreichbar', type='warn')
                         self.core.log.debug(f"{device} {type}")
         except Exception as e:
             self.core.log.error(repr(e))
