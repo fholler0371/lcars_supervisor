@@ -23,7 +23,6 @@ class ApiXML(BaseObj):
     async def _astart(self):
         self.core.log.debug('starte api-xml')
         await self.core.call_random(30, self._check_notifications)
-        await self.core.call_random(20, self._register_notify)
 
     async def _astop(self):
         self.core.log.debug('stoppe api-xml')
@@ -51,18 +50,10 @@ class ApiXML(BaseObj):
                         item = entry.split("name='")[1].split("'")[0]
                         _, device, type = item.split('.')
                         device = device.split(':')[0]
+                        match type:
+                            case 'UNREACH':
+                                await self.core.notify.send(f'Homematic-Sensor {device} ist nicht erreichbar', level='warn')
                         self.core.log.debug(f"{device} {type}")
         except Exception as e:
             self.core.log.error(repr(e))
 
-    async def _register_notify(self)->None:
-        self.core.log.debug('get_notify_token')
-        if self._notify_token is None:
-            await self.core.call_random(60, self._register_notify)
-            data = NotifyApp(label='Budget',
-                            icon='/img/mdi/cash-multiple.svg',
-                            app='budget')
-            resp = await self.core.web_l.msg_send(HttpMsgData(dest='web_notify', type='register_notify_app', data=data))
-            if resp and resp['ok']:
-                self._notify_token = resp['data']['data']
-            self.core.log.debug(f"NotifyToken: {self._notify_token}")
