@@ -16,7 +16,7 @@ class Notify(BaseObj):
         if self.__notify_token is None:
             return
         data = NotifyMessage(token= self.__notify_token,
-                             type= type,
+                             level= type,
                              text= msg)
         await self.core.lc_req.msg(app='web_notify', msg=MsgNotifyMsg(data=data))
 

@@ -7,7 +7,7 @@ def timestamp():
                
 class NotifyMessage(BaseModel):
     token: str
-    type: str = 'info'
+    level: str = 'info'
     text: str 
     md5: str = ''
     use_timestamp: bool = False
