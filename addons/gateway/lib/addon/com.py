@@ -40,7 +40,7 @@ class Com(BaseObj):
                         apps = []
                         if resp := await self.core.lc_req.msg(host=host, app='gateway', msg=MsgGetLocalApps(), host_check=False):
                             try:
-                                apps = resp['data']['data']
+                                apps = resp['data']
                             except Exception as e:
                                 self.core.log.error(f"{host} {resp}")
                                 self.core.log.error(repr(e))
