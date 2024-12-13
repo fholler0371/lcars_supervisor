@@ -2,6 +2,7 @@ from pydantic import BaseModel
 
 MSG_NONE : int = 0
 MSG_DIRECT : int = 1
+MSG_RELAY : int = 2
 
 class MsgBase(BaseModel):
     type : int = MSG_NONE

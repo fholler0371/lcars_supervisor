@@ -1,9 +1,24 @@
 name = "homematic"
 label = "LCARS Homematic"
 
+version = "1.00"
+
+secret = [
+    'homematic'
+]
+
+[app_data]
+label_short = "Homematic"
+icon = "/css/images/homematic.svg"
+
 [docker]
-name = "lcars/python:%Y.%m"
+image = "lcars/python:%Y.%m"
 folder = 'python'
+lcars = true
+python = true
+
+[libs.load_pre] 
+notify = 'notify.Notify'
 
 [lib]
 web = "httplib.HTTP"

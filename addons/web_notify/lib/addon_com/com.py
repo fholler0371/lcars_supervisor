@@ -3,6 +3,7 @@ import mimetypes
 import string
 import random
 import aiofiles
+import json
 
 import clilib.data as cd
 from corelib import BaseObj, Core
@@ -10,6 +11,7 @@ from httplib.models import HttpHandler, HttpRequestData, HttpMsgData, SendOk
 from models.auth import App
 from models.notify import NotifyApp, NotifyMessage
 from models.basic import StringEntry
+from models.msg import MSG_DIRECT
 
 import aiodatabase
 
@@ -42,14 +44,16 @@ class Com(BaseObj):
             return (True, web.Response(status=418))
         
     async def handler(self, request: web.Request, rd: HttpRequestData) -> bool:
-        match '/'.join(rd.path):
-            case 'messages/relay':
-                msg = HttpMsgData.model_validate(rd.data)
-                relay_rd = HttpRequestData.model_validate(msg.data)
-                return await self.static('/'.join(relay_rd.path))
-            case 'messages/register_notify_app':
-                if rd.auth:
-                    data = NotifyApp.model_validate(rd.data.data)
+        msg_type = 0
+        try:
+            rd.data = json.loads(rd.data)
+            msg_type = rd.data.get('type', 0)
+        except:
+            ...
+        if msg_type == MSG_DIRECT and rd.auth:
+            match '/'.join(rd.path):
+                case 'register_notify_app':
+                    data = NotifyApp.model_validate(rd.data)
                     resp = await self._apps_db.table('apps').exec('get_token_by_app', {'app': data.app})
                     if not resp:
                         token = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(32))
@@ -57,23 +61,54 @@ class Com(BaseObj):
                     else:
                         token = resp['token']
                     token = StringEntry(data= token)
-                    return (True, web.json_response(SendOk(data=token.model_dump()).model_dump()))
-            case 'messages/notify_message':
-                if rd.auth:
-                    data = NotifyMessage.model_validate(rd.data.data)
-                    resp = await self._apps_db.table('apps').exec('get_id_by_token', {'token': data.token})
+                    return (True, web.json_response(SendOk(data=token.data).model_dump()))
+                case 'notify_message':
+                    data = rd.data
+                    resp = await self._apps_db.table('apps').exec('get_id_by_token', {'token': data['token']})
                     if not resp:
-                        return (False, web.json_response({}))
+                        return (True, web.json_response({'ok': True}))
                     app_id = resp['id']
-                    self.core.log.error(data)                    
-                    resp = await self._msg_db.table('message').exec('get_timestamp_by_md5', {'md5': data.md5})    
-                    self.core.log.error(resp)                    
+                    self.core.log.critical(data)
+                    resp = await self._msg_db.table('message').exec('get_timestamp_by_md5', {'md5': data['md5']})    
                     if resp is not None:
+                        return (True, web.json_response({'ok': True}))
+                    await self._msg_db.table('message').exec('add', {'app': app_id, 'type': data['level'], 'text': data['text'], 
+                                                                     'md5': data['md5'], 'timestamp': data['timestamp']})
+                    return (True, web.json_response({'ok': True}))
+                case _:
+                    self.core.log.critical(rd)
+        else:       
+            match '/'.join(rd.path):
+                case 'messages/relay':
+                    msg = HttpMsgData.model_validate(rd.data)
+                    relay_rd = HttpRequestData.model_validate(msg.data)
+                    return await self.static('/'.join(relay_rd.path))
+                case 'messages/register_notify_app':
+                    if rd.auth:
+                        data = NotifyApp.model_validate(rd.data.data)
+                        resp = await self._apps_db.table('apps').exec('get_token_by_app', {'app': data.app})
+                        if not resp:
+                            token = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(32))
+                            await self._apps_db.table('apps').exec('add', {'app': data.app, 'icon': data.icon, 'label': data.label, 'token': token})
+                        else:
+                            token = resp['token']
+                        token = StringEntry(data= token)
+                        return (True, web.json_response(SendOk(data=token.model_dump()).model_dump()))
+                case 'messages/notify_message':
+                    if rd.auth:
+                        data = NotifyMessage.model_validate(rd.data.data)
+                        resp = await self._apps_db.table('apps').exec('get_id_by_token', {'token': data.token})
+                        if not resp:
+                            return (False, web.json_response({}))
+                        app_id = resp['id']
+                        resp = await self._msg_db.table('message').exec('get_timestamp_by_md5', {'md5': data.md5})    
+                        self.core.log.error(resp)                    
+                        if resp is not None:
+                            return (True, web.json_response({}))
+                        await self._msg_db.table('message').exec('add', {'app': app_id, 'type': data.type, 'text': data.text, 'md5': data.md5, 'timestamp': data.timestamp})
                         return (True, web.json_response({}))
-                    await self._msg_db.table('message').exec('add', {'app': app_id, 'type': data.type, 'text': data.text, 'md5': data.md5, 'timestamp': data.timestamp})
-                    return (True, web.json_response({}))
-            case _:
-                self.core.log.error(rd)
+                case _:
+                    self.core.log.error(rd)
         
     async def _ainit(self):
         self.core.log.debug('Initaliesiere com')

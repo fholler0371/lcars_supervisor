@@ -59,11 +59,12 @@ define([], function() {
                       let entry = self.data[index]
                       let app_icon = entry.app_icon
                       let app_name = entry.app_name
-                      if (entry.type == 'info') {
-                        color = ' var(--main-color_be)'
+                      if (entry.type == 'warn') {
+                        color = ' var(--main-color_gr)'
+                        icon = 'close-box-outline'
                       }
                       let cross = ''
-                      let html = '<div style="border: 1px solid'+ color +'; border-radius: 8px;"><table style="width: 100%"><tr><td width="40px">' 
+                      let html = '<div style="border: 1px solid'+ color +'; border-radius: 8px;"><table style="width: 100%; color:'+ color +'"><tr><td width="40px">' 
                       html += '<img src="/img/mdi/'+icon+'.svg" style="height:32px" onload="SVGInject(this)"></td><td width="calc( 100% - 32px )">'
                       html += '<span style="font-size:70%">'+app_name+'</span></br>'+label + '</td><td style="width: 20px;vertical-align: top">'
                       html += cross + '</td><td width="40px"><img src="'
