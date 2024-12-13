@@ -16,6 +16,7 @@ class Com(BaseObj):
         BaseObj.__init__(self, core)
         self._apps = {}
         self.__hostname = None
+        self.__lock_local_apps = Lock()
         self.__lock_app_list = Lock()
         
     async def get_apps_from_docker(self):
@@ -38,7 +39,11 @@ class Com(BaseObj):
                     else:
                         apps = []
                         if resp := await self.core.lc_req.msg(host=host, app='gateway', msg=MsgGetLocalApps(), host_check=False):
-                            apps = resp['data']['data']
+                            try:
+                                apps = resp['data']['data']
+                            except Exception as e:
+                                self.core.log.error(f"{host} {resp}")
+                                self.core.log.error(repr(e))
                         self._apps[hostname] = app_data = {'valid': time.time()+self.core.random(600), 'apps': apps}
                 _out.data.extend([f'{hostname}.{name}' for name in app_data['apps']])
             #self.core.log.critical(_out)
@@ -57,8 +62,8 @@ class Com(BaseObj):
             match '/'.join(rd.path):
                 case 'network/get_local_apps':
                     try:
-                        async with self.__lock:
-                            return (True, web.json_response(SendOk(data=StringList(data=await self.get_apps_from_docker())).model_dump()))
+                        async with self.__lock_local_apps:
+                            return (True, web.json_response(StringList(data=await self.get_apps_from_docker()).model_dump()))
                     except Exception as e:
                         self.core.log.error(repr(e))
                 case 'network/app_list':
