@@ -1,9 +1,13 @@
 name = "web_withings"
 label = "LCARS WebWithings"
 
+version = "1.00"
+
 [docker]
-name = "lcars/python:%Y.%m"
+image = "lcars/python:%Y.%m"
 folder = 'python'
+lcars = true
+python = true
 
 [lib]
 web = "httplib.HTTP"
