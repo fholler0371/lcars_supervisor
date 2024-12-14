@@ -30,22 +30,20 @@ class _token:
         if self._data['timeout'] > time.time():
             return self._data['token']
         else:
-            async with aiohttp.ClientSession() as session:
-                with open("/lcars/config/secret.toml", "rb") as f:
-                    config = tomllib.load(f).get('withings', {})
-                response = await session.post(url="https://wbsapi.withings.net/v2/oauth2",
-                                              data={"action": "requesttoken",
-                                                    'grant_type': "refresh_token",
-                                                    'client_id': config['client'],
-                                                    'client_secret': config['secret'],
-                                                    'refresh_token': self._data['refresh_token']},
-                                              headers={"Content-Type": "application/json"})
-                data = await response.json()
-                if data['status'] == 0:
-                    data = data['body']
-                    await self.set_token(data['access_token'], data['refresh_token'], int(time.time() + data['expires_in'] - 900))
-                else:
-                    self._data = None
+            secret = self.core.secret.withings
+            response = await session.post(url="https://wbsapi.withings.net/v2/oauth2",
+                                          data={"action": "requesttoken",
+                                                'grant_type': "refresh_token",
+                                                'client_id': secret['client'],
+                                                'client_secret': secret['secret'],
+                                                'refresh_token': self._data['refresh_token']},
+                                          headers={"Content-Type": "application/json"})
+            data = await response.json()
+            if data['status'] == 0:
+                data = data['body']
+                await self.set_token(data['access_token'], data['refresh_token'], int(time.time() + data['expires_in'] - 900))
+            else:
+                self._data = None
             return self._data['token']
 
 

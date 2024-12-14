@@ -1,9 +1,24 @@
 name = "withings"
 label = "LCARS Withings"
 
+version = "1.00"
+
+secret = [
+    'withings'
+]
+
+[app_data]
+label_short = "Withings"
+icon = "/css/images/human-handsdown.svg"
+
 [docker]
-name = "lcars/python:%Y.%m"
+image = "lcars/python:%Y.%m"
 folder = 'python'
+lcars = true
+python = true
+
+#[libs.load_pre] 
+#notify = 'notify.Notify'
 
 [lib]
 web = "httplib.HTTP"
