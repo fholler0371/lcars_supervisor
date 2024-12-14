@@ -17,8 +17,8 @@ folder = 'python'
 lcars = true
 python = true
 
-#[libs.load_pre] 
-#notify = 'notify.Notify'
+[libs.load_pre] 
+notify = 'notify.Notify'
 
 [lib]
 web = "httplib.HTTP"

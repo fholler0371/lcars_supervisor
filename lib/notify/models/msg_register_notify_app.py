@@ -5,4 +5,4 @@ from .app_reg import NotifyApp
 class MsgNotifyRegApp(MsgBase):
     type : int = MSG_DIRECT
     path : str = 'register_notify_app'
-    data : NotifyApp
+    data : dict

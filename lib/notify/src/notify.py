@@ -18,16 +18,19 @@ class Notify(BaseObj):
         data = NotifyMessage(token= self.__notify_token,
                              level= level,
                              text= msg)
-        await self.core.lc_req.msg(app='web_notify', msg=MsgNotifyMsg(data=data))
+        await self.core.lc_req.msg(app='web_notify', msg=MsgNotifyMsg(data=data.model_dump()))
 
     async def _register_notify(self)->None:
         self.core.log.debug('get_notify_token')
         if self.__notify_token is None:
             await self.core.call_random(60, self._register_notify)
             data = NotifyApp(label= self.core.cfg.manifest['app_data']['label_short'],
-                             icon= self.core.cfg.manifest['app_data']['icon'],
-                             app= self.core.cfg.manifest['name'])
-            if resp := await self.core.lc_req.msg(app='web_notify', msg=MsgNotifyRegApp(data=data)):
-                if resp['ok']:
-                    self.__notify_token = resp['data']
-            self.core.log.debug(f"NotifyToken: {self.__notify_token}")
+                                 icon= self.core.cfg.manifest['app_data']['icon'],
+                                 app= self.core.cfg.manifest['name'])
+            try:
+                if resp := await self.core.lc_req.msg(app='web_notify', msg=MsgNotifyRegApp(data=data.model_dump())):
+                    if resp['ok']:
+                        self.__notify_token = resp['data']
+                self.core.log.debug(f"NotifyToken: {self.__notify_token}")
+            except Exception as e:
+                self.core.log.error(repr(e))

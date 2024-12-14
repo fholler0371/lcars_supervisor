@@ -5,4 +5,4 @@ from .messages import NotifyMessage
 class MsgNotifyMsg(MsgBase):
     type : int = MSG_DIRECT
     path : str = 'notify_message'
-    data : NotifyMessage
+    data : dict
