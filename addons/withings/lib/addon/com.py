@@ -42,7 +42,7 @@ class Com(BaseObj):
                                         return (True, web.json_response(SendOk(data={'value': res['value']}).model_dump()))
                                     else:
                                         return (True, web.json_response(SendOk(ok=False).models_dump()))
-                                case 'sleep_data' | 'sleep_vital':
+                                case 'sleep_data' | 'sleep_vital' | 'sleep_out':
                                     res = await self._data_db.table('sleep').exec('get_last_by_type', {'type': sensor})
                                     if res:
                                         return (True, web.json_response(SendOk(data={'value': res['value']}).model_dump()))

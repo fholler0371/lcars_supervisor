@@ -41,11 +41,12 @@ PANELS = {'base': {
           'sleep': {
               'cards' : [{'name': 'withings_sleep', 'type': 'app'},
                          {'name': 'withings_sleep_timer', 'type': 'app'},
-                         {'name': 'withings_sleep_vital', 'type': 'app'}],
+                         {'name': 'withings_sleep_vital', 'type': 'app'},
+                         {'name': 'withings_sleep_awake', 'type': 'app'}],
               'items' : [{"label": "Qualität", "type": "withings_sleep"},
                         {"label": "Zeiten", "type": "withings_sleep_times"},
                         {"label": "Vital", "type": "withings_sleep_vital"},
-                        #  {"label": "Herz (Quartal)", "type": "withings_cardio"},
+                        {"label": "Wachphasen", "type": "withings_sleep_awake"}
                         #  {"label": "Herz (Jahr)", "type": "withings_cardio"}
                         ]       
                    }
@@ -193,13 +194,8 @@ CARDS = {'withings_base': [
              'rr_avg': {'source': 'withings.sleep_vital.rr_average', 'label': 'Atmung mittel', 'params': {'hist': True}}, 
              'rr_max' : {'source': 'withings.sleep_vital.rr_max', 'label': 'Atmung max'},
              'rr_min' : {'source': 'withings.sleep_vital.rr_min', 'label': 'Atmung min'}},
-            {'average': {'source': 'withings.heart_d.hr_average_q', 'label': 'mittlre'}, 
-             'max' : {'source': 'withings.heart_d.hr_max_q', 'label': 'max'},
-             'min' : {'source': 'withings.heart_d.hr_min_q', 'label': 'min'},
-             'zone0' : {'source': 'withings.heart_d.hr_zone_0_q', 'label': '0-50% Zone', 'unit': 'h'},
-             'zone1' : {'source': 'withings.heart_d.hr_zone_1_q', 'label': '50-70% Zone', 'unit': 'h'},
-             'zone2' : {'source': 'withings.heart_d.hr_zone_2_q', 'label': '70-90% Zone', 'unit': 'h'},
-             'zone3' : {'source': 'withings.heart_d.hr_zone_3_q', 'label': '90-100% Zone', 'unit': 'h'}},
+            {'count': {'source': 'withings.sleep_out.wakeupcount', 'label': 'Aufgestanden'}, 
+             'out' : {'source': 'withings.sleep_out.out_of_bed_count', 'label': 'nur aufgewacht'}},
             {'average': {'source': 'withings.heart_d.hr_average_y', 'label': 'mittlre'}, 
              'max' : {'source': 'withings.heart_d.hr_max_y', 'label': 'max'},
              'min' : {'source': 'withings.heart_d.hr_min_y', 'label': 'min'},
