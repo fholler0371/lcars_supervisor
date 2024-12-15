@@ -2,7 +2,7 @@ define(['lcsmdefaultpanel'], function() {
     window.modul['withings_sleep'] = {
         modul: true,
         icon: '/css/images/bed.svg',
-        label: 'Herz',
+        label: 'Schlaf',
         already_init : false,
         panel:'withings_sleep',
         init: function () {
