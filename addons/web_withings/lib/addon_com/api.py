@@ -41,8 +41,8 @@ PANELS = {'base': {
           'sleep': {
               'cards' : [{'name': 'withings_sleep', 'type': 'app'},
                          {'name': 'withings_sleep_timer', 'type': 'app'}],
-              'items' : [{"label": "Qualität", "type": "withings_sleep"}
-                        # {"label": "Herz (Woche)", "type": "withings_cardio"},
+              'items' : [{"label": "Qualität", "type": "withings_sleep"},
+                        {"label": "Zeiten", "type": "withings_sleep_times"},
                         #  {"label": "Herz (Monat)", "type": "withings_cardio"},
                         #  {"label": "Herz (Quartal)", "type": "withings_cardio"},
                         #  {"label": "Herz (Jahr)", "type": "withings_cardio"}
@@ -182,13 +182,10 @@ CARDS = {'withings_base': [
              'bdi' : {'source': 'withings.sleep_data.breathing_disturbances_intensity', 'label': 'Atemstörungsintensität', 'params': {'hist': True}},
              'latency' : {'source': 'withings.sleep_data.sleep_latency', 'label': 'Einschlafzeit', 'unit': 'min', 'params': {'hist': True}},
              'waso' : {'source': 'withings.sleep_data.waso', 'label': 'Wachphasen', 'unit': 'min', 'params': {'hist': True}}},
-            {'average': {'source': 'withings.heart_d.hr_average_w', 'label': 'mittlre'}, 
-             'max' : {'source': 'withings.heart_d.hr_max_w', 'label': 'max'},
-             'min' : {'source': 'withings.heart_d.hr_min_w', 'label': 'min'},
-             'zone0' : {'source': 'withings.heart_d.hr_zone_0_w', 'label': '0-50% Zone', 'unit': 'h'},
-             'zone1' : {'source': 'withings.heart_d.hr_zone_1_w', 'label': '50-70% Zone', 'unit': 'h'},
-             'zone2' : {'source': 'withings.heart_d.hr_zone_2_w', 'label': '70-90% Zone', 'unit': 'h'},
-             'zone3' : {'source': 'withings.heart_d.hr_zone_3_w', 'label': '90-100% Zone', 'unit': 'h'}},
+            {'deep': {'source': 'withings.sleep_data.deepsleepduration', 'label': 'Tiefschlaf', 'unit': 'h', 'params': {'hist': True}}, 
+             'light' : {'source': 'withings.sleep_data.lightsleepduration', 'label': 'Leichterschlaf', 'unit': 'h', 'params': {'hist': True}},
+             'rem' : {'source': 'withings.sleep_data.remsleepduration', 'label': 'REM-Schlaf', 'unit': 'h', 'params': {'hist': True}},
+             'total_sleep_time' : {'source': 'withings.sleep_data.total_sleep_time', 'label': 'Schlafzeit', 'unit': 'h', 'params': {'hist': True}}},
             {'average': {'source': 'withings.heart_d.hr_average_w', 'label': 'mittlre'}, 
              'max' : {'source': 'withings.heart_d.hr_max_m', 'label': 'max'},
              'min' : {'source': 'withings.heart_d.hr_min_m', 'label': 'min'},

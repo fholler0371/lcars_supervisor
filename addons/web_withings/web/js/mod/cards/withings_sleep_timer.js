@@ -54,7 +54,7 @@ define(function () {
             var div_ele = $(ele).find('.sh_card_item_value'),
                 span_ele = $(div_ele[0]).find('span'),
                 old_text = $(span_ele[0]).text(),
-                new_text = values['total_sleep_time'].toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})
+                new_text = (values['total_sleep_time'] / 3600).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})
             //if (old_text != new_text) { $(div_ele[0]).addClass('sh_card_item_highlight') }
             $(span_ele[0]).text(new_text)
           }
@@ -62,7 +62,7 @@ define(function () {
             var div_ele = $(ele).find('.sh_card_item_value'),
                 span_ele = $(div_ele[0]).find('span'),
                 old_text = $(span_ele[0]).text(),
-                new_text = values['deep'].toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})
+                new_text = (values['deep'] / 3600).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})
             //if (old_text != new_text) { $(div_ele[0]).addClass('sh_card_item_highlight') }
             $(span_ele[0]).text(new_text)
           }
@@ -70,7 +70,7 @@ define(function () {
             var div_ele = $(ele).find('.sh_card_item_value'),
                 span_ele = $(div_ele[0]).find('span'),
                 old_text = $(span_ele[0]).text(),
-                new_text = values['light'].toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})
+                new_text = (values['light'] / 3600).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})
             //if (old_text != new_text) { $(div_ele[0]).addClass('sh_card_item_highlight') }
             $(span_ele[0]).text(new_text)
           }
@@ -78,7 +78,7 @@ define(function () {
             var div_ele = $(ele).find('.sh_card_item_value'),
                 span_ele = $(div_ele[0]).find('span'),
                 old_text = $(span_ele[0]).text(),
-                new_text = values['rem'].toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})
+                new_text = (values['rem'] / 3600).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})
             //if (old_text != new_text) { $(div_ele[0]).addClass('sh_card_item_highlight') }
             $(span_ele[0]).text(new_text)
           }

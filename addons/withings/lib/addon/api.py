@@ -11,8 +11,9 @@ from models.notify import NotifyApp, NotifyMessage
 from . import models
 
 class _token:
-    def __init__(self) -> None:
+    def __init__(self, core) -> None:
         self.file = pathlib.Path('/lcars/data/token.yml')
+        self.__core = core
         self._data = None
         if self.file.exists():
             self._data = aioyamllib._safe_load(self.file)
@@ -30,7 +31,7 @@ class _token:
         if self._data['timeout'] > time.time():
             return self._data['token']
         else:
-            secret = self.core.secret.withings
+            secret = self.__core.secret.withings
             async with aiohttp.ClientSession() as session:
                 response = await session.post(url="https://wbsapi.withings.net/v2/oauth2",
                                               data={"action": "requesttoken",
@@ -55,7 +56,7 @@ class Api(BaseObj):
                 
     async def _ainit(self):
         self.core.log.debug('Initaliesiere api')
-        self.token = _token()
+        self.token = _token(self.core)
                    
     async def _astart(self):
         self.core.log.debug('starte api')
