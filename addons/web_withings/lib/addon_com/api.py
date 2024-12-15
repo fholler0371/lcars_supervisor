@@ -42,53 +42,16 @@ PANELS = {'base': {
               'cards' : [{'name': 'withings_sleep', 'type': 'app'},
                          {'name': 'withings_sleep_timer', 'type': 'app'},
                          {'name': 'withings_sleep_vital', 'type': 'app'},
-                         {'name': 'withings_sleep_awake', 'type': 'app'}],
+                         {'name': 'withings_sleep_awake', 'type': 'app'},
+                         {'name': 'withings_sleep_snoring', 'type': 'app'}],
               'items' : [{"label": "Qualität", "type": "withings_sleep"},
                         {"label": "Zeiten", "type": "withings_sleep_times"},
                         {"label": "Vital", "type": "withings_sleep_vital"},
-                        {"label": "Wachphasen", "type": "withings_sleep_awake"}
-                        #  {"label": "Herz (Jahr)", "type": "withings_cardio"}
+                        {"label": "Wachphasen", "type": "withings_sleep_awake"},
+                        {"label": "Schnarchen", "type": "withings_sleep_snoring"}
                         ]       
                    }
          }
-
-
-# {
-#     "cards": [
-#         "withings_sleep|H",
-#         "withings_sleep_times|H",
-#         "withings_sleep_vital|H",
-#         "withings_sleep_snoring|H",
-#         "withings_sleep_awake|H"
-#     ],
-#     "items": [
-#         {
-#             "label": "Qualit\u00e4t",
-#             "type": "withings_sleep|H",
-#             "ver": 1
-#         },
-#         {
-#             "label": "Zeiten",
-#             "type": "withings_sleep_times|H",
-#             "ver": 1
-#         },
-#         {
-#             "label": "Vital",
-#             "type": "withings_sleep_vital|H",
-#             "ver": 1
-#         },
-#         {
-#             "label": "Schnarchen",
-#             "type": "withings_sleep_snoring|H",
-#             "ver": 1
-#         },
-#         {
-#             "label": "Wachphasen",
-#             "type": "withings_sleep_awake|H",
-#             "ver": 1
-#         }
-#     ]
-# }
 
 CARDS = {'withings_base': [
             {"gewicht": {"source": "withings.body.gewicht"},
@@ -193,16 +156,11 @@ CARDS = {'withings_base': [
              'hr_min' : {'source': 'withings.sleep_vital.hr_min', 'label': 'Herzrate min'},
              'rr_avg': {'source': 'withings.sleep_vital.rr_average', 'label': 'Atmung mittel', 'params': {'hist': True}}, 
              'rr_max' : {'source': 'withings.sleep_vital.rr_max', 'label': 'Atmung max'},
-             'rr_min' : {'source': 'withings.sleep_vital.rr_min', 'label': 'Atmung min'}},
-            {'count': {'source': 'withings.sleep_out.wakeupcount', 'label': 'Aufgestanden'}, 
-             'out' : {'source': 'withings.sleep_out.out_of_bed_count', 'label': 'nur aufgewacht'}},
-            {'average': {'source': 'withings.heart_d.hr_average_y', 'label': 'mittlre'}, 
-             'max' : {'source': 'withings.heart_d.hr_max_y', 'label': 'max'},
-             'min' : {'source': 'withings.heart_d.hr_min_y', 'label': 'min'},
-             'zone0' : {'source': 'withings.heart_d.hr_zone_0_y', 'label': '0-50% Zone', 'unit': 'h'},
-             'zone1' : {'source': 'withings.heart_d.hr_zone_1_y', 'label': '50-70% Zone', 'unit': 'h'},
-             'zone2' : {'source': 'withings.heart_d.hr_zone_2_y', 'label': '70-90% Zone', 'unit': 'h'},
-             'zone3' : {'source': 'withings.heart_d.hr_zone_3_y', 'label': '90-100% Zone', 'unit': 'h'}}]
+             'rr_min' : {'source': 'withings.sleep_vital.rr_min', 'label': 'Atmung min', 'params': {'hist': True}}},
+            {'count': {'source': 'withings.sleep_out.wakeupcount', 'label': 'Aufgestanden', 'params': {'hist': True}}, 
+             'out' : {'source': 'withings.sleep_out.out_of_bed_count', 'label': 'nur aufgewacht', 'params': {'hist': True}}},
+            {'snoring': {'source': 'withings.sleep_snoring.snoring', 'label': 'Schnarchen', 'unit': 'min', 'params': {'hist': True}}, 
+             'episoden' : {'source': 'withings.sleep_snoring.snoringepisodecount', 'label': 'Episoden', 'params': {'hist': True}}}]
          }
 
 HISTORY = {'withings_base': {
