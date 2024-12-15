@@ -37,9 +37,56 @@ PANELS = {'base': {
                          {"label": "Herz (Monat)", "type": "withings_cardio"},
                          {"label": "Herz (Quartal)", "type": "withings_cardio"},
                          {"label": "Herz (Jahr)", "type": "withings_cardio"}]       
+                   },
+          'sleep': {
+              'cards' : [{'name': 'withings_sleep', 'type': 'app'},
+                         {'name': 'withings_sleep_timer', 'type': 'app'}],
+              'items' : [{"label": "Qualität", "type": "withings_sleep"}
+                        # {"label": "Herz (Woche)", "type": "withings_cardio"},
+                        #  {"label": "Herz (Monat)", "type": "withings_cardio"},
+                        #  {"label": "Herz (Quartal)", "type": "withings_cardio"},
+                        #  {"label": "Herz (Jahr)", "type": "withings_cardio"}
+                        ]       
                    }
          }
 
+
+# {
+#     "cards": [
+#         "withings_sleep|H",
+#         "withings_sleep_times|H",
+#         "withings_sleep_vital|H",
+#         "withings_sleep_snoring|H",
+#         "withings_sleep_awake|H"
+#     ],
+#     "items": [
+#         {
+#             "label": "Qualit\u00e4t",
+#             "type": "withings_sleep|H",
+#             "ver": 1
+#         },
+#         {
+#             "label": "Zeiten",
+#             "type": "withings_sleep_times|H",
+#             "ver": 1
+#         },
+#         {
+#             "label": "Vital",
+#             "type": "withings_sleep_vital|H",
+#             "ver": 1
+#         },
+#         {
+#             "label": "Schnarchen",
+#             "type": "withings_sleep_snoring|H",
+#             "ver": 1
+#         },
+#         {
+#             "label": "Wachphasen",
+#             "type": "withings_sleep_awake|H",
+#             "ver": 1
+#         }
+#     ]
+# }
 
 CARDS = {'withings_base': [
             {"gewicht": {"source": "withings.body.gewicht"},
@@ -128,33 +175,42 @@ CARDS = {'withings_base': [
              'zone0' : {'source': 'withings.heart_d.hr_zone_0_y', 'label': '0-50% Zone', 'unit': 'h'},
              'zone1' : {'source': 'withings.heart_d.hr_zone_1_y', 'label': '50-70% Zone', 'unit': 'h'},
              'zone2' : {'source': 'withings.heart_d.hr_zone_2_y', 'label': '70-90% Zone', 'unit': 'h'},
+             'zone3' : {'source': 'withings.heart_d.hr_zone_3_y', 'label': '90-100% Zone', 'unit': 'h'}}],
+         'withings_sleep': [ 
+            {'sleep_score': {'source': 'withings.sleep_data.sleep_score', 'label': 'Schlafqualität', 'unit': '%', 'params': {'hist': True}}, 
+             'ahi' : {'source': 'withings.sleep_data.apnea_hypopnea_index', 'label': 'Apnea-Hypopnea Index', 'params': {'hist': True}},
+             'bdi' : {'source': 'withings.sleep_data.breathing_disturbances_intensity', 'label': 'Atemstörungsintensität', 'params': {'hist': True}},
+             'latency' : {'source': 'withings.sleep_data.sleep_latency', 'label': 'Einschlafzeit', 'unit': 'min', 'params': {'hist': True}},
+             'waso' : {'source': 'withings.sleep_data.waso', 'label': 'Wachphasen', 'unit': 'min', 'params': {'hist': True}}},
+            {'average': {'source': 'withings.heart_d.hr_average_w', 'label': 'mittlre'}, 
+             'max' : {'source': 'withings.heart_d.hr_max_w', 'label': 'max'},
+             'min' : {'source': 'withings.heart_d.hr_min_w', 'label': 'min'},
+             'zone0' : {'source': 'withings.heart_d.hr_zone_0_w', 'label': '0-50% Zone', 'unit': 'h'},
+             'zone1' : {'source': 'withings.heart_d.hr_zone_1_w', 'label': '50-70% Zone', 'unit': 'h'},
+             'zone2' : {'source': 'withings.heart_d.hr_zone_2_w', 'label': '70-90% Zone', 'unit': 'h'},
+             'zone3' : {'source': 'withings.heart_d.hr_zone_3_w', 'label': '90-100% Zone', 'unit': 'h'}},
+            {'average': {'source': 'withings.heart_d.hr_average_w', 'label': 'mittlre'}, 
+             'max' : {'source': 'withings.heart_d.hr_max_m', 'label': 'max'},
+             'min' : {'source': 'withings.heart_d.hr_min_m', 'label': 'min'},
+             'zone0' : {'source': 'withings.heart_d.hr_zone_0_m', 'label': '0-50% Zone', 'unit': 'h'},
+             'zone1' : {'source': 'withings.heart_d.hr_zone_1_m', 'label': '50-70% Zone', 'unit': 'h'},
+             'zone2' : {'source': 'withings.heart_d.hr_zone_2_m', 'label': '70-90% Zone', 'unit': 'h'},
+             'zone3' : {'source': 'withings.heart_d.hr_zone_3_m', 'label': '90-100% Zone', 'unit': 'h'}},
+            {'average': {'source': 'withings.heart_d.hr_average_q', 'label': 'mittlre'}, 
+             'max' : {'source': 'withings.heart_d.hr_max_q', 'label': 'max'},
+             'min' : {'source': 'withings.heart_d.hr_min_q', 'label': 'min'},
+             'zone0' : {'source': 'withings.heart_d.hr_zone_0_q', 'label': '0-50% Zone', 'unit': 'h'},
+             'zone1' : {'source': 'withings.heart_d.hr_zone_1_q', 'label': '50-70% Zone', 'unit': 'h'},
+             'zone2' : {'source': 'withings.heart_d.hr_zone_2_q', 'label': '70-90% Zone', 'unit': 'h'},
+             'zone3' : {'source': 'withings.heart_d.hr_zone_3_q', 'label': '90-100% Zone', 'unit': 'h'}},
+            {'average': {'source': 'withings.heart_d.hr_average_y', 'label': 'mittlre'}, 
+             'max' : {'source': 'withings.heart_d.hr_max_y', 'label': 'max'},
+             'min' : {'source': 'withings.heart_d.hr_min_y', 'label': 'min'},
+             'zone0' : {'source': 'withings.heart_d.hr_zone_0_y', 'label': '0-50% Zone', 'unit': 'h'},
+             'zone1' : {'source': 'withings.heart_d.hr_zone_1_y', 'label': '50-70% Zone', 'unit': 'h'},
+             'zone2' : {'source': 'withings.heart_d.hr_zone_2_y', 'label': '70-90% Zone', 'unit': 'h'},
              'zone3' : {'source': 'withings.heart_d.hr_zone_3_y', 'label': '90-100% Zone', 'unit': 'h'}}]
          }
-
-#"average", "max", "min", "zone0", "zone1", "zone2", "zone3"
-
-# {average: {value: 75, source: "withings.heart_d.hr_average_d", params: []},…}
-# average
-# : 
-# {value: 75, source: "withings.heart_d.hr_average_d", params: []}
-# max
-# : 
-# {value: 140, source: "withings.heart_d.hr_max_d", params: []}
-# min
-# : 
-# {value: 35, source: "withings.heart_d.hr_min_d", params: []}
-# zone0
-# : 
-# {value: 9.97888888888889, source: "withings.heart_d.hr_zone_0_d", params: []}
-# zone1
-# : 
-# {value: 4.296666666666667, source: "withings.heart_d.hr_zone_1_d", params: []}
-# zone2
-# : 
-# {value: 1.0191666666666668, source: "withings.heart_d.hr_zone_2_d", params: []}
-# zone3
-# : 
-# {value: 0, source: "withings.heart_d.hr_zone_3_d", params: []}
 
 HISTORY = {'withings_base': {
                'withings.body.gewicht' : {"label": "Gewicht", "intervalls": "A,Y,Q,M", "style": "line", "interval": "M"},
@@ -255,6 +311,7 @@ class Api(BaseObj):
                     data.append({'mod': 'withings_base', 'src': '/withings/js/mod/withings_base'})
                     data.append({'mod': 'withings_daily', 'src': '/withings/js/mod/withings_daily'})
                     data.append({'mod': 'withings_heart', 'src': '/withings/js/mod/withings_heart'})
+                    data.append({'mod': 'withings_sleep', 'src': '/withings/js/mod/withings_sleep'})
                 if rd.open_id and ('withings_sec' in rd.open_id['app'].split(' ') or rd.open_id['app'] == '*'):
                     data.append({'mod': 'withings_setup', 'src': '/withings/js/mod/withings_setup'})
                 return (True, web.json_response(data.model_dump()))

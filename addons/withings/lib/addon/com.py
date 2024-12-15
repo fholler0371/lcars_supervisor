@@ -26,14 +26,6 @@ class Com(BaseObj):
         if rd.path[0] == 'messages':
 #            msg = HttpMsgData.model_validate(rd.data)
             match rd.path[1]:
-            #     case 'get_ip':
-            #         data = IpData(ip4=self._state.ip4)
-            #         return (True, web.json_response(data.model_dump()))
-            #     case 'get_all_ip':
-            #         #self.core.log.critical(self._state)
-            #         data = IpData(ip4=self._state.ip4, prefix=self._state.prefix, ip6=self._state.ip6, home_ip6=self._state.home_ip6)
-            #         #self.core.log.critical(data)
-            #         return (True, web.json_response(data.model_dump()))
                 case 'messages/set_token':
                     data = rd.data.data
                     await self.token.set_token(data['token'], data['refresh_token'], data['timeout'])
@@ -41,15 +33,17 @@ class Com(BaseObj):
                 case 'sm':
                     data = rd.data.data
                     match rd.path[2]:
-            #                         {'gewicht_month': {"source": "withings.weight_trend.gewicht_month"},
-            #  'gewicht_quartal': {"source": "withings.weight_trend.gewicht_quartal"},
-            #  'gewicht_year': {"source": "withings.weight_trend.gewicht_year"}}
-
                         case 'get_sensor':
                             table, sensor = data['sensor'].split('.')
                             match table:
                                 case 'body' | 'heart' | 'temperatur':
                                     res = await self._data_db.table('vital').exec('get_last_by_type', {'type': sensor})
+                                    if res:
+                                        return (True, web.json_response(SendOk(data={'value': res['value']}).model_dump()))
+                                    else:
+                                        return (True, web.json_response(SendOk(ok=False).models_dump()))
+                                case 'sleep_data':
+                                    res = await self._data_db.table('sleep').exec('get_last_by_type', {'type': sensor})
                                     if res:
                                         return (True, web.json_response(SendOk(data={'value': res['value']}).model_dump()))
                                     else:
@@ -141,6 +135,7 @@ class Com(BaseObj):
         self._data_db = aiodatabase.DB(f"sqlite:///{self.core.path.data}/data.sqlite3")
         self._data_db.add_table(db_settings.Vital())
         self._data_db.add_table(db_settings.Daily())
+        self._data_db.add_table(db_settings.Sleep())
                    
     async def _astart(self):
         self.core.log.debug('starte com')

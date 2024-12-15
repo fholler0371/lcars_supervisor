@@ -31,3 +31,16 @@ class Daily(Table):
                                                            ['value', 'date'], ['type', 'date']))
         self.add_statement('get_avg', QuerySingle("SELECT avg(value) as {fields} FROM {table} WHERE date>? and type='gewicht' ORDER BY date DESC", 
                                                            ['value'], ['date']))
+
+class Sleep(Table):
+    def __init__(self):
+        super().__init__('sleep')
+        self.add_field(Integer('id', autoincrement=True))
+        self.add_field(Text('date'))
+        self.add_field(Integer('start'))
+        self.add_field(Integer('end'))
+        self.add_field(Text('type'))
+        self.add_field(Float('value'))
+        #
+        self.add_statement('get_last_by_type', QuerySingle("SELECT {fields} FROM {table} WHERE type=? ORDER BY date DESC", 
+                                                           ['value'], ['type']))
