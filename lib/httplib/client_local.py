@@ -10,6 +10,8 @@ from models.network import Hostname
 
 from .helper.local_keys import LocalKeys
 from .models import HttpMsgData, RespRaw
+from models.msg import MsgGetHostName
+
 
 class RetryException(BaseException):
     pass 
@@ -122,6 +124,7 @@ class ClientLocal(BaseObj):
         try:
             return await self._get(f'{endpoint}/{version}/{url}', dest)
         except Exception as e:
+            self.core.log.error(url)
             self.core.log.error(e)
         return None
 
@@ -189,9 +192,13 @@ class ClientLocal(BaseObj):
     @aproperty
     async def hostname(self):
         if self._hostname is None:
-            resp = await self.get('network/hostname', dest='gateway', endpoint='com')
-            data = Hostname.model_validate(resp)
-            self._hostname = data.hostname
+            try:
+                self._hostname = (await self.core.lc_req.msg(host='parent', msg=MsgGetHostName(), host_check=False))['hostname']
+            except Exception as e:
+                self.core.log.error(repr(e))
+                resp = await self.get('network/hostname', dest='gateway', endpoint='com')
+                data = Hostname.model_validate(resp)
+                self._hostname = data.hostname
         return self._hostname
 
     @aproperty

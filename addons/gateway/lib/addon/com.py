@@ -9,7 +9,7 @@ from httplib.models import HttpHandler, HttpRequestData, SendOk
 from models.network import Hostname
 from models.basic import StringList, StringEntry
 
-from models.msg import MsgGetLocalApps, MsgRelay, MsgBase, MSG_DIRECT, MSG_RELAY
+from models.msg import MsgGetLocalApps, MsgRelay, MsgBase, MsgGetHostName, MSG_DIRECT, MSG_RELAY
 
 class Com(BaseObj):
     def __init__(self, core: Core) -> None:
@@ -74,7 +74,11 @@ class Com(BaseObj):
                     try:
                         print('network/hostname')
 #                        if self.__hostname:
-                        return (True, web.json_response({'hostname': await self.core.web_l.hostname}))
+                        try:
+                            return (True, web.json_response(await self.core.lc_req.msg(host='parent', msg=MsgGetHostName(), host_check=False)))
+                        except:
+                            ...
+                            #return (True, web.json_response({'hostname': await self.core.web_l.hostname}))
                         # TODO:  CONVERT Parent Communication
                         resp = await self.core.web_l.get('network/hostname', dest='parent')
                         if resp is not None:

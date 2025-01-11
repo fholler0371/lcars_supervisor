@@ -24,7 +24,7 @@ class LcarsRequests:
         self.session_timeout = aiohttp.ClientTimeout(total=None,sock_connect=1,sock_read=5)
         self.session_connector = aiohttp.TCPConnector(verify_ssl=False)
     
-    async def msg(self, app: str, msg: MsgBase, host: str|None = None, host_check=True) -> dict:
+    async def msg(self, app: str = None, msg: MsgBase = None, host: str|None = None, host_check=True) -> dict:
         if msg.data is None:
             msg.data = {}
         if host is None and host_check:
@@ -52,6 +52,12 @@ class LcarsRequests:
                 data['dest_host'] = msg.host
             if hasattr(msg, 'app_path'):
                 data['dest_path'] = msg.app_path
+        elif host == 'parent':
+            url = f"http://10.0.0.1:1234/com/1/{msg.path}"
+            header = {'X-Auth': self.__core._local_keys.local}
+            data = msg.data.copy()
+            data['type'] = msg.type
+            ret = await self._post_retry(url, header=header, data=data)
         else:
             url = f"http://{self.__core._local_keys.ip[host]}:1235/com/1/{msg.path}"
             header = {'X-Auth': getattr(self.__core._local_keys, host)}
